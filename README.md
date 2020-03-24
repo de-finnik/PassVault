@@ -84,7 +84,7 @@ After selecting the backup file, you’ll have to enter the main password with t
 If the password is correct, all passwords that are not already saved, will be added to your passwords.
 
 ## Get help
-The help icon will lead you to this github repository. 
+The help icon will lead you to this GitHub repository. 
 If you need more help, you can contact us: [de.finnik@gmx.net](mailto:de.finnik@gmx.net)
 
 ## Credits
@@ -100,6 +100,3 @@ Google Inc [Gson](https://github.com/google/gson) API
 Thanks to B. for designing the finnik logo
 
 ![finnik](finnik.png)
-
-
-
