@@ -1,0 +1,7 @@
+2020-03-24 12:57:53 [main] INFO  de.finnik.gui.PassVault - Welcome to PassVault, we´re happy to see you!
+2020-03-24 12:57:53 [main] INFO  de.finnik.gui.PassVault - Created pass file in main directory! (D:\Projekte\Java\Workspace\PassVault\Main\target\bin\pass)!
+2020-03-24 12:57:53 [main] INFO  de.finnik.gui.PassVault - Created config.properties in main directory (D:\Projekte\Java\Workspace\PassVault\Main\target\bin\config.properties)!
+2020-03-24 12:57:53 [main] INFO  de.finnik.gui.PassVault - Loaded properties!
+2020-03-24 12:57:53 [main] INFO  de.finnik.gui.PassVault - Loaded properties for language de!
+2020-03-24 12:57:56 [AWT-EventQueue-0] INFO  de.finnik.gui.PassVault - Generated password with length: 12 and chars ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789! 
+2020-03-24 13:26:21 [AWT-EventQueue-0] INFO  de.finnik.gui.PassVault - Generated password with length: 12 and chars ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789! 
