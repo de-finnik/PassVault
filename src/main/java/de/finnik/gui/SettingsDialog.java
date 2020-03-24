@@ -119,7 +119,7 @@ class SettingsDialog extends JDialog {
                 // Open help page
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     try {
-                        Desktop.getDesktop().browse(new URI("http://www.example.com"));
+                        Desktop.getDesktop().browse(new URI("https://github.com/de-finnik/passvault"));
                     } catch (Exception ex) {
                         LOG.error("Error while opening help page!", ex);
                     }
