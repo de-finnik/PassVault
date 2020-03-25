@@ -29,7 +29,6 @@ import static de.finnik.passvault.Utils.*;
 public class PassVault {
 
     public static void main(String[] args) {
-
         LOG = LoggerFactory.getLogger(PassVault.class);
 
         System.setErr(new PrintStream(new LogErrorStream(LOG)));

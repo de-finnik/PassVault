@@ -120,19 +120,19 @@ public class PassDialog {
     public void input(Window owner, String message, Consumer<String> toDo, boolean pass) {
         JDialog dialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);
 
-        JPanel content = new JPanel();
+        JPanel content = new JPanel(new FlowLayout());
 
         dialog.setContentPane(content);
         dialog.setUndecorated(true);
 
         content.setBackground(BACKGROUND);
-        content.setLayout(new BorderLayout(20, 0));
+        ((FlowLayout) content.getLayout()).setHgap(10);
         content.setBorder(BorderFactory.createLineBorder(FOREGROUND, 1));
 
         JLabel lblLogo = new JLabel();
         lblLogo.setIcon(new ImageIcon(IMAGES.length >= 2 ? IMAGES[1] : IMAGES[0]));
         lblLogo.setSize(lblLogo.getPreferredSize());
-        lblLogo.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        lblLogo.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
         content.add(lblLogo, BorderLayout.WEST);
 
         JPanel panel = new JPanel();
@@ -179,6 +179,19 @@ public class PassDialog {
         tfInput.setBorder(BorderFactory.createLineBorder(BACKGROUND.brighter().brighter()));
         panel.add(tfInput, BorderLayout.CENTER);
 
+        JLabel lblYes = new JLabel();
+        lblYes.setCursor(HAND_CURSOR);
+        lblYes.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                dialog.dispose();
+                toDo.accept(tfInput.getText());
+            }
+        });
+        lblYes.setIcon(new ImageIcon(IMAGES[3]));
+        content.add(lblYes);
+
         JLabel lblClose = new JLabel();
         lblClose.setCursor(HAND_CURSOR);
         lblClose.addMouseListener(new MouseAdapter() {
@@ -190,7 +203,7 @@ public class PassDialog {
         });
         lblClose.setIcon(new ImageIcon(CLOSE));
         lblClose.setSize(lblLogo.getPreferredSize());
-        lblClose.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+        lblClose.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
         content.add(lblClose, BorderLayout.EAST);
 
         dialog.setSize(new Dimension(content.getLayout().preferredLayoutSize(content).width + 50, content.getLayout().preferredLayoutSize(content).height + 50));
@@ -216,26 +229,21 @@ public class PassDialog {
         dialog.setUndecorated(true);
 
         content.setBackground(BACKGROUND);
-        content.setLayout(new BorderLayout(20, 0));
+        content.setLayout(new FlowLayout());
+        ((FlowLayout) content.getLayout()).setHgap(10);
         content.setBorder(BorderFactory.createLineBorder(FOREGROUND, 1));
 
         JLabel lblLogo = new JLabel();
         lblLogo.setIcon(new ImageIcon(IMAGES.length >= 3 ? IMAGES[2] : IMAGES[0]));
-        lblLogo.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 0));
-        content.add(lblLogo, BorderLayout.WEST);
-
-        JPanel panel = new JPanel();
-        panel.setBackground(BACKGROUND);
-        panel.setLayout(new BorderLayout());
-        //panel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
-        content.add(panel, BorderLayout.CENTER);
+        lblLogo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
+        content.add(lblLogo);
 
         JLabel lblMessage = new JLabel(message);
         lblMessage.setFont(FONT.deriveFont(13f));
         lblMessage.setPreferredSize(new Dimension(Math.max(lblMessage.getPreferredSize().width+20, 100), 20));
         lblMessage.setForeground(FOREGROUND);
 
-        panel.add(lblMessage, BorderLayout.WEST);
+        content.add(lblMessage);
 
         JLabel lblYes = new JLabel() {
             @Override
@@ -267,7 +275,7 @@ public class PassDialog {
             }
         });
         lblYes.setIcon(new ImageIcon(IMAGES[3]));
-        panel.add(lblYes, BorderLayout.EAST);
+        content.add(lblYes);
 
 
         JLabel lblClose = new JLabel();
@@ -281,8 +289,8 @@ public class PassDialog {
         });
         lblClose.setIcon(new ImageIcon(CLOSE));
         lblClose.setSize(lblLogo.getPreferredSize());
-        lblClose.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
-        content.add(lblClose, BorderLayout.EAST);
+        lblClose.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+        content.add(lblClose);
 
         dialog.setSize(new Dimension(content.getLayout().preferredLayoutSize(content).width + 50, content.getLayout().preferredLayoutSize(content).height + 50));
         dialog.setSize(content.getLayout().preferredLayoutSize(content));

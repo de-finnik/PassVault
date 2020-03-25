@@ -78,8 +78,7 @@ class SettingsDialog extends JDialog {
     private void components() {
         JPanel toolBar = new JPanel();
         toolBar.setBackground(BACKGROUND);
-        toolBar.setLayout(new FlowLayout());
-        ((FlowLayout) toolBar.getLayout()).setAlignment(FlowLayout.RIGHT);
+        toolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
         add(toolBar, "settings.toolBar");
 
         JLabel lblExtract = new JLabel();
@@ -145,8 +144,7 @@ class SettingsDialog extends JDialog {
         lblIcon.setSize(lblIcon.getPreferredSize());
         add(lblIcon, "settings.lbl.icon");
 
-        JPanel panelVersion = new JPanel(new FlowLayout());
-        ((FlowLayout) panelVersion.getLayout()).setAlignment(FlowLayout.CENTER);
+        JPanel panelVersion = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panelVersion.setBackground(BACKGROUND);
 
         JLabel lblVersion = new JLabel(APP_INFO.getProperty("app.name") + " " + APP_INFO.getProperty("app.version") + " \u00a9 "/* + APP_INFO.getProperty("app.author")*/);
