@@ -6,7 +6,7 @@
 
     <groupId>de.finnik</groupId>
     <artifactId>PassVault</artifactId>
-    <version>Alpha 1.0</version>
+    <version>1.1</version>
 
     <properties>
         <author>finnik</author>
