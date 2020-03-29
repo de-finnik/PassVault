@@ -20,7 +20,8 @@ public class PasswordGenerator {
     }
 
     /**
-     * Uses {@link de.finnik.passvault.PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
+     * Uses {@link PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
+     *
      * @return Big letters (ABCDEFGHIJKLMNOPQRSTUVWXYZ)
      */
     public static String BIG_LETTERS() {
@@ -28,7 +29,8 @@ public class PasswordGenerator {
     }
 
     /**
-     * Uses {@link de.finnik.passvault.PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
+     * Uses {@link PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
+     *
      * @return Small letters (abcdefghijklmnopqrstuvwxyz)
      */
     public static String SMALL_LETTERS() {
@@ -36,7 +38,8 @@ public class PasswordGenerator {
     }
 
     /**
-     * Uses {@link de.finnik.passvault.PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
+     * Uses {@link PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
+     *
      * @return Numbers (0123456789) assembled to a string
      */
     public static String NUMBERS() {
@@ -44,7 +47,7 @@ public class PasswordGenerator {
     }
 
     /**
-     * Uses {@link de.finnik.passvault.PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
+     * Uses {@link PasswordGenerator#GET_LETTERS_BETWEEN(int, int)} to return a choice of characters assembled to a string
      * @return Special Characters (!&#x22;#$%&#x26;&#x27;()*+,-./:;&#x3C;=&#x3E;?@[\]^_&#x60;{|}~)  assembled to a string
      */
     public static String SPECIAL_CHARACTERS() {

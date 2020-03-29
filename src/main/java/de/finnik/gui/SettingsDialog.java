@@ -4,6 +4,7 @@ import de.finnik.passvault.*;
 
 import javax.swing.*;
 import javax.swing.plaf.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -18,11 +19,12 @@ import static de.finnik.gui.Var.*;
 /**
  * Change settings, get information and help about the application
  */
-class SettingsDialog extends JDialog {
+public class SettingsDialog extends JDialog {
 
+    public static final IntRange ALLOWED_INACTIVITY_TIME = new IntRange(10, 3600);
     /**
-     * A list of {@link javax.swing.JComponent}s which are generated in {@link de.finnik.gui.SettingsDialog#components()}
-     * to be added to the content pane in the right order {@link de.finnik.gui.SettingsDialog#positionComponents(List)}
+     * A list of {@link javax.swing.JComponent}s which are generated in {@link SettingsDialog#components()}
+     * to be added to the content pane in the right order {@link SettingsDialog#positionComponents(List)}
      */
     private List<JComponent> components;
 
@@ -49,11 +51,9 @@ class SettingsDialog extends JDialog {
         positionComponents(components);
 
         // Sets color for labels and buttons
-        PassUtils.GUIUtils.colorComponents(getMatchingComponents("settings.lbl", "settings.btn"), FOREGROUND, BACKGROUND);
+        PassUtils.GUIUtils.colorComponents(getMatchingComponents("settings.lbl", "settings.btn", "settings.check"), FOREGROUND, BACKGROUND);
 
-        setSize(new Dimension(boxLayout.preferredLayoutSize(getContentPane()).width + 100, boxLayout.preferredLayoutSize(getContentPane()).height + 60));
-
-        setLocationRelativeTo(null);
+        adjustSizeAndCenter();
     }
 
     /**
@@ -83,7 +83,7 @@ class SettingsDialog extends JDialog {
 
         JLabel lblExtract = new JLabel();
         lblExtract.setIcon(new ImageIcon(EXTRACT));
-        lblExtract.setCursor(Var.HAND_CURSOR);
+        lblExtract.setCursor(HAND_CURSOR);
         lblExtract.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -92,7 +92,7 @@ class SettingsDialog extends JDialog {
                 JFileChooser jfc = new JFileChooser();
                 jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 int result = jfc.showOpenDialog(null);
-                if (result == JFileChooser.APPROVE_OPTION && PassFrame.password.length() > 0 && PassFrame.passwordList.size()>0) {
+                if (result == JFileChooser.APPROVE_OPTION && PassFrame.password.length() > 0 && PassFrame.passwordList.size() > 0) {
                     SimpleDateFormat formatter = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss");
                     Date date = new Date();
                     File backup = new File(jfc.getSelectedFile(), "PassVault_" + formatter.format(date) + ".bin");
@@ -158,10 +158,11 @@ class SettingsDialog extends JDialog {
         lblFinnik.setSize(lblFinnik.getPreferredSize());
         panelVersion.add(lblFinnik);
 
-        panelVersion.setSize(new Dimension(lblVersion.getSize().width+lblFinnik.getSize().width,lblVersion.getSize().height+lblFinnik.getSize().height));
+        panelVersion.setSize(new Dimension(lblVersion.getSize().width + lblFinnik.getSize().width, lblVersion.getSize().height + lblFinnik.getSize().height));
         components.add(panelVersion);
 
         JButton btnChangeMainPass = new JButton();
+        btnChangeMainPass.setFont(raleway(13));
         btnChangeMainPass.addActionListener(action -> {
             if (!PassFrame.password.equals("")) {
                 // Validates the user via inserting current main pass
@@ -190,26 +191,58 @@ class SettingsDialog extends JDialog {
         comboBoxLanguage.setSelectedItem(new Locale(PROPS.getProperty("lang")).getDisplayLanguage());
         comboBoxLanguage.addActionListener(action -> {
             // Change language
+            String propertyName = "lang";
             locales.stream()
                     .filter(locale -> locale.getDisplayLanguage().equals(comboBoxLanguage.getSelectedItem()))
-                    .forEach(locale -> PROPS.setProperty("lang", locale.getLanguage()));
-            LOG.info("Changed property {} to {}!", "lang", PROPS.getProperty("lang"));
-            try {
-                PROPS.store(new FileWriter(Var.PROPERTIES), "PassVault settings");
-            } catch (Exception e) {
-                LOG.error("Error while saving properties!", e);
-            }
+                    .forEach(locale -> PROPS.setProperty(propertyName, locale.getLanguage()));
+            LOG.info("Changed property {} to {}!", propertyName, PROPS.getProperty(propertyName));
+            storeProperties();
             LANG = loadLang();
             textComponents();
+            adjustSizeAndCenter();
         });
         comboBoxLanguage.setBackground(FOREGROUND);
         comboBoxLanguage.setForeground(BACKGROUND);
         comboBoxLanguage.setMaximumSize(comboBoxLanguage.getPreferredSize());
         add(comboBoxLanguage, "settings.combo.language");
+
+        JPanel panelInactivity = new JPanel(new FlowLayout());
+        panelInactivity.setBackground(BACKGROUND);
+        components.add(panelInactivity);
+
+        JCheckBox checkBoxInactivityLock = new JCheckBox();
+        checkBoxInactivityLock.setSelected(Boolean.parseBoolean(PROPS.getProperty("inactivity_lock")));
+        checkBoxInactivityLock.addActionListener(action -> {
+            String propertyName = "inactivity_lock";
+            PROPS.setProperty(propertyName, String.valueOf(checkBoxInactivityLock.isSelected()));
+            LOG.info("Changed property {} to {}!", propertyName, checkBoxInactivityLock.isSelected());
+            storeProperties();
+            INACTIVITY_LISTENER.start();
+        });
+        checkBoxInactivityLock.setFont(raleway(13));
+        COMPONENTS.put("settings.check.inactivityLock", checkBoxInactivityLock);
+        panelInactivity.add(checkBoxInactivityLock);
+
+        JSpinner spinnerInactivityTime = new JSpinner(new SpinnerNumberModel(Integer.parseInt(PROPS.getProperty("inactivity_time")), ALLOWED_INACTIVITY_TIME.small, ALLOWED_INACTIVITY_TIME.big, 1));
+        spinnerInactivityTime.setPreferredSize(new Dimension(50, 20));
+        spinnerInactivityTime.setFont(raleway(11));
+        spinnerInactivityTime.setBorder(BorderFactory.createEmptyBorder());
+        ((JSpinner.DefaultEditor) spinnerInactivityTime.getEditor()).getTextField().setFormatterFactory(new DefaultFormatterFactory() {
+            public JFormattedTextField.AbstractFormatter getFormatter(JFormattedTextField source) {
+                return new MyFormatter();
+            }
+        });
+        COMPONENTS.put("settings.spinner.inactivityTime", spinnerInactivityTime);
+        panelInactivity.add(spinnerInactivityTime);
+
+        JLabel lblInactivityLock = new JLabel();
+        lblInactivityLock.setFont(raleway(13));
+        COMPONENTS.put("settings.lbl.inactivityLock", lblInactivityLock);
+        panelInactivity.add(lblInactivityLock);
     }
 
     /**
-     * Adds a component with its name to the {@link de.finnik.gui.Var#COMPONENTS} map and adds the component to the panel
+     * Adds a component with its name to the {@link Var#COMPONENTS} map and adds the component to the panel
      * The method kind of overwrites {@link java.awt.Container#add(Component)} method in order to handle the components later
      *
      * @param c   The component
@@ -231,5 +264,48 @@ class SettingsDialog extends JDialog {
             getContentPane().add(component);
             getContentPane().add(Box.createVerticalGlue());
         });
+    }
+
+    private void adjustSizeAndCenter() {
+        setSize(new Dimension((getContentPane().getLayout().preferredLayoutSize(getContentPane())).width + 50, (getContentPane().getLayout().preferredLayoutSize(getContentPane())).height + 60));
+        setLocationRelativeTo(null);
+    }
+
+    private static final class MyFormatter extends JFormattedTextField.AbstractFormatter {
+        private MyFormatter() {
+        }
+
+        public Object stringToValue(String text) {
+            int i = Integer.parseInt(text);
+            if (!ALLOWED_INACTIVITY_TIME.matches(i)) {
+                DIALOG.message(FRAME, String.format(LANG.getProperty("settings.jop.noValidInactivityTime"), ALLOWED_INACTIVITY_TIME.small, ALLOWED_INACTIVITY_TIME.big));
+            } else {
+                String propertyName = "inactivity_time";
+                PROPS.setProperty(propertyName, text);
+                LOG.info("Changed property {} to {}!", propertyName, text);
+                storeProperties();
+                INACTIVITY_LISTENER.setInactivity(i);
+            }
+            return i;
+        }
+
+        public String valueToString(Object value) {
+            return Objects.toString(value);
+        }
+    }
+
+    public static final class IntRange {
+        int small;
+
+        int big;
+
+        public IntRange(int first, int second) {
+            small = Math.min(first, second);
+            big = Math.max(first, second);
+        }
+
+        public boolean matches(int toCheck) {
+            return (toCheck >= small && toCheck <= big);
+        }
     }
 }

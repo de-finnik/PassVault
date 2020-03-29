@@ -121,9 +121,9 @@ public class Password {
 
 
     /**
-     * Encrypts all {@link de.finnik.passvault.Password} objects with a given password and saves them in a given file,
+     * Encrypts all {@link Password} objects with a given password and saves them in a given file,
      *
-     * @param passwords List of {@link de.finnik.passvault.Password} objects
+     * @param passwords List of {@link Password} objects
      * @param file      The file to save the encrypted passwords to
      * @param pass      The password to encrypt
      */
@@ -140,7 +140,7 @@ public class Password {
      *
      * @param file The encrypted file
      * @param pass The password to decrypt
-     * @return The List of {@link de.finnik.passvault.Password} objects
+     * @return The List of {@link Password} objects
      */
     public static List<Password> readPasswords(File file, String pass) throws IllegalArgumentException {
         try (AESReader aesReader = new AESReader(new FileReader(file), new AES(pass))) {
@@ -155,7 +155,7 @@ public class Password {
     }
 
     /**
-     * Creates a string containing all attributes of a {@link de.finnik.passvault.Password} objects excluding the password attribute
+     * Creates a string containing all attributes of a {@link Password} objects excluding the password attribute
      *
      * @param password The password to convert to a string
      * @return The converted string

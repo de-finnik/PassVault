@@ -20,8 +20,8 @@ It also generates new passwords with a given length and given parameters.
 ![Main frame](screenshots/main_frame.png)
 
 This window is mainly divided into two parts:
-- In the left part of the window you can [generate new passwords] by choosing the variety of characters and the length
-- In the right part you can [manage your passwords] by searching, deleting, editing and copying to the clipboard
+- In the left part of the window you can [generate new passwords](#generate-a-new-password) by choosing the variety of characters and the length
+- In the right part you can [manage your passwords](#manage-your-passwords) by searching, deleting, editing and copying to the clipboard
 
 # Generate a new password
 

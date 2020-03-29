@@ -40,7 +40,7 @@ public class PassVault {
 
     /**
      * Creates necessary files (if they don´t already exist), loads fonts, images and properties,
-     * creates necessary instances for variables in {@link de.finnik.gui.Var} and starts the application.
+     * creates necessary instances for variables in {@link Var} and starts the application.
      */
     private void run() {
         final File dir = new File("bin");
@@ -71,7 +71,7 @@ public class PassVault {
             LOG.error("Error while reading config.properties");
         }
 
-        PROPS = PassUtils.FileUtils.getDefaultProperties();
+        PROPS = new Properties();
         try {
             PROPS.load(new FileReader(PROPERTIES));
             LOG.info("Loaded properties!");
@@ -94,6 +94,8 @@ public class PassVault {
 
         COMPONENTS = new HashMap<>();
 
+        INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PROPS.getProperty("inactivity_time")), () -> ((PassFrame) FRAME).inactive());
+
         EventQueue.invokeLater(() -> {
 
             UIManager.put("ToolTip.background", FOREGROUND);
@@ -101,7 +103,7 @@ public class PassVault {
             UIManager.put("ToolTip.border", BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
             /*
-            Reads the {@link de.finnik.gui.Var#PASSWORDS} file, checks whether passwords are already saved and creates either the login dialog
+            Reads the {@link Var#PASSWORDS} file, checks whether passwords are already saved and creates either the login dialog
             or the main frame with an empty string as the main password
              */
             try (BufferedReader br = new BufferedReader(new FileReader(PASSWORDS))) {
@@ -136,7 +138,7 @@ public class PassVault {
 
     /**
      * Login frame that wants you to enter your main password that is used to encrypt all passwords.
-     * It´s created on beginning and you won´t enter {@link de.finnik.gui.PassFrame} unless you haven´t typed in the correct password.
+     * It´s created on beginning and you won´t enter {@link PassFrame} unless you haven´t typed in the correct password.
      */
     public static class CheckFrame extends JDialog {
         /**
@@ -196,7 +198,7 @@ public class PassVault {
             JTextField passwordField = new JPasswordField();
             passwordField.setBounds(10, 120, 360, 30);
             passwordField.setFont(raleway(20));
-            passwordField.setBorder(BorderFactory.createLineBorder(Color.black));
+            passwordField.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
             passwordField.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
@@ -234,7 +236,7 @@ public class PassVault {
         }
 
         /**
-         * Adds a component with its name to the {@link de.finnik.gui.Var#COMPONENTS} map and adds the component to the panel
+         * Adds a component with its name to the {@link Var#COMPONENTS} map and adds the component to the panel
          * The method kind of overwrites {@link java.awt.Container#add(Component)} method in order to handle the components later
          *
          * @param c   The component

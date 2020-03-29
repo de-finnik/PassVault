@@ -36,10 +36,10 @@ class PassBankPanel extends JPanel {
     }
 
     /**
-     * Checks via {@link PassBankPanel#showAll()} whether {@link de.finnik.gui.PassBankPanel#tableModelPassBank} should display all passwords
-     * or just the ones matching to the input from {@link de.finnik.gui.PassBankPanel#tfSearch}
+     * Checks via {@link PassBankPanel#showAll()} whether {@link PassBankPanel#tableModelPassBank} should display all passwords
+     * or just the ones matching to the input from {@link PassBankPanel#tfSearch}
      *
-     * @return All passwords to be currently displayed in {@link de.finnik.gui.PassBankPanel#tableModelPassBank}
+     * @return All passwords to be currently displayed in {@link PassBankPanel#tableModelPassBank}
      */
     private static ArrayList<Password> getAllMatchingPasswords() {
         return (ArrayList<Password>) PassFrame.passwordList.stream()
@@ -49,7 +49,7 @@ class PassBankPanel extends JPanel {
     }
 
     /**
-     * Updates {@link de.finnik.gui.PassBankPanel#tableModelPassBank} via adding all passwords from {@link PassBankPanel#getAllMatchingPasswords()} to {@link de.finnik.gui.PassBankPanel#tableModelPassBank}
+     * Updates {@link PassBankPanel#tableModelPassBank} via adding all passwords from {@link PassBankPanel#getAllMatchingPasswords()} to {@link PassBankPanel#tableModelPassBank}
      */
     static void updateTableModel() {
         tableModelPassBank.setRowCount(0);
@@ -59,7 +59,7 @@ class PassBankPanel extends JPanel {
     }
 
     /**
-     * Checks whether {@link de.finnik.gui.PassBankPanel#tableModelPassBank} should display all passwords or just the ones that match with the user input
+     * Checks whether {@link PassBankPanel#tableModelPassBank} should display all passwords or just the ones that match with the user input
      *
      * @return A boolean (true=All passwords should be displayed; false=passwords matching to user input should be displayed)
      */
@@ -226,7 +226,7 @@ class PassBankPanel extends JPanel {
                     Utils.copyToClipboard(password.getPass());
                     LOG.info("Copied password to clipboard: {}!", Password.log(password));
                 } catch (IndexOutOfBoundsException ex) {
-                    DIALOG.message(null, LANG.getProperty("passBank.jop.noEntrySelected"));
+                    DIALOG.message(FRAME, LANG.getProperty("passBank.jop.noEntrySelected"));
                 }
             }
         });
@@ -234,7 +234,7 @@ class PassBankPanel extends JPanel {
     }
 
     /**
-     * Adds a component with its name to the {@link de.finnik.gui.Var#COMPONENTS} map and adds the component to the panel
+     * Adds a component with its name to the {@link Var#COMPONENTS} map and adds the component to the panel
      * The method kind of overwrites {@link java.awt.Container#add(Component)} method in order to handle the components later
      *
      * @param c   The component
