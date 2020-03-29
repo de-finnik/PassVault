@@ -25,9 +25,9 @@ public class PassDialog {
      * @param font The font that will be used for the dialogs
      * @param close An image which will be displayed by a button that closes the dialog
      * @param images An array of images that will be used for icons in the dialogs
-     *               (images[0] in {@link de.finnik.gui.PassDialog#message(Window, String)}, images[1] in {@link de.finnik.gui.PassDialog#input(Window, String, Consumer)}
-     *               images[2] in {@link de.finnik.gui.PassDialog#confirm(Window, String, Consumer)}
-     *               and images[3] as the button in {@link de.finnik.gui.PassDialog#confirm(Window, String, Consumer)} with that the user confirms the dialog
+     *               (images[0] in {@link PassDialog#message(Window, String)}, images[1] in {@link PassDialog#input(Window, String, Consumer)}
+     *               images[2] in {@link PassDialog#confirm(Window, String, Consumer)}
+     *               and images[3] as the button in {@link PassDialog#confirm(Window, String, Consumer)} with that the user confirms the dialog
      */
     PassDialog(Color foreground, Color background, Font font, BufferedImage close, BufferedImage... images) {
         this.CLOSE = close;
@@ -43,6 +43,8 @@ public class PassDialog {
      * @param message The message which the user should see
      */
     void message(Window owner, String message) {
+        Toolkit.getDefaultToolkit().beep();
+
         JDialog dialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);
 
         JPanel content = new JPanel();
@@ -111,11 +113,12 @@ public class PassDialog {
     }
 
     /**
-     * Displays the same input dialog as {@link de.finnik.gui.PassDialog#input(Window, String, Consumer)} but accepts a boolean to let the user input a password
-     * @param owner The window that owns the dialog
+     * Displays the same input dialog as {@link PassDialog#input(Window, String, Consumer)} but accepts a boolean to let the user input a password
+     *
+     * @param owner   The window that owns the dialog
      * @param message The message which the user should see
-     * @param toDo A consumer that accepts the string, that the user inputs
-     * @param pass A boolean whether the input is a password
+     * @param toDo    A consumer that accepts the string, that the user inputs
+     * @param pass    A boolean whether the input is a password
      */
     public void input(Window owner, String message, Consumer<String> toDo, boolean pass) {
         JDialog dialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);
@@ -168,15 +171,15 @@ public class PassDialog {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     dialog.dispose();
                     toDo.accept(tfInput.getText());
-                } else if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    dialog. dispose();
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    dialog.dispose();
                     toDo.accept("");
                 }
             }
         });
-        tfInput.setFont(FONT.deriveFont(pass?20f:15f));
+        tfInput.setFont(FONT.deriveFont(pass ? 20f : 15f));
         tfInput.setPreferredSize(new Dimension(Math.max(lblMessage.getPreferredSize().width + 100, 250), 25));
-        tfInput.setBorder(BorderFactory.createLineBorder(BACKGROUND.brighter().brighter()));
+        tfInput.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         panel.add(tfInput, BorderLayout.CENTER);
 
         JLabel lblYes = new JLabel();

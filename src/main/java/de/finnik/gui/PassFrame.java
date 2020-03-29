@@ -1,6 +1,5 @@
 package de.finnik.gui;
 
-import com.sun.java.swing.plaf.windows.*;
 import de.finnik.passvault.*;
 
 import javax.swing.*;
@@ -18,7 +17,7 @@ import static de.finnik.gui.Var.*;
 
 /**
  * The heart of the PassVault application.
- * It's the main frame where you can generate new passwords ({@link de.finnik.gui.GeneratePasswordPanel}) or search for the password that you need ({@link de.finnik.gui.PassBankPanel}).
+ * It's the main frame where you can generate new passwords ({@link GeneratePasswordPanel}) or search for the password that you need ({@link PassBankPanel}).
  */
 public class PassFrame extends JFrame {
 
@@ -34,8 +33,8 @@ public class PassFrame extends JFrame {
     /**
      * Creates the frame
      *
-     * @param password     The main password which will be saved to {@link de.finnik.gui.PassFrame#password}
-     * @param passwordList The list of {@link de.finnik.passvault.Password}s which will be saved to {@link de.finnik.gui.PassFrame#passwordList}
+     * @param password     The main password which will be saved to {@link PassFrame#password}
+     * @param passwordList The list of {@link Password}s which will be saved to {@link PassFrame#passwordList}
      */
     PassFrame(String password, List<Password> passwordList) {
         PassFrame.password = password;
@@ -61,11 +60,6 @@ public class PassFrame extends JFrame {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 if (e.isShiftDown() && e.getButton() == MouseEvent.BUTTON3) {
-                    try {
-                        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                    } catch (Exception ex) {
-                        LOG.error("Error while setting look and feel!", ex);
-                    }
                     JFileChooser jfc = new JFileChooser() {
                         @Override
                         public int showOpenDialog(Component parent) throws HeadlessException {
@@ -75,11 +69,6 @@ public class PassFrame extends JFrame {
                     jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                     jfc.setFileFilter(new FileNameExtensionFilter(".bin", "bin"));
                     int result = jfc.showOpenDialog(null);
-                    try {
-                        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
-                    } catch (Exception ex) {
-                        LOG.error("Error while setting look and feel!", ex);
-                    }
                     if (result == JFileChooser.APPROVE_OPTION && PassFrame.password.length() > 0) {
                         importBackup(jfc.getSelectedFile());
                     }
@@ -153,6 +142,16 @@ public class PassFrame extends JFrame {
 
         Arrays.stream(getMatchingComponents("passFrame.lbl"))
                 .forEach(c -> c.setCursor(Var.HAND_CURSOR));
+
+        INACTIVITY_LISTENER.start();
+    }
+
+    /**
+     * Saves the password stored in {@link PassFrame#passwordList} encrypted with the password {@link PassFrame#password}
+     * to the passwords file {@link Var#PASSWORDS}
+     */
+    static void savePasswords() {
+        Password.savePasswords(passwordList, PASSWORDS, password);
     }
 
     /**
@@ -165,9 +164,9 @@ public class PassFrame extends JFrame {
         lblLogo.setIcon(new ImageIcon(LOGO));
         getContentPane().add(lblLogo);
 
-        JLabel lblInfo = new JLabel();
-        lblInfo.setIcon(new ImageIcon(INFO));
-        lblInfo.addMouseListener(new MouseAdapter() {
+        JLabel lblSettings = new JLabel();
+        lblSettings.setIcon(new ImageIcon(SETTINGS));
+        lblSettings.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
@@ -176,8 +175,8 @@ public class PassFrame extends JFrame {
                 settingsDialog.setVisible(true);
             }
         });
-        lblInfo.setBounds(10, 10, 30, 30);
-        add(lblInfo, "passFrame.lbl.info");
+        lblSettings.setBounds(10, 10, 30, 30);
+        add(lblSettings, "passFrame.lbl.settings");
 
         JLabel lblClose = new JLabel();
         lblClose.setIcon(new ImageIcon(CLOSE));
@@ -219,7 +218,7 @@ public class PassFrame extends JFrame {
     }
 
     /**
-     * Adds a component with its name to the {@link de.finnik.gui.Var#COMPONENTS} map and adds the component to the panel
+     * Adds a component with its name to the {@link Var#COMPONENTS} map and adds the component to the panel
      * The method kind of overwrites {@link java.awt.Container#add(Component)} method in order to handle the components later
      *
      * @param c   The component
@@ -231,11 +230,30 @@ public class PassFrame extends JFrame {
     }
 
     /**
-     * Saves the password stored in {@link de.finnik.gui.PassFrame#passwordList} encrypted with the password {@link de.finnik.gui.PassFrame#password}
-     * to the passwords file {@link de.finnik.gui.Var#PASSWORDS}
+     * Is called when user is inactive. If property inactivity_lock is true, PassVault will be locked
+     * and can just be reentered by inputting the main password
      */
-    static void savePasswords() {
-        Password.savePasswords(passwordList, PASSWORDS, password);
+    public void inactive() {
+        if (!Boolean.parseBoolean(PROPS.getProperty("inactivity_lock")) || password.length() == 0)
+            return;
+
+        Window[] toHide = {this, (Window) COMPONENTS.get("savePass"), (Window) COMPONENTS.get("settings")};
+        for (Window window : toHide) {
+            if (window != null)
+                window.setOpacity(0.0F);
+        }
+
+        DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), string -> {
+            if (!string.equals(password)) {
+                LOG.info("User tried to log in with wrong password!");
+                System.exit(0);
+            }
+            INACTIVITY_LISTENER.start();
+            for (Window window : toHide) {
+                if (window != null)
+                    window.setOpacity(1.0F);
+            }
+        }, true);
     }
 
     /**

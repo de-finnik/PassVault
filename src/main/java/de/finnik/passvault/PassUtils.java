@@ -65,18 +65,42 @@ public class PassUtils {
          *
          * @return Default properties
          */
-        public static Properties getDefaultProperties() {
+        private static Properties getDefaultProperties() {
             Properties properties = new Properties();
             String systemLang = Locale.getDefault().getLanguage();
             properties.setProperty("lang", FileUtils.availableLanguages().contains(systemLang) ? systemLang : "en");
+            properties.setProperty("inactivity_time", "30");
+            properties.setProperty("inactivity_lock", "true");
             return properties;
         }
 
+        /**
+         * Validates application properties and replaces invalid values with defaults from {@link FileUtils#getDefaultProperties()}
+         *
+         * @param properties The properties to validate
+         */
         public static void validateProperties(Properties properties) {
+            List<String> propertiesToDefault = new ArrayList<>();
             String property = "lang";
-            if (!availableLanguages().contains(properties.getProperty(property))) {
-                LOG.info("Adjusted {} property from {} to default property {}!", property, properties.getProperty(property), getDefaultProperties().getProperty(property));
-                properties.setProperty(property, getDefaultProperties().getProperty(property));
+            if (!properties.containsKey(property) || !availableLanguages().contains(properties.getProperty(property)))
+                propertiesToDefault.add(property);
+            property = "inactivity_time";
+            try {
+                int inactivity_time = Integer.parseInt(properties.getProperty("inactivity_time"));
+                if (!properties.containsKey(property) || !SettingsDialog.ALLOWED_INACTIVITY_TIME.matches(inactivity_time))
+                    throw new NumberFormatException();
+            } catch (NumberFormatException e) {
+                propertiesToDefault.add(property);
+            }
+            property = "inactivity_lock";
+            if (!properties.containsKey(property) || (!properties.getProperty(property).equals("true") && !properties.getProperty(property).equals("false")))
+                propertiesToDefault.add(property);
+            propertiesToDefault.forEach(prop -> {
+                LOG.info("Automatically adjusted property {} to default: {}", prop, getDefaultProperties().getProperty(prop));
+                properties.setProperty(prop, getDefaultProperties().getProperty(prop));
+            });
+            if (!propertiesToDefault.isEmpty()) {
+                storeProperties();
             }
         }
     }

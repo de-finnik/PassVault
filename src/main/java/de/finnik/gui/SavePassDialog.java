@@ -17,8 +17,8 @@ import static de.finnik.gui.Var.*;
 class SavePassDialog extends JDialog {
 
     /**
-     * A list of {@link javax.swing.JComponent}s which are generated in {@link de.finnik.gui.SavePassDialog#components(String)}
-     * to be added to the content pane in the right order {@link de.finnik.gui.SavePassDialog#positionComponents(List)}
+     * A list of {@link javax.swing.JComponent}s which are generated in {@link SavePassDialog#components(String)}
+     * to be added to the content pane in the right order {@link SavePassDialog#positionComponents(List)}
      */
     private List<JComponent> components;
 
@@ -80,7 +80,7 @@ class SavePassDialog extends JDialog {
         setLocationRelativeTo(null);
     }
 
-    private void components(String pass) {
+    private void components(final String pass) {
         JPanel toolBar = new JPanel(new BorderLayout());
         toolBar.setBackground(BACKGROUND);
         add(toolBar, "savePass.toolbar");
@@ -112,7 +112,9 @@ class SavePassDialog extends JDialog {
             @Override
             public void addNotify() {
                 super.addNotify();
-                requestFocus();
+                // Gets focus if password is given
+                if (!pass.equals(""))
+                    requestFocus();
             }
         };
         add(tfSite, "savePass.tf.site");
@@ -159,7 +161,7 @@ class SavePassDialog extends JDialog {
     }
 
     /**
-     * Adds a component with its name to the {@link de.finnik.gui.Var#COMPONENTS} map and adds the component to the panel
+     * Adds a component with its name to the {@link Var#COMPONENTS} map and adds the component to the panel
      * The method kind of overwrites {@link java.awt.Container#add(Component)} method in order to handle the components later
      *
      * @param c   The component

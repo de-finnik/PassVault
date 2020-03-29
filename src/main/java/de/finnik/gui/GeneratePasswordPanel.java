@@ -96,7 +96,7 @@ public class GeneratePasswordPanel extends JPanel {
                 tfPass.setText(PasswordGenerator.generatePassword(chars, sliderLength.getValue()));
                 LOG.info("Generated password with length: {} and chars {}! ", sliderLength.getValue(), chars);
             } else {
-                DIALOG.message(null, LANG.getProperty("generate.jop.insufficientChars"));
+                DIALOG.message(FRAME, LANG.getProperty("generate.jop.insufficientChars"));
             }
         });
         add(btnGenerate, "generate.btn.generate");
@@ -116,8 +116,8 @@ public class GeneratePasswordPanel extends JPanel {
     }
 
     /**
-     * Adds a component with its name to the {@link de.finnik.gui.Var#COMPONENTS} map and adds the component to the panel
-     * The method kind of overwrites {@link java.awt.Container#add(Component)} method in order to handle the components later
+     * Adds a component with its name to the {@link Var#COMPONENTS} map and adds the component to the panel
+     * The method kind of overwrites {@link Container#add(Component)} method in order to handle the components later
      *
      * @param c   The component
      * @param key The component´s matching name
