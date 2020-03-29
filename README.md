@@ -13,7 +13,7 @@ It also generates new passwords with a given length and given parameters.
 
 # Installation & Quick Start
 1. Make sure you have [java](https://www.java.com/download/) installed on your computer
-2. Download [PassVault.jar](https://t1p.de/passvault) file
+2. Download the latest [PassVault.jar](https://t1p.de/passvault) file
 3. Execute the file (Note: application files will be created in the execution directory)
 4. Now you should be able to see the main window of the PassVault application:
 
