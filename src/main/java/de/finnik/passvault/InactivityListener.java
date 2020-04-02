@@ -67,6 +67,8 @@ public class InactivityListener {
      */
     public void setInactivity(int inactivity) {
         this.inactivity = inactivity;
+        if (executor != null && !executor.isShutdown())
+            start();
     }
 
     public interface Inactivity {
