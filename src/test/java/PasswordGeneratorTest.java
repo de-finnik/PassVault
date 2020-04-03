@@ -1,58 +1,50 @@
-import de.finnik.passvault.Password;
-import de.finnik.passvault.PasswordGenerator;
-import org.junit.Test;
+import org.junit.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import java.util.*;
 
 import static de.finnik.passvault.PasswordGenerator.*;
+import static org.junit.Assert.*;
 
 public class PasswordGeneratorTest {
     @Test
     public void testBigLetters() {
-        assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", BIG_LETTERS());
+        assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", PassChars.BIG_LETTERS.get());
     }
 
     @Test
     public void testSmallLetters() {
-        assertEquals("abcdefghijklmnopqrstuvwxyz", SMALL_LETTERS());
+        assertEquals("abcdefghijklmnopqrstuvwxyz", PassChars.SMALL_LETTERS.get());
     }
 
     @Test
     public void testNumbers() {
-        assertEquals("0123456789", NUMBERS());
+        assertEquals("0123456789", PassChars.NUMBERS.get());
     }
 
     @Test
     public void testSpecials() {
-        assertEquals("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", SPECIAL_CHARACTERS());
+        assertEquals("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~", PassChars.SPECIAL_CHARACTERS.get());
     }
 
     @Test
     public void testLengthOfGeneratedPassword() {
         int random;
         for (int z = 0; z < 5; z++) {
-            random = (int)(Math.random()*100);
-            assertEquals(random, generatePassword("Test",random).length());
+            random = (int) (Math.random() * 100) + 1;
+            assertEquals(random, generatePassword(new PassChars[]{PassChars.BIG_LETTERS}, random).length());
         }
     }
 
     @Test
     public void testGenerateContainsMatchingChars() {
-        List<String> allChars = Arrays.asList((BIG_LETTERS()+SMALL_LETTERS()+NUMBERS()+SPECIAL_CHARACTERS()).split(""));
-        Collections.shuffle(allChars);
-        String random = allChars.stream().limit(20).collect(Collectors.joining());
-
-        String generatedPass = generatePassword(random, (int)(Math.random()*30+1));
-        for(String ch:random.split("")) {
-            generatedPass = generatedPass.replace(ch,"");
+        List<PassChars> all = Arrays.asList(PassChars.values());
+        for (int i = 0; i <= 500; i++) {
+            Collections.shuffle(all);
+            String password;
+            password = generatePassword(new PassChars[]{all.get(0)}, (int) (Math.random() * 30) + 1);
+            if (Arrays.stream(all.get(0).get().split("")).noneMatch(password::contains)) {
+                fail();
+            }
         }
-
-        assertEquals(0,generatedPass.length());
     }
 }

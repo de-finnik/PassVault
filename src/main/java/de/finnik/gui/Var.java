@@ -27,21 +27,12 @@ public class Var {
      */
     public static File PASSWORDS;
     /**
-     * The file where properties are saved
-     */
-    public static File PROPERTIES;
-    /**
      * Properties that contain information about the application:
      * app.name
      * app.version
      * app.author
      */
     public static Properties APP_INFO;
-    /**
-     * The application properties:
-     * lang
-     */
-    public static Properties PROPS;
     /**
      * Language properties that contain texts for all components
      */
@@ -70,10 +61,10 @@ public class Var {
     /**
      * Overrides {@link PassUtils.FileUtils#loadLang} method with matching variables from this class
      *
-     * @return The language properties for property "lang" from {@link Var#PROPS}
+     * @return The language properties for property {@link PassProperty#LANG}
      */
     public static Properties loadLang() {
-        return PassUtils.FileUtils.loadLang(PROPS.getProperty("lang"));
+        return PassUtils.FileUtils.loadLang(PassProperty.LANG.getValue());
     }
 
     /**
@@ -102,16 +93,5 @@ public class Var {
      */
     public static Font raleway(int size) {
         return Utils.sizeFont(RALEWAY, size);
-    }
-
-    /**
-     * Stores the application properties {@link Var#PROPS} to {@link Var#PROPERTIES}
-     */
-    public static void storeProperties() {
-        try {
-            PROPS.store(new FileWriter(PROPERTIES), "PassVault settings");
-        } catch (IOException e) {
-            LOG.error("Error while saving properties!");
-        }
     }
 }

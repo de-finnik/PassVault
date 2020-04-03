@@ -230,11 +230,11 @@ public class PassFrame extends JFrame {
     }
 
     /**
-     * Is called when user is inactive. If property inactivity_lock is true, PassVault will be locked
+     * Is called when user is inactive. If property {@link PassProperty#INACTIVITY_LOCK} is true, PassVault will be locked
      * and can just be reentered by inputting the main password
      */
     public void inactive() {
-        if (!Boolean.parseBoolean(PROPS.getProperty("inactivity_lock")) || password.length() == 0)
+        if (!Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()) || password.length() == 0)
             return;
 
         Window[] toHide = {this, (Window) COMPONENTS.get("savePass"), (Window) COMPONENTS.get("settings")};

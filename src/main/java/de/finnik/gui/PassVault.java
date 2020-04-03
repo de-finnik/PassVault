@@ -61,24 +61,15 @@ public class PassVault {
             LOG.error("Error while reading application.properties!", e);
         }
 
-
-        PROPERTIES = new File(dir, "config.properties");
         try {
-            if (PROPERTIES.createNewFile()) {
-                LOG.info("Created config.properties in main directory ({})!", PROPERTIES.getAbsolutePath());
+            if (PassProperty.PROPERTIES.createNewFile()) {
+                LOG.info("Created config.properties in main directory ({})!", PassProperty.PROPERTIES.getAbsolutePath());
             }
         } catch (Exception e) {
-            LOG.error("Error while reading config.properties");
+            LOG.error("Error while creating config.properties");
         }
 
-        PROPS = new Properties();
-        try {
-            PROPS.load(new FileReader(PROPERTIES));
-            LOG.info("Loaded properties!");
-            PassUtils.FileUtils.validateProperties(PROPS);
-        } catch (Exception e) {
-            LOG.error("Error while loading properties from config.properties file!", e);
-        }
+        PassProperty.load();
 
         LANG = loadLang();
 
@@ -94,7 +85,7 @@ public class PassVault {
 
         COMPONENTS = new HashMap<>();
 
-        INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PROPS.getProperty("inactivity_time")), () -> ((PassFrame) FRAME).inactive());
+        INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
 
         EventQueue.invokeLater(() -> {
 
@@ -156,6 +147,7 @@ public class PassVault {
             setResizable(false);
             getContentPane().setBackground(BACKGROUND);
             setUndecorated(true);
+            setIconImage(FRAME_ICON);
 
             components();
             textComponents();

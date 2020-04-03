@@ -4,7 +4,6 @@ import de.finnik.passvault.*;
 
 import javax.swing.*;
 import javax.swing.plaf.*;
-import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -21,7 +20,6 @@ import static de.finnik.gui.Var.*;
  */
 public class SettingsDialog extends JDialog {
 
-    public static final IntRange ALLOWED_INACTIVITY_TIME = new IntRange(10, 3600);
     /**
      * A list of {@link javax.swing.JComponent}s which are generated in {@link SettingsDialog#components()}
      * to be added to the content pane in the right order {@link SettingsDialog#positionComponents(List)}
@@ -188,15 +186,12 @@ public class SettingsDialog extends JDialog {
         comboBoxLanguage.setFont(raleway(15));
         List<Locale> locales = PassUtils.FileUtils.availableLanguages().stream().map(Locale::new).collect(Collectors.toList());
         locales.stream().map(Locale::getDisplayName).forEach(comboBoxLanguageModel::addElement);
-        comboBoxLanguage.setSelectedItem(new Locale(PROPS.getProperty("lang")).getDisplayLanguage());
+        comboBoxLanguage.setSelectedItem(new Locale(PassProperty.LANG.getValue()).getDisplayLanguage());
         comboBoxLanguage.addActionListener(action -> {
             // Change language
-            String propertyName = "lang";
             locales.stream()
                     .filter(locale -> locale.getDisplayLanguage().equals(comboBoxLanguage.getSelectedItem()))
-                    .forEach(locale -> PROPS.setProperty(propertyName, locale.getLanguage()));
-            LOG.info("Changed property {} to {}!", propertyName, PROPS.getProperty(propertyName));
-            storeProperties();
+                    .forEach(locale -> PassProperty.LANG.setValue(locale.getLanguage()));
             LANG = loadLang();
             textComponents();
             adjustSizeAndCenter();
@@ -211,25 +206,35 @@ public class SettingsDialog extends JDialog {
         components.add(panelInactivity);
 
         JCheckBox checkBoxInactivityLock = new JCheckBox();
-        checkBoxInactivityLock.setSelected(Boolean.parseBoolean(PROPS.getProperty("inactivity_lock")));
+        checkBoxInactivityLock.setSelected(Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()));
         checkBoxInactivityLock.addActionListener(action -> {
-            String propertyName = "inactivity_lock";
-            PROPS.setProperty(propertyName, String.valueOf(checkBoxInactivityLock.isSelected()));
-            LOG.info("Changed property {} to {}!", propertyName, checkBoxInactivityLock.isSelected());
-            storeProperties();
+            PassProperty.INACTIVITY_LOCK.setValue(checkBoxInactivityLock.isSelected());
             INACTIVITY_LISTENER.start();
         });
         checkBoxInactivityLock.setFont(raleway(13));
         COMPONENTS.put("settings.check.inactivityLock", checkBoxInactivityLock);
         panelInactivity.add(checkBoxInactivityLock);
 
-        JSpinner spinnerInactivityTime = new JSpinner(new SpinnerNumberModel(Integer.parseInt(PROPS.getProperty("inactivity_time")), ALLOWED_INACTIVITY_TIME.small, ALLOWED_INACTIVITY_TIME.big, 1));
+        JSpinner spinnerInactivityTime = new JSpinner(new SpinnerNumberModel(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), 10, 3600, 1));
         spinnerInactivityTime.setPreferredSize(new Dimension(50, 20));
         spinnerInactivityTime.setFont(raleway(11));
         spinnerInactivityTime.setBorder(BorderFactory.createEmptyBorder());
-        ((JSpinner.DefaultEditor) spinnerInactivityTime.getEditor()).getTextField().setFormatterFactory(new DefaultFormatterFactory() {
-            public JFormattedTextField.AbstractFormatter getFormatter(JFormattedTextField source) {
-                return new MyFormatter();
+        ((JSpinner.DefaultEditor) spinnerInactivityTime.getEditor()).getTextField().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                try {
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER)
+                        spinnerInactivityTime.setValue(Integer.valueOf(((JFormattedTextField) e.getComponent()).getText()));
+                } catch (NumberFormatException ignored) {
+
+                }
+            }
+        });
+        spinnerInactivityTime.addChangeListener(e -> {
+            if (!PassProperty.INACTIVITY_TIME.setValue(spinnerInactivityTime.getValue())) {
+                DIALOG.message(FRAME, String.format(LANG.getProperty("settings.jop.noValidInactivityTime"), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMinimum(), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMaximum()));
+            } else {
+                INACTIVITY_LISTENER.setInactivity(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()));
             }
         });
         COMPONENTS.put("settings.spinner.inactivityTime", spinnerInactivityTime);
@@ -269,43 +274,5 @@ public class SettingsDialog extends JDialog {
     private void adjustSizeAndCenter() {
         setSize(new Dimension((getContentPane().getLayout().preferredLayoutSize(getContentPane())).width + 50, (getContentPane().getLayout().preferredLayoutSize(getContentPane())).height + 60));
         setLocationRelativeTo(null);
-    }
-
-    private static final class MyFormatter extends JFormattedTextField.AbstractFormatter {
-        private MyFormatter() {
-        }
-
-        public Object stringToValue(String text) {
-            int i = Integer.parseInt(text);
-            if (!ALLOWED_INACTIVITY_TIME.matches(i)) {
-                DIALOG.message(FRAME, String.format(LANG.getProperty("settings.jop.noValidInactivityTime"), ALLOWED_INACTIVITY_TIME.small, ALLOWED_INACTIVITY_TIME.big));
-            } else {
-                String propertyName = "inactivity_time";
-                PROPS.setProperty(propertyName, text);
-                LOG.info("Changed property {} to {}!", propertyName, text);
-                storeProperties();
-                INACTIVITY_LISTENER.setInactivity(i);
-            }
-            return i;
-        }
-
-        public String valueToString(Object value) {
-            return Objects.toString(value);
-        }
-    }
-
-    public static final class IntRange {
-        int small;
-
-        int big;
-
-        public IntRange(int first, int second) {
-            small = Math.min(first, second);
-            big = Math.max(first, second);
-        }
-
-        public boolean matches(int toCheck) {
-            return (toCheck >= small && toCheck <= big);
-        }
     }
 }

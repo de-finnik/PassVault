@@ -95,7 +95,7 @@ class PassBankPanel extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
-                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && tableModelPassBank.getRowCount() > 0) {
                     lblCopy.getMouseListeners()[0].mouseClicked(null);
                 }
             }
@@ -172,7 +172,7 @@ class PassBankPanel extends JPanel {
                         break;
 
                 }
-                LOG.info("Edited password: {}!", Password.log(password));
+                LOG.info(Password.log(password, "Edited password"));
                 PassFrame.savePasswords();
             }
         });
@@ -188,7 +188,7 @@ class PassBankPanel extends JPanel {
                             Password password = getAllMatchingPasswords().get(row);
                             PassFrame.passwordList.remove(password);
                             tableModelPassBank.removeRow(row);
-                            LOG.info("Deleted password: {}!", Password.log(password));
+                            LOG.info(Password.log(password, "Deleted password"));
                             PassFrame.savePasswords();
                         }
                     });
@@ -224,7 +224,7 @@ class PassBankPanel extends JPanel {
                     int row = tablePassBank.getRowCount() == 1 ? 0 : tablePassBank.getSelectedRow();
                     Password password = getAllMatchingPasswords().get(row);
                     Utils.copyToClipboard(password.getPass());
-                    LOG.info("Copied password to clipboard: {}!", Password.log(password));
+                    LOG.info(Password.log(password, "Copied password to clipboard"));
                 } catch (IndexOutOfBoundsException ex) {
                     DIALOG.message(FRAME, LANG.getProperty("passBank.jop.noEntrySelected"));
                 }

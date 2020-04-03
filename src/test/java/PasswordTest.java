@@ -7,6 +7,7 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 public class PasswordTest {
+
     @Test
     public void testWriteAndReadPasswords() throws IOException {
         List<Password> passwords = new ArrayList<>();
@@ -16,7 +17,7 @@ public class PasswordTest {
 
         File temp = File.createTempFile("passvault","bin");
 
-        String pass = PasswordGenerator.generatePassword(PasswordGenerator.BIG_LETTERS(), (int)(Math.random()*30));
+        String pass = PasswordGenerator.generatePassword(new PasswordGenerator.PassChars[]{PasswordGenerator.PassChars.BIG_LETTERS}, (int) (Math.random() * 30));
 
         Password.savePasswords(passwords, temp,pass);
         assertEquals(passwords, Password.readPasswords(temp, pass));
@@ -26,12 +27,12 @@ public class PasswordTest {
 
     @Test
     public void testLog() {
-        Password password = new Password("pass","site","user","other");
+        Password password = new Password("pass", "site", "user", "other");
 
-        assertFalse(!password.getPass().equals("") && Password.log(password).contains(password.getPass()));
+        assertFalse(!password.getPass().equals("") && Password.log(password, "").contains(password.getPass()));
 
-        assertTrue(Password.log(password).contains(password.getSite()));
-        assertTrue(Password.log(password).contains(password.getUser()));
-        assertTrue(Password.log(password).contains(password.getOther()));
+        assertTrue(Password.log(password, "").contains(password.getSite()));
+        assertTrue(Password.log(password, "").contains(password.getUser()));
+        assertTrue(Password.log(password, "").contains(password.getOther()));
     }
 }

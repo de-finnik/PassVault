@@ -4,6 +4,7 @@ import de.finnik.passvault.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 import java.util.*;
 
 import static de.finnik.gui.Var.*;
@@ -38,8 +39,8 @@ public class GeneratePasswordPanel extends JPanel {
         Arrays.stream(getMatchingComponents("generate.checkBox", "generate.lbl"))
                 .forEach(c -> c.setFont(raleway(14)));
 
-        // Sets the font for buttons and textfields
-        Arrays.stream(getMatchingComponents("generate.btn", "generate.tf"))
+        // Sets the font for buttons
+        Arrays.stream(getMatchingComponents("generate.btn"))
                 .forEach(c -> c.setFont(raleway(15)));
     }
 
@@ -88,12 +89,26 @@ public class GeneratePasswordPanel extends JPanel {
         JButton btnGenerate = new JButton();
         btnGenerate.setBounds(75, 230, 150, 30);
         btnGenerate.addActionListener(action -> {
-            String chars = (checkBoxBigLetters.isSelected() ? PasswordGenerator.BIG_LETTERS() : "") +
-                    (checkBoxSmallLetters.isSelected() ? PasswordGenerator.SMALL_LETTERS() : "") +
-                    (checkBoxNumbers.isSelected() ? PasswordGenerator.NUMBERS() : "") +
-                    (checkBoxSpecialCharacters.isSelected() ? PasswordGenerator.SPECIAL_CHARACTERS() : "");
-            if (chars.length() > 0) {
-                tfPass.setText(PasswordGenerator.generatePassword(chars, sliderLength.getValue()));
+            List<PasswordGenerator.PassChars> chars = new ArrayList<>();
+            if (checkBoxBigLetters.isSelected()) {
+                chars.add(PasswordGenerator.PassChars.BIG_LETTERS);
+            }
+            if (checkBoxSmallLetters.isSelected()) {
+                chars.add(PasswordGenerator.PassChars.SMALL_LETTERS);
+            }
+            if (checkBoxNumbers.isSelected()) {
+                chars.add(PasswordGenerator.PassChars.NUMBERS);
+            }
+            if (checkBoxSpecialCharacters.isSelected()) {
+                chars.add(PasswordGenerator.PassChars.SPECIAL_CHARACTERS);
+            }
+            if (chars.size() > 0) {
+                tfPass.setFont(raleway(20));
+                String pass = PasswordGenerator.generatePassword(chars.toArray(new PasswordGenerator.PassChars[0]), sliderLength.getValue());
+                while (getFontMetrics(tfPass.getFont()).stringWidth(pass) + 10 > tfPass.getWidth()) {
+                    tfPass.setFont(tfPass.getFont().deriveFont((float) tfPass.getFont().getSize() - 1));
+                }
+                tfPass.setText(pass);
                 LOG.info("Generated password with length: {} and chars {}! ", sliderLength.getValue(), chars);
             } else {
                 DIALOG.message(FRAME, LANG.getProperty("generate.jop.insufficientChars"));
@@ -103,6 +118,7 @@ public class GeneratePasswordPanel extends JPanel {
 
         tfPass.setBounds(0, 270, 300, 40);
         tfPass.setEditable(false);
+        tfPass.setHorizontalAlignment(SwingConstants.CENTER);
         add(tfPass, "generate.tf.pass");
 
         JButton btnSavePass = new JButton();

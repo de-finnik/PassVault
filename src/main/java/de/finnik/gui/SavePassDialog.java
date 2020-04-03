@@ -148,7 +148,7 @@ class SavePassDialog extends JDialog {
                 }
 
                 PassFrame.passwordList.add(newPass);
-                LOG.info("Created password for {}!", Password.log(newPass));
+                LOG.info(Password.log(newPass, "Created password"));
             }
 
             PassFrame.savePasswords();
