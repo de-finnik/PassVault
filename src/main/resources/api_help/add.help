@@ -11,6 +11,7 @@ add <input>
 
     Error codes:
         20  The input wasn't adequate to the json format
+        21  The input password has no parameters
 
     Hint:
         Error messages will be displayed as following:
