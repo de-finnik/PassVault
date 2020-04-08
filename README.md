@@ -35,7 +35,7 @@ A generated password will automatically be filled into the password field:
 
 The button “Save and copy password” saves the new password with its information and copies it to your clipboard. 
 
-When you save a password for the first time, you´ll have to enter a main password with that all of your passwords will be encrypted (you can change it later, if you want to).
+When you save a password for the first time, you'll have to enter a main password with that all of your passwords will be encrypted (you can change it later, if you want to).
 
 # Manage your passwords
 In the right part of the PassVault window you can manage your passwords. 
@@ -80,8 +80,14 @@ First, you can just drag it to the main frame.
 The second option is pressing shift and do a right-click at the same time somewhere near the PassVault logo. 
 In the opening dialog you can select the backup file.
 
-After selecting the backup file, you’ll have to enter the main password with that the file was encrypted (your main password at exporting). 
+After selecting the backup file, you'll have to enter the main password with that the file was encrypted (your main password at exporting). 
 If the password is correct, all passwords that are not already saved, will be added to your passwords.
+
+## Inactivity
+From PassVault 2.0, there's a feature that allows you to lock PassVault after a certain time of inactivity.
+
+With the tick box you can enable/disable this feature.
+In the textfield you can enter the time after that PassVault will be locked in seconds. (Valid values between 10 and 3600)
 
 ## Get help
 The help icon will lead you to this GitHub repository. 
