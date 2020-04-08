@@ -8,6 +8,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.List;
 import java.util.*;
+import java.util.stream.*;
 
 import static de.finnik.gui.Var.*;
 
@@ -119,5 +120,7 @@ public class PassUtils {
         }
     }
 
-
+    public static List<Password> getAllMatchingPasswords(String key, List<Password> passwords) {
+        return passwords.stream().filter(pass -> pass.getValues().anyMatch(arg -> arg.toLowerCase().contains(key.toLowerCase()))).collect(Collectors.toList());
+    }
 }
