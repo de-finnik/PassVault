@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.api.*;
 import de.finnik.passvault.*;
 import org.slf4j.*;
 
@@ -44,7 +45,7 @@ public class PassVault {
                         System.out.println(404);
                     }
                 } catch (Exception e) {
-                    LOG.error("Error while reading password file!", e);
+                    LOG.error("Error with API input", e);
                 }
             });
             return;
