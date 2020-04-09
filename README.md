@@ -106,10 +106,12 @@ The API has two features:
 The user has to enter his main password in both cases before something happens.
 
 If you want to include PassVault via the API to one of your projects, you can simply execute the PassVault program e.g. via the command line
-and append help as an argument. You will get a list of all available commands and via appending help to a command, you'll learn how to use it.
+and append help as an argument. You will get a list of all available commands and via appending help to a command, you'll learn how to use them.
 
 The default installation folder of PassVault is C:\\Users\\%username%\\AppData\\Local\\Programs\\PassVault
 
+Example for adding a password to the users' password list:
+![API Sample](screenshots/api_sample.PNG)
 # Credits
 Raleway font:
 - Matt McInerney ([matt@pixelspread.com](mailto:matt@pixelspread.com))
