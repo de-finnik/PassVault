@@ -9,6 +9,7 @@ It also generates new passwords with a given length and given parameters.
 - [Generate a new password](#generate-a-new-password)
 - [Manage your passwords](#manage-your-passwords)
 - [Settings](#settings)
+- [API](#api)
 - [Credits](#credits)
 
 # Installation & Quick Start
@@ -94,7 +95,22 @@ In the textfield you can enter the time after that PassVault will be locked in s
 The help icon will lead you to this GitHub repository. 
 If you need more help, you can contact us: [de.finnik@gmx.net](mailto:de.finnik@gmx.net)
 
-## Credits
+# API
+From PassVault 2.2, other developers have the possibility of including PassVault to their projects.
+There's an API that allows other programs to get access to the saved passwords of the user.
+
+The API has two features:
+- Adding a password to the password list of the user
+- Getting passwords matching to a keyword
+
+The user has to enter his main password in both cases before something happens.
+
+If you want to include PassVault via the API to one of your projects, you can simply execute the PassVault program e.g. via the command line
+and append help as an argument. You will get a list of all available commands and via appending help to a command, you'll learn how to use it.
+
+The default installation folder of PassVault is C:\\Users\\%username%\\AppData\\Local\\Programs\\PassVault
+
+# Credits
 Raleway font:
 - Matt McInerney ([matt@pixelspread.com](mailto:matt@pixelspread.com))
 - Pablo Impallari ([www.impallari.com](www.impallari.com) | [impallari@gmail.com](mailto:impallari@gmail.com))

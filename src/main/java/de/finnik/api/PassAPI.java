@@ -42,7 +42,7 @@ public class PassAPI {
 
         assert password != null;
         if (password.emptyParameters() == 4) {
-            error(21, "Input password has no parameters!");
+            error(21, "Input password has no valid parameters!");
         }
 
         Password finalPassword = password;
@@ -72,7 +72,7 @@ public class PassAPI {
 
             System.out.println(builder.create().toJson(matching));
             LOG.info("User got information about passwords containing {}!", args[0]);
-        }, String.format("This is not the PassVault main application, an external program is trying to get information about \"%s\"!", args[0])).setVisible(true);
+        }, String.format(LANG.getProperty("api.get.warning"), args[0])).setVisible(true);
     }
 
     @Command(description = "Get information about the installed version of PassVault")
