@@ -7,8 +7,8 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.List;
 import java.util.*;
-import java.util.stream.*;
 
 import static de.finnik.gui.Var.*;
 
@@ -21,6 +21,7 @@ class PassBankPanel extends JPanel {
     private static DefaultTableModel tableModelPassBank;
     private static JButton btnShowPass;
     private static JLabel lblCopy;
+
     /**
      * Creates the panel
      */
@@ -41,11 +42,13 @@ class PassBankPanel extends JPanel {
      *
      * @return All passwords to be currently displayed in {@link PassBankPanel#tableModelPassBank}
      */
-    private static ArrayList<Password> getAllMatchingPasswords() {
-        return (ArrayList<Password>) PassFrame.passwordList.stream()
-                .filter(pass -> pass.getValues()
-                        .anyMatch(value -> showAll() || (tfSearch.getText().length() >= 3 && value.toLowerCase().contains(tfSearch.getText().toLowerCase()))))
-                .collect(Collectors.toList());
+    private static List<Password> getAllMatchingPasswords() {
+        if (showAll()) {
+            return PassFrame.passwordList;
+        } else if (tfSearch.getText().length() >= 3) {
+            return PassUtils.getAllMatchingPasswords(tfSearch.getText(), PassFrame.passwordList);
+        }
+        return new ArrayList<>();
     }
 
     /**

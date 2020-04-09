@@ -1,0 +1,18 @@
+add <input>
+    %s
+
+    <input> is a json object representing the password to add to the passwords list.
+    It can contain four keys and their values: pass, site, user, other.
+
+    Examples:
+
+    ...add {pass=test123,site=gmail.com,user=John}
+    -> The input mustn't contain all four keys
+
+    Error codes:
+        20  The input wasn't adequate to the json format
+        21  The input password has no parameters
+
+    Hint:
+        Error messages will be displayed as following:
+            !<code> <message>

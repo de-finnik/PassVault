@@ -27,6 +27,13 @@ public class Password {
         this.other = other;
     }
 
+    private Password() {
+        pass = "";
+        site = "";
+        user = "";
+        other = "";
+    }
+
     /**
      * Encrypts all {@link Password} objects with a given password and saves them in a given file,
      *

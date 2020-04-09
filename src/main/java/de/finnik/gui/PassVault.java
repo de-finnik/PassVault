@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.api.*;
 import de.finnik.passvault.*;
 import org.slf4j.*;
 
@@ -13,6 +14,7 @@ import java.lang.reflect.*;
 import java.nio.charset.*;
 import java.util.List;
 import java.util.*;
+import java.util.function.*;
 
 import static de.finnik.gui.Var.*;
 import static de.finnik.passvault.Utils.*;
@@ -29,20 +31,34 @@ import static de.finnik.passvault.Utils.*;
 public class PassVault {
 
     public static void main(String[] args) {
-        LOG = LoggerFactory.getLogger(PassVault.class);
+        LOG = LoggerFactory.getLogger(args.length == 0 ? "APPLICATION" : "API");
+
+        LOG.info("Welcome to PassVault, we're happy to see you!");
 
         System.setErr(new PrintStream(new LogErrorStream(LOG)));
+        if (args.length > 0) {
+            init();
+            EventQueue.invokeLater(() -> {
+                try (BufferedReader br = new BufferedReader(new FileReader(PASSWORDS))) {
+                    String file = br.readLine();
+                    if (file != null) {
+                        new PassAPI(args);
+                    } else {
+                        System.out.println(404);
+                    }
+                } catch (Exception e) {
+                    LOG.error("Error with API input", e);
+                }
+            });
+            return;
+        }
+
 
         PassVault main = new PassVault();
-        LOG.info("Welcome to PassVault, we´re happy to see you!");
         main.run();
     }
 
-    /**
-     * Creates necessary files (if they don´t already exist), loads fonts, images and properties,
-     * creates necessary instances for variables in {@link Var} and starts the application.
-     */
-    private void run() {
+    private static void init() {
         final File dir = new File("bin");
 
         PASSWORDS = new File(dir, "pass");
@@ -73,7 +89,7 @@ public class PassVault {
 
         LANG = loadLang();
 
-        try (InputStream is = getClass().getResourceAsStream("/fonts/Raleway-Regular.ttf")) {
+        try (InputStream is = PassVault.class.getResourceAsStream("/fonts/Raleway-Regular.ttf")) {
             RALEWAY = Font.createFont(Font.TRUETYPE_FONT, is);
         } catch (Exception e) {
             LOG.error("Error while loading Raleway font!", e);
@@ -85,9 +101,33 @@ public class PassVault {
 
         COMPONENTS = new HashMap<>();
 
-        INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
+    }
+
+    /**
+     * Loads all images from its fields (The matching file has the same name as the field)
+     *
+     * @param images The image fields that should be loaded
+     */
+    private static void loadImages(Field[] images) {
+        for (Field img : images) {
+            String res = String.format("/images/%s.png", img.getName().toLowerCase());
+            try (InputStream is = PassVault.class.getResourceAsStream(res)) {
+                img.set(null, ImageIO.read(is));
+            } catch (Exception e) {
+                LOG.error("Error while reading {}!", res, e);
+            }
+        }
+    }
+
+    /**
+     * Creates necessary files (if they don´t already exist), loads fonts, images and properties,
+     * creates necessary instances for variables in {@link Var} and starts the application.
+     */
+    private void run() {
+        init();
 
         EventQueue.invokeLater(() -> {
+            INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
 
             UIManager.put("ToolTip.background", FOREGROUND);
             UIManager.put("ToolTip.foreground", BACKGROUND);
@@ -100,7 +140,10 @@ public class PassVault {
             try (BufferedReader br = new BufferedReader(new FileReader(PASSWORDS))) {
                 String file = br.readLine();
                 if (file != null) {
-                    FRAME = new CheckFrame();
+                    FRAME = new CheckFrame((pass, passList) -> {
+                        FRAME = new PassFrame(pass, passList);
+                        FRAME.setVisible(true);
+                    });
                 } else {
                     FRAME = new PassFrame("", new ArrayList<>());
                 }
@@ -112,33 +155,22 @@ public class PassVault {
     }
 
     /**
-     * Loads all images from its fields (The matching file has the same name as the field)
-     *
-     * @param images The image fields that should be loaded
-     */
-    private void loadImages(Field[] images) {
-        for (Field img : images) {
-            String res = String.format("/images/%s.png", img.getName().toLowerCase());
-            try (InputStream is = PassVault.class.getResourceAsStream(res)) {
-                img.set(null, ImageIO.read(is));
-            } catch (Exception e) {
-                LOG.error("Error while reading {}!", res, e);
-            }
-        }
-    }
-
-    /**
      * Login frame that wants you to enter your main password that is used to encrypt all passwords.
      * It´s created on beginning and you won´t enter {@link PassFrame} unless you haven´t typed in the correct password.
      */
     public static class CheckFrame extends JDialog {
+        private final BiConsumer<String, List<Password>> todo;
+        private String message;
+
         /**
          * Creates the frame
          */
-        CheckFrame() {
+        public CheckFrame(BiConsumer<String, List<Password>> todo, String message) {
+            this.todo = todo;
+            this.message = message;
+
             setSize(380, 200);
             setTitle("Login");
-            setLocationRelativeTo(null);
 
             setContentPane(new JPanel());
             getContentPane().setLayout(null);
@@ -149,8 +181,18 @@ public class PassVault {
             setUndecorated(true);
             setIconImage(FRAME_ICON);
 
+            if (message != null) {
+                setSize(Math.max(getWidth(), getFontMetrics(raleway(14)).stringWidth(message) + 30), getHeight());
+            }
+
+            setLocationRelativeTo(null);
+
             components();
             textComponents();
+        }
+
+        public CheckFrame(BiConsumer<String, List<Password>> todo) {
+            this(todo, null);
         }
 
         /**
@@ -179,16 +221,24 @@ public class PassVault {
             JLabel lblPass = new JLabel();
             add(lblPass, "check.lbl.pass");
             textComponents();
+            lblPass.setForeground(FOREGROUND);
             lblPass.setFont(raleway(15));
             lblPass.setSize(lblPass.getFontMetrics(lblPass.getFont()).stringWidth(lblPass.getText()), 50);
-            lblPass.setBounds(Utils.getCentralPosition(getWidth(), lblPass.getWidth()), 70, lblPass.getWidth(), lblPass.getHeight());
-            lblPass.setForeground(FOREGROUND);
+            lblPass.setBounds(Utils.getCentralPosition(getWidth(), lblPass.getWidth()), message == null ? 70 : 60, lblPass.getWidth(), lblPass.getHeight());
 
+            if (message != null) {
+                JLabel lblWarning = new JLabel(message);
+                lblWarning.setFont(raleway(14));
+                lblWarning.setForeground(new Color(189, 0, 12));
+                lblWarning.setSize(lblWarning.getPreferredSize());
+                lblWarning.setBounds(Utils.getCentralPosition(getWidth(), lblWarning.getWidth()), 96, lblWarning.getWidth(), lblWarning.getHeight());
+                add(lblWarning, "check.lbl.warning");
+            }
 
             JButton btnLogin = new JButton();
 
             JTextField passwordField = new JPasswordField();
-            passwordField.setBounds(10, 120, 360, 30);
+            passwordField.setBounds(10, 120, getWidth() - 20, 30);
             passwordField.setFont(raleway(20));
             passwordField.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
             passwordField.addKeyListener(new KeyAdapter() {
@@ -219,10 +269,8 @@ public class PassVault {
                     return;
                 }
                 LOG.info("User logged in!");
+                todo.accept(passwordField.getText(), passwordList);
                 dispose();
-
-                FRAME = new PassFrame(passwordField.getText(), passwordList);
-                FRAME.setVisible(true);
             });
             add(btnLogin, "check.btn.login");
         }

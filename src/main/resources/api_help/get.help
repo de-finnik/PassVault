@@ -1,0 +1,31 @@
+get <input> [-p]
+    %s
+
+    <input> is the keyword used to find matching passwords. Its length has to be at least three characters
+    The output is a json array containing all matching passwords as json objects.
+    The json objects contain four keys and their values: pass, site, user, other.
+
+    -p  Enables pretty printing for the output json array
+
+    Examples:
+
+    ...get gmail
+    [{"pass":"test123","site":"gmail.com","user":"John","other"=""}]
+
+    ...get gmail -p
+    [
+        {
+            "pass": "test123",
+            "site": "gmail.com",
+            "user": "John",
+            "other": ""
+        }
+    ]
+
+    Error codes:
+        10  No matching passwords were found
+        11  The input length must be at least three characters
+
+    Hint:
+        Error messages will be displayed as following:
+            !<code> <message>
