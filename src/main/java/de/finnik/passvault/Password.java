@@ -19,12 +19,16 @@ import static de.finnik.gui.Var.*;
  */
 public class Password {
     private String pass, site, user, other;
+    private final String ID;
+    private long lastModified;
 
     public Password(String pass, String site, String user, String other) {
         this.pass = pass;
         this.site = site;
         this.user = user;
         this.other = other;
+        lastModified = System.currentTimeMillis();
+        ID = UUID.randomUUID().toString();
     }
 
     private Password() {
@@ -32,6 +36,8 @@ public class Password {
         site = "";
         user = "";
         other = "";
+        lastModified = System.currentTimeMillis();
+        ID = UUID.randomUUID().toString();
     }
 
     /**
@@ -57,15 +63,30 @@ public class Password {
      * @return The List of {@link Password} objects
      */
     public static List<Password> readPasswords(File file, String pass) throws IllegalArgumentException {
-        try (AESReader aesReader = new AESReader(new FileReader(file), new AES(pass))) {
+        try (InputStream is = new FileInputStream(file)) {
+            return readPasswords(is, pass);
+        } catch (IOException e) {
+            LOG.error("Error while reading passwords from {}!", file.getAbsolutePath(), e);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * This static method returns all passwords with all of their parameters that are saved to an encrypted file
+     *
+     * @param inputStream The encrypted inputStream
+     * @param pass        The password to decrypt
+     * @return The List of {@link Password} objects
+     */
+    public static List<Password> readPasswords(InputStream inputStream, String pass) throws IllegalArgumentException, IOException {
+        try (AESReader aesReader = new AESReader(new InputStreamReader(inputStream), new AES(pass))) {
             return new ArrayList<>(Arrays.asList(new Gson().fromJson(aesReader.readLine(), Password[].class)));
         } catch (IllegalArgumentException e) {
             // Wrong password
             throw new IllegalArgumentException(e);
-        } catch (Exception e) {
-            LOG.error("Error while reading passwords from {}!", file.getAbsolutePath(), e);
+        } catch (IOException e) {
+            throw new IOException(e);
         }
-        return new ArrayList<>();
     }
 
     /**
@@ -105,6 +126,7 @@ public class Password {
 
     public void setPass(String pass) {
         this.pass = pass;
+        lastModified = System.currentTimeMillis();
     }
 
     public String getSite() {
@@ -113,6 +135,7 @@ public class Password {
 
     public void setSite(String site) {
         this.site = site;
+        lastModified = System.currentTimeMillis();
     }
 
     public String getUser() {
@@ -121,6 +144,7 @@ public class Password {
 
     public void setUser(String user) {
         this.user = user;
+        lastModified = System.currentTimeMillis();
     }
 
     public String getOther() {
@@ -129,6 +153,15 @@ public class Password {
 
     public void setOther(String other) {
         this.other = other;
+        lastModified = System.currentTimeMillis();
+    }
+
+    public String id() {
+        return ID;
+    }
+
+    public long lastModified() {
+        return lastModified;
     }
 
     /**

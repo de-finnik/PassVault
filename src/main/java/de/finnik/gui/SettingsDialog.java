@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.drive.*;
 import de.finnik.passvault.*;
 
 import javax.swing.*;
@@ -78,6 +79,23 @@ public class SettingsDialog extends JDialog {
         toolBar.setBackground(BACKGROUND);
         toolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
         add(toolBar, "settings.toolBar");
+
+        JLabel lblDrive = new JLabel();
+        lblDrive.setIcon(new ImageIcon(DRIVE_ICON));
+        lblDrive.setCursor(HAND_CURSOR);
+        lblDrive.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
+        lblDrive.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                try {
+                    PassDrive.compare(true);
+                } catch (Exception ioException) {
+                    LOG.error("Error while synchronizing with Google Drive!");
+                }
+            }
+        });
+        toolBar.add(lblDrive);
 
         JLabel lblExtract = new JLabel();
         lblExtract.setIcon(new ImageIcon(EXTRACT));

@@ -31,7 +31,7 @@ public class PasswordGeneratorTest {
         int random;
         for (int z = 0; z < 5; z++) {
             random = (int) (Math.random() * 100) + 1;
-            assertEquals(random, generatePassword(new PassChars[]{PassChars.BIG_LETTERS}, random).length());
+            assertEquals(random, generatePassword(random, PassChars.BIG_LETTERS).length());
         }
     }
 
@@ -41,7 +41,7 @@ public class PasswordGeneratorTest {
         for (int i = 0; i <= 500; i++) {
             Collections.shuffle(all);
             String password;
-            password = generatePassword(new PassChars[]{all.get(0)}, (int) (Math.random() * 30) + 1);
+            password = generatePassword((int) (Math.random() * 30) + 1, all.get(0));
             if (Arrays.stream(all.get(0).get().split("")).noneMatch(password::contains)) {
                 fail();
             }

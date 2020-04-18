@@ -100,7 +100,6 @@ public class PassVault {
         DIALOG = new PassDialog(FOREGROUND, BACKGROUND, RALEWAY, CLOSE, WARNING, ICON_SMALL, QUESTION_MARK, CHECK_MARK);
 
         COMPONENTS = new HashMap<>();
-
     }
 
     /**
@@ -160,7 +159,7 @@ public class PassVault {
      */
     public static class CheckFrame extends JDialog {
         private final BiConsumer<String, List<Password>> todo;
-        private String message;
+        private final String message;
 
         /**
          * Creates the frame

@@ -94,7 +94,6 @@ public class PassAPI {
                 builder.setPrettyPrinting();
             }
 
-            System.out.println(builder.create().toJson(matching));
             LOG.info("User got information about passwords containing {}!", args[0]);
         }, String.format(LANG.getProperty("api.get.warning"), args[0])).setVisible(true);
     }

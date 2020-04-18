@@ -14,7 +14,7 @@ public class PasswordGenerator {
      * @param length The length of the output password
      * @return The generated password
      */
-    public static String generatePassword(PassChars[] chars, int length) {
+    public static String generatePassword(int length, PassChars... chars) {
         List<Character> password = new ArrayList<>();
         String all = Arrays.stream(chars).map(PassChars::get).collect(Collectors.joining());
         for (int i = 0; i < length; i++) {

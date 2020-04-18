@@ -104,7 +104,7 @@ public class GeneratePasswordPanel extends JPanel {
             }
             if (chars.size() > 0) {
                 tfPass.setFont(raleway(20));
-                String pass = PasswordGenerator.generatePassword(chars.toArray(new PasswordGenerator.PassChars[0]), sliderLength.getValue());
+                String pass = PasswordGenerator.generatePassword(sliderLength.getValue(), chars.toArray(new PasswordGenerator.PassChars[0]));
                 while (getFontMetrics(tfPass.getFont()).stringWidth(pass) + 10 > tfPass.getWidth()) {
                     tfPass.setFont(tfPass.getFont().deriveFont((float) tfPass.getFont().getSize() - 1));
                 }

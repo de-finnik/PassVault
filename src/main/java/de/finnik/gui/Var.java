@@ -40,7 +40,7 @@ public class Var {
     /**
      * Images for the application components and dialogs
      */
-    public static BufferedImage LOGO, ICON, ICON_SMALL, FRAME_ICON, COPY, EXTRACT, SETTINGS, CLOSE, WARNING, SELECTED, NOT_SELECTED, CHECK_MARK, QUESTION_MARK, HELP, FINNIK;
+    public static BufferedImage LOGO, ICON, ICON_SMALL, FRAME_ICON, COPY, EXTRACT, DRIVE_ICON, SETTINGS, CLOSE, WARNING, SELECTED, NOT_SELECTED, CHECK_MARK, QUESTION_MARK, HELP, FINNIK;
     public static Color FOREGROUND = Color.white;
     public static Color BACKGROUND = Color.black;
     /**

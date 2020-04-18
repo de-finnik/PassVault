@@ -9,7 +9,7 @@ import static de.finnik.gui.Var.*;
  * The properties of the application
  */
 public enum PassProperty {
-    LANG, INACTIVITY_LOCK, INACTIVITY_TIME;
+    LANG, INACTIVITY_LOCK, INACTIVITY_TIME, DRIVE_PASSWORD;
 
     /**
      * The file where the properties are saved
@@ -33,7 +33,7 @@ public enum PassProperty {
         }
 
         for (PassProperty property : PassProperty.values()) {
-            property.setValue(properties.getProperty(property.name()));
+            property.setValue(properties.getProperty(property.name(), property.getDefault()));
         }
     }
 
@@ -96,6 +96,8 @@ public enum PassProperty {
                 return "true";
             case INACTIVITY_TIME:
                 return "30";
+            case DRIVE_PASSWORD:
+                return "";
         }
         return null;
     }
@@ -118,6 +120,8 @@ public enum PassProperty {
                     return i >= 10 && i <= 3600;
                 } catch (NumberFormatException ignored) {
                 }
+            case DRIVE_PASSWORD:
+                return value != null;
             default:
                 return false;
         }

@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.drive.*;
 import de.finnik.passvault.*;
 
 import javax.swing.*;
@@ -150,8 +151,15 @@ public class PassFrame extends JFrame {
      * Saves the password stored in {@link PassFrame#passwordList} encrypted with the password {@link PassFrame#password}
      * to the passwords file {@link Var#PASSWORDS}
      */
-    static void savePasswords() {
+    public static void savePasswords() {
         Password.savePasswords(passwordList, PASSWORDS, password);
+        new Thread(() -> {
+            try {
+                PassDrive.compare();
+            } catch (Exception ioException) {
+                LOG.error("Error while synchronizing with Google Drive!");
+            }
+        }).start();
     }
 
     /**
@@ -267,7 +275,7 @@ public class PassFrame extends JFrame {
                 try {
                     PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> !PassFrame.passwordList.contains(p)).collect(Collectors.toList()));
                     LOG.info("Imported passwords from {}!", file.getAbsolutePath());
-                    Password.savePasswords(PassFrame.passwordList, PASSWORDS, password);
+                    savePasswords();
                     PassBankPanel.updateTableModel();
                 } catch (Exception e) {
                     if (pass.length() > 0)
