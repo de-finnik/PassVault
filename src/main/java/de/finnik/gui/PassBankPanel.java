@@ -9,6 +9,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
 import java.util.*;
+import java.util.stream.*;
 
 import static de.finnik.gui.Var.*;
 
@@ -34,40 +35,6 @@ class PassBankPanel extends JPanel {
 
         Arrays.stream(getMatchingComponents("passBank.lbl", "passBank.table", "passBank.tf"))
                 .forEach(c -> c.setFont(raleway(13)));
-    }
-
-    /**
-     * Checks via {@link PassBankPanel#showAll()} whether {@link PassBankPanel#tableModelPassBank} should display all passwords
-     * or just the ones matching to the input from {@link PassBankPanel#tfSearch}
-     *
-     * @return All passwords to be currently displayed in {@link PassBankPanel#tableModelPassBank}
-     */
-    private static List<Password> getAllMatchingPasswords() {
-        if (showAll()) {
-            return PassFrame.passwordList;
-        } else if (tfSearch.getText().length() >= 3) {
-            return PassUtils.getAllMatchingPasswords(tfSearch.getText(), PassFrame.passwordList);
-        }
-        return new ArrayList<>();
-    }
-
-    /**
-     * Updates {@link PassBankPanel#tableModelPassBank} via adding all passwords from {@link PassBankPanel#getAllMatchingPasswords()} to {@link PassBankPanel#tableModelPassBank}
-     */
-    static void updateTableModel() {
-        tableModelPassBank.setRowCount(0);
-        for (Password password : getAllMatchingPasswords()) {
-            tableModelPassBank.addRow(new String[]{password.getPass(), password.getSite(), password.getUser(), password.getOther()});
-        }
-    }
-
-    /**
-     * Checks whether {@link PassBankPanel#tableModelPassBank} should display all passwords or just the ones that match with the user input
-     *
-     * @return A boolean (true=All passwords should be displayed; false=passwords matching to user input should be displayed)
-     */
-    private static boolean showAll() {
-        return btnShowPass.getBackground().equals(BACKGROUND);
     }
 
     /**
@@ -145,19 +112,7 @@ class PassBankPanel extends JPanel {
              * Note: Editing a password so that it would has no information, will delete it after confirming
              */
             if (e.getType() == TableModelEvent.UPDATE && tablePassBank.getSelectedRow() >= 0) {
-                Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
-
-                // Checks whether the password would be empty after the edit
-                if (((String) tableModelPassBank.getValueAt(e.getFirstRow(), e.getColumn())).length() == 0 && password.emptyParameters() == 3 && password.isEmpty(e.getColumn())) {
-                    DIALOG.confirm(FRAME, LANG.getProperty("jop.deletePass"), confirm -> {
-                        if (confirm) {
-                            PassFrame.passwordList.remove(password);
-                            PassFrame.savePasswords();
-                        }
-                        updateTableModel();
-                    });
-                    return;
-                }
+                Password password = new Password(getAllMatchingPasswords().get(tablePassBank.getSelectedRow()));
 
                 // Edits the password
                 switch (e.getColumn()) {
@@ -187,10 +142,8 @@ class PassBankPanel extends JPanel {
                 if (e.getKeyCode() == KeyEvent.VK_DELETE && tablePassBank.getSelectedRow() >= 0) {
                     DIALOG.confirm(FRAME, LANG.getProperty("jop.deletePass"), confirm -> {
                         if (confirm) {
-                            int row = tablePassBank.getSelectedRow();
-                            Password password = getAllMatchingPasswords().get(row);
-                            PassFrame.passwordList.remove(password);
-                            tableModelPassBank.removeRow(row);
+                            Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
+                            PassUtils.deletePassword(password);
                             LOG.info(Password.log(password, "Deleted password"));
                             PassFrame.savePasswords();
                         }
@@ -246,5 +199,39 @@ class PassBankPanel extends JPanel {
     private void add(Component c, String key) {
         COMPONENTS.put(key, c);
         add(c);
+    }
+
+    /**
+     * Checks via {@link PassBankPanel#showAll()} whether {@link PassBankPanel#tableModelPassBank} should display all passwords
+     * or just the ones matching to the input from {@link PassBankPanel#tfSearch}
+     *
+     * @return All passwords to be currently displayed in {@link PassBankPanel#tableModelPassBank}
+     */
+    private List<Password> getAllMatchingPasswords() {
+        if (showAll()) {
+            return PassFrame.passwordList.stream().filter(p -> !p.isEmpty()).collect(Collectors.toList());
+        } else if (tfSearch.getText().length() >= 3) {
+            return PassUtils.getAllMatchingPasswords(tfSearch.getText(), PassFrame.passwordList);
+        }
+        return new ArrayList<>();
+    }
+
+    /**
+     * Updates {@link PassBankPanel#tableModelPassBank} via adding all passwords from {@link PassBankPanel#getAllMatchingPasswords()} to {@link PassBankPanel#tableModelPassBank}
+     */
+    public void updateTableModel() {
+        tableModelPassBank.setRowCount(0);
+        for (Password password : getAllMatchingPasswords()) {
+            tableModelPassBank.addRow(new String[]{password.getPass(), password.getSite(), password.getUser(), password.getOther()});
+        }
+    }
+
+    /**
+     * Checks whether {@link PassBankPanel#tableModelPassBank} should display all passwords or just the ones that match with the user input
+     *
+     * @return A boolean (true=All passwords should be displayed; false=passwords matching to user input should be displayed)
+     */
+    private boolean showAll() {
+        return btnShowPass.getBackground().equals(BACKGROUND);
     }
 }

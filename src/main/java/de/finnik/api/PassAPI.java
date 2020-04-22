@@ -59,7 +59,7 @@ public class PassAPI {
         }
 
         assert password != null;
-        if (password.emptyParameters() == 4) {
+        if (password.isEmpty()) {
             error(21, "Input password has no valid parameters!");
         }
 

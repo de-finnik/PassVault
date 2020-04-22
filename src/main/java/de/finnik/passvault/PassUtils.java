@@ -123,4 +123,11 @@ public class PassUtils {
     public static List<Password> getAllMatchingPasswords(String key, List<Password> passwords) {
         return passwords.stream().filter(pass -> pass.getValues().anyMatch(arg -> arg.toLowerCase().contains(key.toLowerCase()))).collect(Collectors.toList());
     }
+
+    public static void deletePassword(Password password) {
+        password.setPass("");
+        password.setSite("");
+        password.setUser("");
+        password.setOther("");
+    }
 }

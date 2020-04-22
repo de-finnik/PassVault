@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.AES.*;
 import de.finnik.api.*;
 import de.finnik.passvault.*;
 import org.slf4j.*;
@@ -260,7 +261,7 @@ public class PassVault {
                 List<Password> passwordList;
                 try {
                     passwordList = Password.readPasswords(PASSWORDS, passwordField.getText());
-                } catch (IllegalArgumentException e) {
+                } catch (AES.WrongPasswordException e) {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
                     passwordField.setText("");

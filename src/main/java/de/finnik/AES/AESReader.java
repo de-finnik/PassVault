@@ -12,7 +12,7 @@ public class AESReader extends BufferedReader {
 
 
     @Override
-    public String readLine() throws IOException, IllegalArgumentException {
+    public String readLine() throws IOException, AES.WrongPasswordException {
         return convertFromUnicode(aes.decrypt(super.readLine()));
     }
 

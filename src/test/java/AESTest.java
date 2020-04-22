@@ -1,8 +1,7 @@
-import de.finnik.AES.AES;
+import de.finnik.AES.*;
+import org.junit.*;
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class AESTest {
     @Test
@@ -12,7 +11,7 @@ public class AESTest {
         assertEquals(string, aes.decrypt(aes.encrypt(string)));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = AES.WrongPasswordException.class)
     public void decryptWithWrongPass() {
         String string = randomString(8);
         AES en = new AES(randomString(15)), de = new AES(randomString(14));

@@ -18,8 +18,8 @@ import static de.finnik.gui.Var.*;
  * 4. Other information that is useful to know among the password
  */
 public class Password {
-    private String pass, site, user, other;
     private final String ID;
+    private String pass, site, user, other;
     private long lastModified;
 
     public Password(String pass, String site, String user, String other) {
@@ -38,6 +38,15 @@ public class Password {
         other = "";
         lastModified = System.currentTimeMillis();
         ID = UUID.randomUUID().toString();
+    }
+
+    public Password(Password password) {
+        pass = password.pass;
+        site = password.site;
+        user = password.user;
+        other = password.other;
+        lastModified = password.lastModified;
+        ID = password.ID;
     }
 
     /**
@@ -62,9 +71,11 @@ public class Password {
      * @param pass The password to decrypt
      * @return The List of {@link Password} objects
      */
-    public static List<Password> readPasswords(File file, String pass) throws IllegalArgumentException {
+    public static List<Password> readPasswords(File file, String pass) throws AES.WrongPasswordException {
         try (InputStream is = new FileInputStream(file)) {
             return readPasswords(is, pass);
+        } catch (AES.WrongPasswordException w) {
+            throw new AES.WrongPasswordException();
         } catch (IOException e) {
             LOG.error("Error while reading passwords from {}!", file.getAbsolutePath(), e);
         }
@@ -78,12 +89,12 @@ public class Password {
      * @param pass        The password to decrypt
      * @return The List of {@link Password} objects
      */
-    public static List<Password> readPasswords(InputStream inputStream, String pass) throws IllegalArgumentException, IOException {
+    public static List<Password> readPasswords(InputStream inputStream, String pass) throws AES.WrongPasswordException, IOException {
         try (AESReader aesReader = new AESReader(new InputStreamReader(inputStream), new AES(pass))) {
             return new ArrayList<>(Arrays.asList(new Gson().fromJson(aesReader.readLine(), Password[].class)));
-        } catch (IllegalArgumentException e) {
+        } catch (AES.WrongPasswordException e) {
             // Wrong password
-            throw new IllegalArgumentException(e);
+            throw new AES.WrongPasswordException();
         } catch (IOException e) {
             throw new IOException(e);
         }
@@ -174,32 +185,12 @@ public class Password {
     }
 
     /**
-     * Checks how many parameters of the password equal to ""
+     * Checks if all parameters of the password equal are empty
      *
-     * @return The count of empty parameters
+     * @return {@code true} if every parameter is empty (equal to "") or {@code false} if not
      */
-    public int emptyParameters() {
-        return (int) Stream.of(pass, site, user, other).filter(s -> s.length() == 0).count();
-    }
-
-    /**
-     * Checks whether a parameter is equal to ""
-     *
-     * @param i The index of the parameter (1=pass; 2=site; 3=user; 4=other)
-     * @return Parameter equals to ""
-     */
-    public boolean isEmpty(int i) {
-        switch (i) {
-            case 0:
-                return pass.length() > 0;
-            case 1:
-                return site.length() > 0;
-            case 2:
-                return user.length() > 0;
-            case 3:
-                return other.length() > 0;
-        }
-        return true;
+    public boolean isEmpty() {
+        return Stream.of(pass, site, user, other).filter(String::isEmpty).count() == 4;
     }
 
     @Override

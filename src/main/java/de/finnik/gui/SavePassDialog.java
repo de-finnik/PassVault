@@ -137,7 +137,7 @@ class SavePassDialog extends JDialog {
 
             Password newPass = new Password(tfPass.getText(), tfSite.getText(), tfUser.getText(), tfOther.getText());
 
-            if (!PassFrame.passwordList.contains(newPass) && newPass.emptyParameters() < 4) {
+            if (!PassFrame.passwordList.contains(newPass) && !newPass.isEmpty()) {
                 // Checks whether the user has set a main password
                 if (PassFrame.password.length() == 0) {
                     SettingsDialog.changeMainPass();
@@ -154,7 +154,6 @@ class SavePassDialog extends JDialog {
             PassFrame.savePasswords();
             Utils.copyToClipboard(newPass.getPass());
 
-            PassBankPanel.updateTableModel();
             dispose();
         });
         add(btnSave, "savePass.btn.save");

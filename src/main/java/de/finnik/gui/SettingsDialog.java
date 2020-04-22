@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.AES.*;
 import de.finnik.drive.*;
 import de.finnik.passvault.*;
 
@@ -63,6 +64,7 @@ public class SettingsDialog extends JDialog {
             if (first != null && !first.equals("")) {
                 DIALOG.input(FRAME, LANG.getProperty("jop.repeatEnteringNewMainPass"), second -> {
                     if (first.equals(second)) {
+                        PassProperty.DRIVE_PASSWORD.setValue(new AES(first).encrypt(new AES(PassFrame.password).decrypt(PassProperty.DRIVE_PASSWORD.getValue())));
                         PassFrame.password = first;
                         LOG.info("Changed main password!");
                         PassFrame.savePasswords();
@@ -88,11 +90,7 @@ public class SettingsDialog extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                try {
-                    PassDrive.compare(true);
-                } catch (Exception ioException) {
-                    LOG.error("Error while synchronizing with Google Drive!");
-                }
+                PassDrive.compare(((PassFrame) FRAME).passBankPanel::updateTableModel);
             }
         });
         toolBar.add(lblDrive);
@@ -262,6 +260,32 @@ public class SettingsDialog extends JDialog {
         lblInactivityLock.setFont(raleway(13));
         COMPONENTS.put("settings.lbl.inactivityLock", lblInactivityLock);
         panelInactivity.add(lblInactivityLock);
+
+        JButton btnDrivePassword = new JButton();
+        btnDrivePassword.addActionListener(action -> {
+            if (!btnDrivePassword.getText().equals(LANG.getProperty("settings.btn.drivePassword"))) {
+                return;
+            }
+            DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), pass -> {
+                if (PassProperty.DRIVE_PASSWORD.getValue().length() == 0) {
+                    return;
+                }
+                try {
+                    String drivePass = new AES(pass).decrypt(PassProperty.DRIVE_PASSWORD.getValue());
+                    btnDrivePassword.setText(drivePass);
+                } catch (AES.WrongPasswordException e) {
+                    if (pass.equals(PassFrame.password)) {
+                        PassProperty.DRIVE_PASSWORD.setValue("");
+                    } else {
+                        DIALOG.message(FRAME, LANG.getProperty("jop.wrongPass"));
+                    }
+                }
+            }, true);
+        });
+        btnDrivePassword.setForeground(FOREGROUND);
+        btnDrivePassword.setBackground(BACKGROUND);
+        if (PassProperty.DRIVE_PASSWORD.getValue().length() > 0)
+            add(btnDrivePassword, "settings.btn.drivePassword");
     }
 
     /**

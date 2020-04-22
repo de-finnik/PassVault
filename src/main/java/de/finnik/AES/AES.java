@@ -8,7 +8,7 @@ import java.util.*;
 
 public class AES {
 
-    private SecretKeySpec secretKeySpec;
+    private final SecretKeySpec secretKeySpec;
 
     public AES(String pass) {
         secretKeySpec = getSecretKey(pass);
@@ -42,18 +42,24 @@ public class AES {
         }
     }
 
-    /**Decrypts a string with a given key via Advanced Encryption Standard (AES).
+    /**
+     * Decrypts a string with a given key via Advanced Encryption Standard (AES).
+     *
      * @param strToDecrypt String to decrypt
      * @return Decrypted key
-     * @throws IllegalArgumentException Wrong key!
+     * @throws WrongPasswordException Wrong password!
      */
-    public String decrypt(String strToDecrypt) throws IllegalArgumentException {
+    public String decrypt(String strToDecrypt) throws WrongPasswordException {
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
             return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt.getBytes(StandardCharsets.UTF_8))));
         } catch (Exception e) {
-            throw new IllegalArgumentException();
+            throw new WrongPasswordException();
         }
+    }
+
+    public static class WrongPasswordException extends RuntimeException {
+
     }
 }

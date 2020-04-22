@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.AES.*;
 import de.finnik.drive.*;
 import de.finnik.passvault.*;
 
@@ -30,6 +31,7 @@ public class PassFrame extends JFrame {
      * The list of saved passwords
      */
     public static List<Password> passwordList;
+    public PassBankPanel passBankPanel;
 
     /**
      * Creates the frame
@@ -153,13 +155,15 @@ public class PassFrame extends JFrame {
      */
     public static void savePasswords() {
         Password.savePasswords(passwordList, PASSWORDS, password);
-        new Thread(() -> {
-            try {
-                PassDrive.compare();
-            } catch (Exception ioException) {
-                LOG.error("Error while synchronizing with Google Drive!");
-            }
-        }).start();
+        if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
+            PassDrive.compare(((PassFrame) FRAME).passBankPanel::updateTableModel);
+        ((PassFrame) FRAME).passBankPanel.updateTableModel();
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify();
+        savePasswords();
     }
 
     /**
@@ -220,7 +224,7 @@ public class PassFrame extends JFrame {
         generatePasswordPanel.setBounds(10, 100, 300, 350);
         getContentPane().add(generatePasswordPanel);
 
-        JPanel passBankPanel = new PassBankPanel();
+        passBankPanel = new PassBankPanel();
         passBankPanel.setBounds(350, 100, 350, 350);
         getContentPane().add(passBankPanel);
     }
@@ -276,8 +280,7 @@ public class PassFrame extends JFrame {
                     PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> !PassFrame.passwordList.contains(p)).collect(Collectors.toList()));
                     LOG.info("Imported passwords from {}!", file.getAbsolutePath());
                     savePasswords();
-                    PassBankPanel.updateTableModel();
-                } catch (Exception e) {
+                } catch (AES.WrongPasswordException e) {
                     if (pass.length() > 0)
                         DIALOG.message(FRAME, LANG.getProperty("jop.wrongPass"));
                 }
