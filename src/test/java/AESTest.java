@@ -1,7 +1,7 @@
-import de.finnik.AES.*;
-import org.junit.*;
+import de.finnik.AES.AES;
+import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class AESTest {
     @Test

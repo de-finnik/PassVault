@@ -1,14 +1,16 @@
 package de.finnik.passvault;
 
-import com.google.gson.*;
-import de.finnik.AES.*;
+import com.google.gson.Gson;
+import de.finnik.AES.AES;
+import de.finnik.AES.AESReader;
+import de.finnik.AES.AESWriter;
 
 import java.io.*;
-import java.nio.charset.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.*;
+import java.util.stream.Stream;
 
-import static de.finnik.gui.Var.*;
+import static de.finnik.gui.Var.LOG;
 
 /**
  * A password object has four parameters:
@@ -70,6 +72,7 @@ public class Password {
      * @param file The encrypted file
      * @param pass The password to decrypt
      * @return The List of {@link Password} objects
+     * @throws AES.WrongPasswordException If password is wrong
      */
     public static List<Password> readPasswords(File file, String pass) throws AES.WrongPasswordException {
         try (InputStream is = new FileInputStream(file)) {
@@ -185,7 +188,7 @@ public class Password {
     }
 
     /**
-     * Checks if all parameters of the password equal are empty
+     * Checks if all parameters of the password are empty
      *
      * @return {@code true} if every parameter is empty (equal to "") or {@code false} if not
      */
@@ -200,7 +203,9 @@ public class Password {
             return password.getPass().equals(getPass())
                     && password.getSite().equals(getSite())
                     && password.getUser().equals(getUser())
-                    && password.getOther().equals(getOther());
+                    && password.getOther().equals(getOther())
+                    && password.id().equals(id())
+                    && password.lastModified() == lastModified();
         }
         return false;
     }

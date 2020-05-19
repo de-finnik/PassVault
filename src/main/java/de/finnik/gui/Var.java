@@ -1,12 +1,16 @@
 package de.finnik.gui;
 
-import de.finnik.passvault.*;
-import org.slf4j.*;
+import de.finnik.passvault.InactivityListener;
+import de.finnik.passvault.PassProperty;
+import de.finnik.passvault.PassUtils;
+import de.finnik.passvault.Utils;
+import org.slf4j.Logger;
 
 import java.awt.*;
-import java.awt.image.*;
-import java.io.*;
-import java.util.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * All static variables that concern multiple classes
@@ -40,7 +44,7 @@ public class Var {
     /**
      * Images for the application components and dialogs
      */
-    public static BufferedImage LOGO, ICON, ICON_SMALL, FRAME_ICON, COPY, EXTRACT, DRIVE_ICON, SETTINGS, CLOSE, WARNING, SELECTED, NOT_SELECTED, CHECK_MARK, QUESTION_MARK, HELP, FINNIK;
+    public static BufferedImage LOGO, ICON, ICON_SMALL, FRAME_ICON, COPY, EXTRACT, DRIVE_ICON, SETTINGS, REFRESH, REFRESH_DRIVE, CLOSE, WARNING, SELECTED, NOT_SELECTED, CHECK_MARK, QUESTION_MARK, HELP, FINNIK;
     public static Color FOREGROUND = Color.white;
     public static Color BACKGROUND = Color.black;
     /**

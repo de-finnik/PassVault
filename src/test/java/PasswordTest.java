@@ -1,8 +1,11 @@
-import de.finnik.passvault.*;
-import org.junit.*;
+import de.finnik.passvault.Password;
+import de.finnik.passvault.PasswordGenerator;
+import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 

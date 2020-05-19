@@ -1,36 +1,51 @@
 package de.finnik.drive;
 
-import com.google.api.client.auth.oauth2.*;
-import com.google.api.client.extensions.java6.auth.oauth2.*;
-import com.google.api.client.extensions.jetty.auth.oauth2.*;
-import com.google.api.client.googleapis.auth.oauth2.*;
-import com.google.api.client.googleapis.javanet.*;
-import com.google.api.client.http.*;
-import com.google.api.client.http.javanet.*;
-import com.google.api.client.json.*;
-import com.google.api.client.json.jackson2.*;
-import com.google.api.client.util.store.*;
+import com.google.api.client.auth.oauth2.Credential;
+import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
+import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
+import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
+import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.FileContent;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
-import com.google.api.services.drive.*;
+import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
-import com.google.api.services.drive.model.*;
-import de.finnik.AES.*;
-import de.finnik.gui.*;
-import de.finnik.passvault.*;
+import com.google.api.services.drive.model.FileList;
+import de.finnik.AES.AES;
+import de.finnik.gui.Animation;
+import de.finnik.gui.PassFrame;
+import de.finnik.passvault.PassProperty;
+import de.finnik.passvault.Password;
+import de.finnik.passvault.PasswordGenerator;
 
-import java.io.*;
-import java.nio.file.*;
-import java.security.*;
-import java.util.*;
-import java.util.concurrent.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static de.finnik.gui.Var.*;
 
 public class PassDrive {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
-    public static Drive DRIVE;
     private static final ExecutorService SERVICE = Executors.newSingleThreadExecutor();
+    public static Drive DRIVE;
+    private static boolean stopAnimation;
     private static final Runnable compare = () -> {
         try {
             INACTIVITY_LISTENER.stop();
@@ -55,6 +70,7 @@ public class PassDrive {
                                             appDataFolder.getFiles().forEach(file -> {
                                                 try {
                                                     DRIVE.files().delete(file.getId()).execute();
+                                                    compare();
                                                 } catch (IOException ioException) {
                                                     LOG.error("Error while deleting pass file {}", file.getId(), ioException);
                                                 }
@@ -63,13 +79,13 @@ public class PassDrive {
                                     });
                                 }
                             });
-                            DIALOG.message(FRAME, LANG.getProperty("jop.wrongPass"));
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }, true);
                     return;
                 }
+                LOG.info("Synchronizing...");
                 String drivePass;
                 List<Password> drivePasswords;
                 try {
@@ -81,8 +97,11 @@ public class PassDrive {
                     compare();
                     return;
                 }
-                PassFrame.passwordList = CompareVaults.compare(PassFrame.passwordList,
+                List<Password> compared = CompareVaults.compare(PassFrame.passwordList,
                         drivePasswords);
+                Arrays.stream(CompareVaults.changeLog(PassFrame.passwordList, compared)).forEach(s -> LOG.info("Synchronization: " + String.format(s, "Drive", "Local")));
+                Arrays.stream(CompareVaults.changeLog(drivePasswords, compared)).forEach(s -> LOG.info("Synchronization: " + String.format(s, "Local", "Drive")));
+                PassFrame.passwordList = compared;
 
                 // Not PassFrame.savePasswords() because it would call this function again -> endless loop
                 Password.savePasswords(PassFrame.passwordList, PASSWORDS, PassFrame.password);
@@ -98,7 +117,7 @@ public class PassDrive {
                 DRIVE.files()
                         .update(old.getId(), file, new FileContent("text/plain", temp))
                         .execute();
-                LOG.info("Synchronized with Google Drive!");
+                LOG.info("Successfully synchronized with Google Drive!");
                 Files.delete(temp.toPath());
             } else {
                 String drivePass = PasswordGenerator.generatePassword(12, PasswordGenerator.PassChars.BIG_LETTERS, PasswordGenerator.PassChars.SMALL_LETTERS, PasswordGenerator.PassChars.NUMBERS);
@@ -119,6 +138,7 @@ public class PassDrive {
                 PassProperty.DRIVE_PASSWORD.setValue(new AES(PassFrame.password).encrypt(drivePass));
                 DIALOG.message(FRAME, String.format(LANG.getProperty("drive.jop.createdDrivePass"), drivePass));
             }
+            ((PassFrame) FRAME).refreshVisibility();
             INACTIVITY_LISTENER.start();
         } catch (IOException | GeneralSecurityException ioException) {
             LOG.error("Error while synchronizing with Google Drive:", ioException);
@@ -131,7 +151,30 @@ public class PassDrive {
     }
 
     public static void compare() {
+        URL url = null;
+        try {
+            url = new URL("http://www.googleapis.com");
+            url.openConnection().connect();
+        } catch (UnknownHostException e) {
+            DIALOG.message(FRAME, String.format(LANG.getProperty("drive.jop.noInternet"), url.getHost()));
+            return;
+        } catch (IOException ioException) {
+            LOG.error("Connection error", ioException);
+        }
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        scheduledExecutorService.scheduleAtFixedRate(() -> {
+            Animation driveAnimation = ((PassFrame) FRAME).driveAnimation;
+            driveAnimation.angle++;
+            if (stopAnimation && driveAnimation.isFinished()) {
+                scheduledExecutorService.shutdown();
+                driveAnimation.stop();
+            }
+            COMPONENTS.get("passFrame.lbl.refresh").repaint();
+        }, 0, 3, TimeUnit.MILLISECONDS);
         SERVICE.execute(compare);
+
+        stopAnimation = false;
+        SERVICE.execute(() -> stopAnimation = true);
     }
 
     private static void initialize() throws GeneralSecurityException, IOException {
@@ -140,6 +183,11 @@ public class PassDrive {
                 .setApplicationName(APP_INFO.getProperty("app.name"))
                 .build();
     }
+
+    public static void restart() {
+        DRIVE = null;
+    }
+
 
     /**
      * Creates an authorized Credential object.

@@ -1,8 +1,10 @@
 package de.finnik.passvault;
 
 import java.awt.*;
-import java.awt.event.*;
-import java.util.concurrent.*;
+import java.awt.event.AWTEventListener;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Checks whether the user is inactive for a given period of time

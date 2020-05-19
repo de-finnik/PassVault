@@ -1,6 +1,8 @@
 package de.finnik.AES;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 public class AESWriter extends BufferedWriter {
     private AES aes;

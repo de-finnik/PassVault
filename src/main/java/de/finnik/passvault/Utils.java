@@ -1,8 +1,8 @@
 package de.finnik.passvault;
 
 import java.awt.*;
-import java.awt.datatransfer.*;
-import java.awt.image.*;
+import java.awt.datatransfer.StringSelection;
+import java.awt.image.BufferedImage;
 
 /**
  * Contains useful methods
@@ -42,9 +42,29 @@ public class Utils {
     public static BufferedImage resizeImage(BufferedImage input, int width, int height) {
         BufferedImage out = new BufferedImage(width, height, input.getType());
         final Graphics2D graphics2D = ((Graphics2D) out.getGraphics());
-        graphics2D.drawImage(input,0,0, width, height, null);
+        graphics2D.drawImage(input, 0, 0, width, height, null);
         graphics2D.dispose();
         return out;
+    }
+
+    /**
+     * Rotates a given image by given degrees
+     *
+     * @param img   The input image
+     * @param angle The angle to rotate in degrees
+     * @return The rotated image
+     */
+    public static BufferedImage rotateImage(BufferedImage img, double angle) {
+        int w = img.getWidth();
+        int h = img.getHeight();
+
+        BufferedImage rotated = new BufferedImage(w, h, img.getType());
+        Graphics2D graphic = rotated.createGraphics();
+        graphic.rotate(Math.toRadians(angle), w / 2.0, h / 2.0);
+        graphic.drawImage(img, null, 0, 0);
+        graphic.dispose();
+
+        return rotated;
     }
 
     /**

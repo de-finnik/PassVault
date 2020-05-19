@@ -1,9 +1,15 @@
 package de.finnik.passvault;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Locale;
+import java.util.Properties;
 
-import static de.finnik.gui.Var.*;
+import static de.finnik.gui.Var.LOG;
+import static de.finnik.gui.Var.PASSWORDS;
 
 /**
  * The properties of the application
@@ -126,5 +132,4 @@ public enum PassProperty {
                 return false;
         }
     }
-
 }

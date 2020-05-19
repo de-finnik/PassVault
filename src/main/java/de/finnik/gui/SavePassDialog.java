@@ -1,12 +1,18 @@
 package de.finnik.gui;
 
-import de.finnik.passvault.*;
+import de.finnik.passvault.PassUtils;
+import de.finnik.passvault.Password;
+import de.finnik.passvault.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
 
 import static de.finnik.gui.Var.*;
 
@@ -20,7 +26,7 @@ class SavePassDialog extends JDialog {
      * A list of {@link javax.swing.JComponent}s which are generated in {@link SavePassDialog#components(String)}
      * to be added to the content pane in the right order {@link SavePassDialog#positionComponents(List)}
      */
-    private List<JComponent> components;
+    private final List<JComponent> components;
 
     /**
      * Creates the frame
@@ -137,7 +143,7 @@ class SavePassDialog extends JDialog {
 
             Password newPass = new Password(tfPass.getText(), tfSite.getText(), tfUser.getText(), tfOther.getText());
 
-            if (!PassFrame.passwordList.contains(newPass) && !newPass.isEmpty()) {
+            if (!newPass.isEmpty()) {
                 // Checks whether the user has set a main password
                 if (PassFrame.password.length() == 0) {
                     SettingsDialog.changeMainPass();

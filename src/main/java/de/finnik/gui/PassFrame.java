@@ -1,19 +1,23 @@
 package de.finnik.gui;
 
-import de.finnik.AES.*;
-import de.finnik.drive.*;
-import de.finnik.passvault.*;
+import de.finnik.AES.AES;
+import de.finnik.drive.PassDrive;
+import de.finnik.passvault.PassProperty;
+import de.finnik.passvault.Password;
+import de.finnik.passvault.Utils;
 
 import javax.swing.*;
-import javax.swing.filechooser.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.datatransfer.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.io.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
 import static de.finnik.gui.Var.*;
 
@@ -32,6 +36,8 @@ public class PassFrame extends JFrame {
      */
     public static List<Password> passwordList;
     public PassBankPanel passBankPanel;
+
+    public Animation driveAnimation;
 
     /**
      * Creates the frame
@@ -140,6 +146,7 @@ public class PassFrame extends JFrame {
             }
         });
 
+        driveAnimation = new Animation(REFRESH);
         components();
         textComponents();
 
@@ -189,6 +196,25 @@ public class PassFrame extends JFrame {
         });
         lblSettings.setBounds(10, 10, 30, 30);
         add(lblSettings, "passFrame.lbl.settings");
+
+        JLabel lblRefresh = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                g.drawImage(REFRESH_DRIVE, 0, 0, null);
+                g.drawImage(driveAnimation.get(), 0, 0, null);
+            }
+        };
+        lblRefresh.setIcon(new ImageIcon(REFRESH));
+        lblRefresh.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                super.mouseClicked(e);
+                savePasswords();
+            }
+        });
+        lblRefresh.setBounds(50, 10, 31, 30);
+        add(lblRefresh, "passFrame.lbl.refresh");
+        refreshVisibility();
 
         JLabel lblClose = new JLabel();
         lblClose.setIcon(new ImageIcon(CLOSE));
@@ -268,6 +294,10 @@ public class PassFrame extends JFrame {
         }, true);
     }
 
+    public void refreshVisibility() {
+        COMPONENTS.get("passFrame.lbl.refresh").setVisible(!PassProperty.DRIVE_PASSWORD.getValue().isEmpty());
+    }
+
     /**
      * Import a backup from a file
      *
@@ -277,7 +307,7 @@ public class PassFrame extends JFrame {
         if (file.getName().endsWith(".bin")) {
             DIALOG.input(FRAME, LANG.getProperty("passFrame.jop.enterPass"), pass -> {
                 try {
-                    PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> !PassFrame.passwordList.contains(p)).collect(Collectors.toList()));
+                    PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> PassFrame.passwordList.stream().noneMatch(p1 -> p1.id().equals(p.id()))).collect(Collectors.toList()));
                     LOG.info("Imported passwords from {}!", file.getAbsolutePath());
                     savePasswords();
                 } catch (AES.WrongPasswordException e) {

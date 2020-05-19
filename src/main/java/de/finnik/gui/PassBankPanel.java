@@ -1,15 +1,22 @@
 package de.finnik.gui;
 
-import de.finnik.passvault.*;
+import de.finnik.passvault.PassUtils;
+import de.finnik.passvault.Password;
+import de.finnik.passvault.Utils;
 
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
 import static de.finnik.gui.Var.*;
 
@@ -112,7 +119,7 @@ class PassBankPanel extends JPanel {
              * Note: Editing a password so that it would has no information, will delete it after confirming
              */
             if (e.getType() == TableModelEvent.UPDATE && tablePassBank.getSelectedRow() >= 0) {
-                Password password = new Password(getAllMatchingPasswords().get(tablePassBank.getSelectedRow()));
+                Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
 
                 // Edits the password
                 switch (e.getColumn()) {

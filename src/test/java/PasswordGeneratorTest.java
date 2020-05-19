@@ -1,9 +1,13 @@
-import org.junit.*;
+import org.junit.Test;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-import static de.finnik.passvault.PasswordGenerator.*;
-import static org.junit.Assert.*;
+import static de.finnik.passvault.PasswordGenerator.PassChars;
+import static de.finnik.passvault.PasswordGenerator.generatePassword;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class PasswordGeneratorTest {
     @Test

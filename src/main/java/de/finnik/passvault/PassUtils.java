@@ -1,16 +1,16 @@
 package de.finnik.passvault;
 
-import de.finnik.gui.*;
+import de.finnik.gui.PassVault;
 
 import javax.swing.*;
-import javax.swing.table.*;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.*;
+import java.io.InputStream;
 import java.util.List;
 import java.util.*;
-import java.util.stream.*;
+import java.util.stream.Collectors;
 
-import static de.finnik.gui.Var.*;
+import static de.finnik.gui.Var.LOG;
 
 /**
  * Contains useful methods that concern this application

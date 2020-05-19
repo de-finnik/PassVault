@@ -1,19 +1,27 @@
 package de.finnik.gui;
 
-import de.finnik.AES.*;
-import de.finnik.drive.*;
-import de.finnik.passvault.*;
+import de.finnik.AES.AES;
+import de.finnik.drive.PassDrive;
+import de.finnik.passvault.PassProperty;
+import de.finnik.passvault.PassUtils;
+import de.finnik.passvault.Password;
+import de.finnik.passvault.Utils;
 
 import javax.swing.*;
-import javax.swing.plaf.*;
+import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.net.*;
-import java.text.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.*;
-import java.util.stream.*;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import static de.finnik.gui.Var.*;
 
@@ -26,7 +34,7 @@ public class SettingsDialog extends JDialog {
      * A list of {@link javax.swing.JComponent}s which are generated in {@link SettingsDialog#components()}
      * to be added to the content pane in the right order {@link SettingsDialog#positionComponents(List)}
      */
-    private List<JComponent> components;
+    private final List<JComponent> components;
 
     /**
      * Creates the frame
@@ -82,6 +90,9 @@ public class SettingsDialog extends JDialog {
         toolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
         add(toolBar, "settings.toolBar");
 
+        UIManager.put("MenuItem.selectionBackground", new ColorUIResource(Color.white));
+        UIManager.put("MenuItem.selectionForeground", new ColorUIResource(Color.black));
+
         JLabel lblDrive = new JLabel();
         lblDrive.setIcon(new ImageIcon(DRIVE_ICON));
         lblDrive.setCursor(HAND_CURSOR);
@@ -90,10 +101,30 @@ public class SettingsDialog extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                PassDrive.compare(((PassFrame) FRAME).passBankPanel::updateTableModel);
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    PassDrive.compare(() -> {
+                        ((PassFrame) FRAME).passBankPanel.updateTableModel();
+                        ((PassFrame) FRAME).refreshVisibility();
+                    });
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
+                        new PopUp(new PopUp.PopUpItem(LANG.getProperty("settings.pop.disableDrive"), action -> {
+                            PassProperty.DRIVE_PASSWORD.setValue("");
+                            new File("StoredCredential").delete();
+                            ((PassFrame) FRAME).refreshVisibility();
+                            PassDrive.restart();
+                        }), new PopUp.PopUpItem(LANG.getProperty("settings.pop.changeDrive"), action -> {
+                            PassProperty.DRIVE_PASSWORD.setValue("");
+                            new File("StoredCredential").delete();
+                            PassDrive.restart();
+                            PassFrame.savePasswords();
+                            ((PassFrame) FRAME).refreshVisibility();
+                        })).show(e.getComponent(), e.getX(), e.getY());
+                }
             }
         });
-        toolBar.add(lblDrive);
+        if (!PassFrame.password.isEmpty())
+            toolBar.add(lblDrive);
 
         JLabel lblExtract = new JLabel();
         lblExtract.setIcon(new ImageIcon(EXTRACT));

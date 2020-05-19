@@ -1,11 +1,13 @@
 package de.finnik.gui;
 
-import de.finnik.passvault.*;
+import de.finnik.passvault.PassUtils;
+import de.finnik.passvault.PasswordGenerator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
 
 import static de.finnik.gui.Var.*;
 
