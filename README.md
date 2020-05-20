@@ -8,6 +8,7 @@ It also generates new passwords with a given length and given parameters.
 - [Installation & Quick Start](#installation-&-quick-start)
 - [Generate a new password](#generate-a-new-password)
 - [Manage your passwords](#manage-your-passwords)
+- [Google Drive](#google-drive)
 - [Settings](#settings)
 - [API](#api)
 - [Credits](#credits)
@@ -60,6 +61,16 @@ Just click on the right of the head column of the sorting parameter and click on
 By clicking on the i(nformation) icon in the left top corner, you open the settings frame:
 
 ![Settings dialog](screenshots/settings.png)
+
+## Google Drive
+PassVault lets you synchronize your passwords with all of your devices via Google Drive. 
+To start you'll have to click the button with the Google Drive icon in the top right corner.
+Now you'll have to log in to your Google Account and allow PassVault to save your passwords encrypted to your Google Drive. 
+When you synchronize your passwords the first time, PassVault will generate a random drive password for you, with that your passwords will be encrypted in your Google Drive. 
+You'll need this password later if you want to log in from another device.
+After logging in, PassVault will always synchronize your passwords with your drive on startup, after adding, deleting or editing a password 
+or if you click the "synchronize with Drive" button in the top left corner of the main frame.
+If you forget your drive password, you'll be able to show it after clicking on the "Your Google Drive password" button and entering your main password.
 
 ## Changing your main password
 You can easily change your main password by hitting the button. 

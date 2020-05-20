@@ -1,24 +1,27 @@
 package de.finnik.gui;
 
-import de.finnik.AES.*;
-import de.finnik.api.*;
+import de.finnik.AES.AES;
+import de.finnik.api.PassAPI;
 import de.finnik.passvault.*;
-import org.slf4j.*;
+import org.slf4j.LoggerFactory;
 
-import javax.imageio.*;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.reflect.*;
-import java.nio.charset.*;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiConsumer;
 
 import static de.finnik.gui.Var.*;
-import static de.finnik.passvault.Utils.*;
+import static de.finnik.passvault.Utils.sizeFont;
 
 /**
  * The PassVault program implements an application that saves passwords encrypted
@@ -32,6 +35,7 @@ import static de.finnik.passvault.Utils.*;
 public class PassVault {
 
     public static void main(String[] args) {
+        Locale.setDefault(new Locale("en"));
         LOG = LoggerFactory.getLogger(args.length == 0 ? "APPLICATION" : "API");
 
         LOG.info("Welcome to PassVault, we're happy to see you!");

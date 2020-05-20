@@ -1,7 +1,10 @@
 package de.finnik.passvault;
 
-import java.util.*;
-import java.util.stream.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Generates a password out of a given length and given characters
