@@ -15,7 +15,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -72,7 +71,8 @@ public class SettingsDialog extends JDialog {
             if (first != null && !first.equals("")) {
                 DIALOG.input(FRAME, LANG.getProperty("jop.repeatEnteringNewMainPass"), second -> {
                     if (first.equals(second)) {
-                        PassProperty.DRIVE_PASSWORD.setValue(new AES(first).encrypt(new AES(PassFrame.password).decrypt(PassProperty.DRIVE_PASSWORD.getValue())));
+                        if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
+                            PassProperty.DRIVE_PASSWORD.setValue(new AES(first).encrypt(new AES(PassFrame.password).decrypt(PassProperty.DRIVE_PASSWORD.getValue())));
                         PassFrame.password = first;
                         LOG.info("Changed main password!");
                         PassFrame.savePasswords();
@@ -161,14 +161,13 @@ public class SettingsDialog extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 // Open help page
-                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                    try {
-                        Desktop.getDesktop().browse(new URI("https://github.com/de-finnik/passvault"));
-                    } catch (Exception ex) {
-                        LOG.error("Error while opening help page!", ex);
-                    }
-
+                String url = "https://github.com/de-finnik/passvault";
+                try {
+                    Utils.PassBrowser.browse(url);
+                } catch (Exception ex) {
+                    LOG.error("Error while opening help page!", ex);
                 }
+
             }
         });
         toolBar.add(lblHelp);
@@ -291,6 +290,21 @@ public class SettingsDialog extends JDialog {
         lblInactivityLock.setFont(raleway(13));
         COMPONENTS.put("settings.lbl.inactivityLock", lblInactivityLock);
         panelInactivity.add(lblInactivityLock);
+
+        JCheckBox checkBoxDottedPasswords = new JCheckBox();
+        checkBoxDottedPasswords.setSelected(Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue()));
+        checkBoxDottedPasswords.addActionListener(action -> {
+            PassProperty.SHOW_PASSWORDS_DOTTED.setValue(checkBoxDottedPasswords.isSelected());
+            ((PassFrame) FRAME).passBankPanel.updateTableModel();
+        });
+        checkBoxDottedPasswords.setFont(raleway(13));
+        add(checkBoxDottedPasswords, "settings.check.dottedPasswords");
+
+        JCheckBox checkBoxShowMainPass = new JCheckBox();
+        checkBoxShowMainPass.setSelected(Boolean.parseBoolean(PassProperty.SHOW_MAIN_PASSWORD.getValue()));
+        checkBoxShowMainPass.addActionListener(action -> PassProperty.SHOW_MAIN_PASSWORD.setValue(checkBoxShowMainPass.isSelected()));
+        checkBoxShowMainPass.setFont(raleway(13));
+        add(checkBoxShowMainPass, "settings.check.showMainPass");
 
         JButton btnDrivePassword = new JButton();
         btnDrivePassword.addActionListener(action -> {

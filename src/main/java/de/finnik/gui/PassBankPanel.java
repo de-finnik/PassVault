@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.PassUtils;
 import de.finnik.passvault.Password;
 import de.finnik.passvault.Utils;
@@ -104,6 +105,11 @@ class PassBankPanel extends JPanel {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                if (column == 0 && Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue())) {
+                    JTextField textField = new JPasswordField();
+                    textField.setText(value.toString());
+                    return textField;
+                }
                 setBackground(FOREGROUND);
                 setForeground(BACKGROUND);
                 if (hasFocus) {

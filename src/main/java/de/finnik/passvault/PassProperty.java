@@ -15,7 +15,7 @@ import static de.finnik.gui.Var.PASSWORDS;
  * The properties of the application
  */
 public enum PassProperty {
-    LANG, INACTIVITY_LOCK, INACTIVITY_TIME, DRIVE_PASSWORD;
+    LANG, INACTIVITY_LOCK, INACTIVITY_TIME, DRIVE_PASSWORD, SHOW_PASSWORDS_DOTTED, SHOW_MAIN_PASSWORD, GEN_LENGTH, GEN_BIG, GEN_SMALL, GEN_NUM, GEN_SPE;
 
     /**
      * The file where the properties are saved
@@ -99,7 +99,15 @@ public enum PassProperty {
                 String systemLang = Locale.getDefault().getLanguage();
                 return PassUtils.FileUtils.availableLanguages().contains(systemLang) ? systemLang : "en";
             case INACTIVITY_LOCK:
+            case SHOW_PASSWORDS_DOTTED:
+            case SHOW_MAIN_PASSWORD:
+            case GEN_BIG:
+            case GEN_SMALL:
+            case GEN_NUM:
+            case GEN_SPE:
                 return "true";
+            case GEN_LENGTH:
+                return "12";
             case INACTIVITY_TIME:
                 return "30";
             case DRIVE_PASSWORD:
@@ -119,7 +127,16 @@ public enum PassProperty {
             case LANG:
                 return PassUtils.FileUtils.availableLanguages().contains(value);
             case INACTIVITY_LOCK:
+            case SHOW_PASSWORDS_DOTTED:
+            case SHOW_MAIN_PASSWORD:
+            case GEN_BIG:
+            case GEN_SMALL:
+            case GEN_NUM:
+            case GEN_SPE:
                 return value.equals("true") || value.equals("false");
+            case GEN_LENGTH:
+                int z = Integer.parseInt(value);
+                return z >= 5 && z <= 30;
             case INACTIVITY_TIME:
                 try {
                     int i = Integer.parseInt(value);

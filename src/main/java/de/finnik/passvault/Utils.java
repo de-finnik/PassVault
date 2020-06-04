@@ -3,6 +3,9 @@ package de.finnik.passvault;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 /**
  * Contains useful methods
@@ -34,8 +37,8 @@ public class Utils {
     /**
      * Resize a given image to a new width and a new height
      *
-     * @param input The original image
-     * @param width The new width
+     * @param input  The original image
+     * @param width  The new width
      * @param height The new height
      * @return The resized image
      */
@@ -99,4 +102,22 @@ public class Utils {
         return font.deriveFont(size);
     }
 
+    public static class PassBrowser {
+        public static void browse(String url) throws URISyntaxException, IOException {
+            String os = System.getProperty("os.name").toLowerCase();
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                // Windows
+                Desktop.getDesktop().browse(new URI(url));
+            } else {
+                Runtime runtime = Runtime.getRuntime();
+                if (os.contains("mac")) {
+                    //MacOS
+                    runtime.exec("open " + url);
+                } else {
+                    // Linux
+                    runtime.exec("xdg-open " + url);
+                }
+            }
+        }
+    }
 }

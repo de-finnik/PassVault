@@ -35,6 +35,7 @@ import static de.finnik.passvault.Utils.sizeFont;
 public class PassVault {
 
     public static void main(String[] args) {
+        System.out.println(PasswordGenerator.PassChars.SPECIAL_CHARACTERS.get());
         Locale.setDefault(new Locale("en"));
         LOG = LoggerFactory.getLogger(args.length == 0 ? "APPLICATION" : "API");
 
@@ -241,7 +242,16 @@ public class PassVault {
 
             JButton btnLogin = new JButton();
 
-            JTextField passwordField = new JPasswordField();
+            JPasswordField passwordField = new JPasswordField() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    g.setColor(FOREGROUND);
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                    if (Boolean.parseBoolean(PassProperty.SHOW_MAIN_PASSWORD.getValue())) {
+                        super.paintComponent(g);
+                    }
+                }
+            };
             passwordField.setBounds(10, 120, getWidth() - 20, 30);
             passwordField.setFont(raleway(20));
             passwordField.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -264,7 +274,7 @@ public class PassVault {
                 // The login
                 List<Password> passwordList;
                 try {
-                    passwordList = Password.readPasswords(PASSWORDS, passwordField.getText());
+                    passwordList = Password.readPasswords(PASSWORDS, new String(passwordField.getPassword()));
                 } catch (AES.WrongPasswordException e) {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
@@ -273,7 +283,7 @@ public class PassVault {
                     return;
                 }
                 LOG.info("User logged in!");
-                todo.accept(passwordField.getText(), passwordList);
+                todo.accept(new String(passwordField.getPassword()), passwordList);
                 dispose();
             });
             add(btnLogin, "check.btn.login");

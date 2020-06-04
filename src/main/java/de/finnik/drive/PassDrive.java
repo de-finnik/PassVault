@@ -21,11 +21,13 @@ import de.finnik.gui.PassFrame;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.Password;
 import de.finnik.passvault.PasswordGenerator;
+import de.finnik.passvault.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
@@ -211,6 +213,12 @@ public class PassDrive {
                 .setAccessType("offline")
                 .build();
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
+        return new AuthorizationCodeInstalledApp(flow, receiver, url -> {
+            try {
+                Utils.PassBrowser.browse(url);
+            } catch (URISyntaxException | IOException e) {
+                LOG.error("Error trying to open Google login page!");
+            }
+        }).authorize("user");
     }
 }
