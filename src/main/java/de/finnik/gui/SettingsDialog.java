@@ -163,7 +163,7 @@ public class SettingsDialog extends JDialog {
                 // Open help page
                 String url = "https://github.com/de-finnik/passvault";
                 try {
-                    Utils.PassBrowser.browse(url);
+                    Utils.Browser.browse(url);
                 } catch (Exception ex) {
                     LOG.error("Error while opening help page!", ex);
                 }

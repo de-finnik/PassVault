@@ -215,7 +215,7 @@ public class PassDrive {
         LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
         return new AuthorizationCodeInstalledApp(flow, receiver, url -> {
             try {
-                Utils.PassBrowser.browse(url);
+                Utils.Browser.browse(url);
             } catch (URISyntaxException | IOException e) {
                 LOG.error("Error trying to open Google login page!");
             }
