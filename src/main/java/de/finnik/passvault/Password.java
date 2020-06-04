@@ -1,14 +1,16 @@
 package de.finnik.passvault;
 
-import com.google.gson.*;
-import de.finnik.AES.*;
+import com.google.gson.Gson;
+import de.finnik.AES.AES;
+import de.finnik.AES.AESReader;
+import de.finnik.AES.AESWriter;
 
 import java.io.*;
-import java.nio.charset.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.stream.*;
+import java.util.stream.Stream;
 
-import static de.finnik.gui.Var.*;
+import static de.finnik.gui.Var.LOG;
 
 /**
  * A password object has four parameters:
@@ -18,13 +20,17 @@ import static de.finnik.gui.Var.*;
  * 4. Other information that is useful to know among the password
  */
 public class Password {
+    private final String ID;
     private String pass, site, user, other;
+    private long lastModified;
 
     public Password(String pass, String site, String user, String other) {
         this.pass = pass;
         this.site = site;
         this.user = user;
         this.other = other;
+        lastModified = System.currentTimeMillis();
+        ID = UUID.randomUUID().toString();
     }
 
     private Password() {
@@ -32,6 +38,17 @@ public class Password {
         site = "";
         user = "";
         other = "";
+        lastModified = System.currentTimeMillis();
+        ID = UUID.randomUUID().toString();
+    }
+
+    public Password(Password password) {
+        pass = password.pass;
+        site = password.site;
+        user = password.user;
+        other = password.other;
+        lastModified = password.lastModified;
+        ID = password.ID;
     }
 
     /**
@@ -55,17 +72,35 @@ public class Password {
      * @param file The encrypted file
      * @param pass The password to decrypt
      * @return The List of {@link Password} objects
+     * @throws AES.WrongPasswordException If password is wrong
      */
-    public static List<Password> readPasswords(File file, String pass) throws IllegalArgumentException {
-        try (AESReader aesReader = new AESReader(new FileReader(file), new AES(pass))) {
-            return new ArrayList<>(Arrays.asList(new Gson().fromJson(aesReader.readLine(), Password[].class)));
-        } catch (IllegalArgumentException e) {
-            // Wrong password
-            throw new IllegalArgumentException(e);
-        } catch (Exception e) {
+    public static List<Password> readPasswords(File file, String pass) throws AES.WrongPasswordException {
+        try (InputStream is = new FileInputStream(file)) {
+            return readPasswords(is, pass);
+        } catch (AES.WrongPasswordException w) {
+            throw new AES.WrongPasswordException();
+        } catch (IOException e) {
             LOG.error("Error while reading passwords from {}!", file.getAbsolutePath(), e);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * This static method returns all passwords with all of their parameters that are saved to an encrypted file
+     *
+     * @param inputStream The encrypted inputStream
+     * @param pass        The password to decrypt
+     * @return The List of {@link Password} objects
+     */
+    public static List<Password> readPasswords(InputStream inputStream, String pass) throws AES.WrongPasswordException, IOException {
+        try (AESReader aesReader = new AESReader(new InputStreamReader(inputStream), new AES(pass))) {
+            return new ArrayList<>(Arrays.asList(new Gson().fromJson(aesReader.readLine(), Password[].class)));
+        } catch (AES.WrongPasswordException e) {
+            // Wrong password
+            throw new AES.WrongPasswordException();
+        } catch (IOException e) {
+            throw new IOException(e);
+        }
     }
 
     /**
@@ -105,6 +140,7 @@ public class Password {
 
     public void setPass(String pass) {
         this.pass = pass;
+        lastModified = System.currentTimeMillis();
     }
 
     public String getSite() {
@@ -113,6 +149,7 @@ public class Password {
 
     public void setSite(String site) {
         this.site = site;
+        lastModified = System.currentTimeMillis();
     }
 
     public String getUser() {
@@ -121,6 +158,7 @@ public class Password {
 
     public void setUser(String user) {
         this.user = user;
+        lastModified = System.currentTimeMillis();
     }
 
     public String getOther() {
@@ -129,6 +167,15 @@ public class Password {
 
     public void setOther(String other) {
         this.other = other;
+        lastModified = System.currentTimeMillis();
+    }
+
+    public String id() {
+        return ID;
+    }
+
+    public long lastModified() {
+        return lastModified;
     }
 
     /**
@@ -141,32 +188,12 @@ public class Password {
     }
 
     /**
-     * Checks how many parameters of the password equal to ""
+     * Checks if all parameters of the password are empty
      *
-     * @return The count of empty parameters
+     * @return {@code true} if every parameter is empty (equal to "") or {@code false} if not
      */
-    public int emptyParameters() {
-        return (int) Stream.of(pass, site, user, other).filter(s -> s.length() == 0).count();
-    }
-
-    /**
-     * Checks whether a parameter is equal to ""
-     *
-     * @param i The index of the parameter (1=pass; 2=site; 3=user; 4=other)
-     * @return Parameter equals to ""
-     */
-    public boolean isEmpty(int i) {
-        switch (i) {
-            case 0:
-                return pass.length() > 0;
-            case 1:
-                return site.length() > 0;
-            case 2:
-                return user.length() > 0;
-            case 3:
-                return other.length() > 0;
-        }
-        return true;
+    public boolean isEmpty() {
+        return Stream.of(pass, site, user, other).filter(String::isEmpty).count() == 4;
     }
 
     @Override
@@ -176,7 +203,9 @@ public class Password {
             return password.getPass().equals(getPass())
                     && password.getSite().equals(getSite())
                     && password.getUser().equals(getUser())
-                    && password.getOther().equals(getOther());
+                    && password.getOther().equals(getOther())
+                    && password.id().equals(id())
+                    && password.lastModified() == lastModified();
         }
         return false;
     }

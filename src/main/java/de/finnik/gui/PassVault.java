@@ -1,23 +1,27 @@
 package de.finnik.gui;
 
-import de.finnik.api.*;
+import de.finnik.AES.AES;
+import de.finnik.api.PassAPI;
 import de.finnik.passvault.*;
-import org.slf4j.*;
+import org.slf4j.LoggerFactory;
 
-import javax.imageio.*;
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.*;
-import java.lang.reflect.*;
-import java.nio.charset.*;
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiConsumer;
 
 import static de.finnik.gui.Var.*;
-import static de.finnik.passvault.Utils.*;
+import static de.finnik.passvault.Utils.sizeFont;
 
 /**
  * The PassVault program implements an application that saves passwords encrypted
@@ -31,6 +35,8 @@ import static de.finnik.passvault.Utils.*;
 public class PassVault {
 
     public static void main(String[] args) {
+        System.out.println(PasswordGenerator.PassChars.SPECIAL_CHARACTERS.get());
+        Locale.setDefault(new Locale("en"));
         LOG = LoggerFactory.getLogger(args.length == 0 ? "APPLICATION" : "API");
 
         LOG.info("Welcome to PassVault, we're happy to see you!");
@@ -100,7 +106,6 @@ public class PassVault {
         DIALOG = new PassDialog(FOREGROUND, BACKGROUND, RALEWAY, CLOSE, WARNING, ICON_SMALL, QUESTION_MARK, CHECK_MARK);
 
         COMPONENTS = new HashMap<>();
-
     }
 
     /**
@@ -160,7 +165,7 @@ public class PassVault {
      */
     public static class CheckFrame extends JDialog {
         private final BiConsumer<String, List<Password>> todo;
-        private String message;
+        private final String message;
 
         /**
          * Creates the frame
@@ -237,7 +242,16 @@ public class PassVault {
 
             JButton btnLogin = new JButton();
 
-            JTextField passwordField = new JPasswordField();
+            JPasswordField passwordField = new JPasswordField() {
+                @Override
+                protected void paintComponent(Graphics g) {
+                    g.setColor(FOREGROUND);
+                    g.fillRect(0, 0, getWidth(), getHeight());
+                    if (Boolean.parseBoolean(PassProperty.SHOW_MAIN_PASSWORD.getValue())) {
+                        super.paintComponent(g);
+                    }
+                }
+            };
             passwordField.setBounds(10, 120, getWidth() - 20, 30);
             passwordField.setFont(raleway(20));
             passwordField.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -260,8 +274,8 @@ public class PassVault {
                 // The login
                 List<Password> passwordList;
                 try {
-                    passwordList = Password.readPasswords(PASSWORDS, passwordField.getText());
-                } catch (IllegalArgumentException e) {
+                    passwordList = Password.readPasswords(PASSWORDS, new String(passwordField.getPassword()));
+                } catch (AES.WrongPasswordException e) {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
                     passwordField.setText("");
@@ -269,7 +283,7 @@ public class PassVault {
                     return;
                 }
                 LOG.info("User logged in!");
-                todo.accept(passwordField.getText(), passwordList);
+                todo.accept(new String(passwordField.getPassword()), passwordList);
                 dispose();
             });
             add(btnLogin, "check.btn.login");

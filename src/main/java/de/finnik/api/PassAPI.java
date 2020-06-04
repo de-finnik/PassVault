@@ -1,14 +1,24 @@
 package de.finnik.api;
 
-import com.google.gson.*;
-import de.finnik.gui.*;
-import de.finnik.passvault.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import de.finnik.gui.PassVault;
+import de.finnik.passvault.PassUtils;
+import de.finnik.passvault.Password;
 
-import java.io.*;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.stream.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static de.finnik.gui.Var.*;
 
@@ -59,7 +69,7 @@ public class PassAPI {
         }
 
         assert password != null;
-        if (password.emptyParameters() == 4) {
+        if (password.isEmpty()) {
             error(21, "Input password has no valid parameters!");
         }
 
@@ -94,7 +104,6 @@ public class PassAPI {
                 builder.setPrettyPrinting();
             }
 
-            System.out.println(builder.create().toJson(matching));
             LOG.info("User got information about passwords containing {}!", args[0]);
         }, String.format(LANG.getProperty("api.get.warning"), args[0])).setVisible(true);
     }

@@ -1,11 +1,14 @@
 package de.finnik.gui;
 
-import de.finnik.passvault.*;
+import de.finnik.passvault.PassProperty;
+import de.finnik.passvault.PassUtils;
+import de.finnik.passvault.PasswordGenerator;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
 
 import static de.finnik.gui.Var.*;
 
@@ -53,35 +56,40 @@ public class GeneratePasswordPanel extends JPanel {
         lblHeadline.setBounds(0, 0, 300, 30);
         add(lblHeadline, "generate.lbl.headline");
 
-        JSlider sliderLength = new JSlider(5, 30, 12);
+        JSlider sliderLength = new JSlider(5, 30, Integer.parseInt(PassProperty.GEN_LENGTH.getValue()));
         sliderLength.setMajorTickSpacing(5);
         sliderLength.setMinorTickSpacing(1);
         sliderLength.setPaintTicks(true);
         sliderLength.setPaintLabels(true);
         sliderLength.setPaintTrack(false);
         sliderLength.setBounds(0, 40, 300, 50);
+        sliderLength.addChangeListener(e -> PassProperty.GEN_LENGTH.setValue(sliderLength.getValue()));
         add(sliderLength, "generate.slider.length");
 
         UIManager.put("CheckBox.focus", BACKGROUND);
 
         JCheckBox checkBoxBigLetters = new JCheckBox();
-        checkBoxBigLetters.setSelected(true);
+        checkBoxBigLetters.setSelected(Boolean.parseBoolean(PassProperty.GEN_BIG.getValue()));
         checkBoxBigLetters.setBounds(0, 100, 300, 30);
+        checkBoxBigLetters.addActionListener(e -> PassProperty.GEN_BIG.setValue(checkBoxBigLetters.isSelected()));
         add(checkBoxBigLetters, "generate.checkBox.bigLetters");
 
         JCheckBox checkBoxSmallLetters = new JCheckBox();
-        checkBoxSmallLetters.setSelected(true);
+        checkBoxSmallLetters.setSelected(Boolean.parseBoolean(PassProperty.GEN_SMALL.getValue()));
         checkBoxSmallLetters.setBounds(0, 130, 300, 30);
+        checkBoxSmallLetters.addActionListener(e -> PassProperty.GEN_SMALL.setValue(checkBoxSmallLetters.isSelected()));
         add(checkBoxSmallLetters, "generate.checkBox.smallLetters");
 
         JCheckBox checkBoxNumbers = new JCheckBox();
-        checkBoxNumbers.setSelected(true);
+        checkBoxNumbers.setSelected(Boolean.parseBoolean(PassProperty.GEN_NUM.getValue()));
         checkBoxNumbers.setBounds(0, 160, 300, 30);
+        checkBoxNumbers.addActionListener(e -> PassProperty.GEN_NUM.setValue(checkBoxNumbers.isSelected()));
         add(checkBoxNumbers, "generate.checkBox.numbers");
 
         JCheckBox checkBoxSpecialCharacters = new JCheckBox();
-        checkBoxSpecialCharacters.setSelected(false);
+        checkBoxSpecialCharacters.setSelected(Boolean.parseBoolean(PassProperty.GEN_SPE.getValue()));
         checkBoxSpecialCharacters.setBounds(0, 190, 300, 30);
+        checkBoxSpecialCharacters.addActionListener(e -> PassProperty.GEN_SPE.setValue(checkBoxSpecialCharacters.isSelected()));
         add(checkBoxSpecialCharacters, "generate.checkBox.specials");
 
         JTextField tfPass = new JTextField();
@@ -104,7 +112,7 @@ public class GeneratePasswordPanel extends JPanel {
             }
             if (chars.size() > 0) {
                 tfPass.setFont(raleway(20));
-                String pass = PasswordGenerator.generatePassword(chars.toArray(new PasswordGenerator.PassChars[0]), sliderLength.getValue());
+                String pass = PasswordGenerator.generatePassword(sliderLength.getValue(), chars.toArray(new PasswordGenerator.PassChars[0]));
                 while (getFontMetrics(tfPass.getFont()).stringWidth(pass) + 10 > tfPass.getWidth()) {
                     tfPass.setFont(tfPass.getFont().deriveFont((float) tfPass.getFont().getSize() - 1));
                 }

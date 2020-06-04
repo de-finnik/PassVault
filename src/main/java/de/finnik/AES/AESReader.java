@@ -1,6 +1,8 @@
 package de.finnik.AES;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.Reader;
 
 public class AESReader extends BufferedReader {
     private AES aes;
@@ -12,7 +14,7 @@ public class AESReader extends BufferedReader {
 
 
     @Override
-    public String readLine() throws IOException, IllegalArgumentException {
+    public String readLine() throws IOException, AES.WrongPasswordException {
         return convertFromUnicode(aes.decrypt(super.readLine()));
     }
 

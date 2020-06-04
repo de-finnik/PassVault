@@ -2,9 +2,12 @@ package de.finnik.gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.util.function.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 
 
 /**
@@ -39,10 +42,11 @@ public class PassDialog {
 
     /**
      * Displays a message dialog which displays a simple message
-     * @param owner The window that owns the dialog
+     *
+     * @param owner   The window that owns the dialog
      * @param message The message which the user should see
      */
-    void message(Window owner, String message) {
+    public void message(Window owner, String message) {
         Toolkit.getDefaultToolkit().beep();
 
         JDialog dialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);

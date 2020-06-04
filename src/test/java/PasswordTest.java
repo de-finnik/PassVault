@@ -1,8 +1,11 @@
-import de.finnik.passvault.*;
-import org.junit.*;
+import de.finnik.passvault.Password;
+import de.finnik.passvault.PasswordGenerator;
+import org.junit.Test;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -17,7 +20,7 @@ public class PasswordTest {
 
         File temp = File.createTempFile("passvault","bin");
 
-        String pass = PasswordGenerator.generatePassword(new PasswordGenerator.PassChars[]{PasswordGenerator.PassChars.BIG_LETTERS}, (int) (Math.random() * 30) + 1);
+        String pass = PasswordGenerator.generatePassword((int) (Math.random() * 30) + 1, PasswordGenerator.PassChars.BIG_LETTERS);
 
         Password.savePasswords(passwords, temp,pass);
         assertEquals(passwords, Password.readPasswords(temp, pass));
