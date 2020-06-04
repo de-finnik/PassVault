@@ -102,7 +102,14 @@ public class Utils {
         return font.deriveFont(size);
     }
 
-    public static class PassBrowser {
+    public static class Browser {
+        /**
+         * Allows you to open a given URL in the users default browser cross-platform
+         *
+         * @param url The URL to open
+         * @throws URISyntaxException Wrong formatted URL
+         * @throws IOException        Not able to open URL
+         */
         public static void browse(String url) throws URISyntaxException, IOException {
             String os = System.getProperty("os.name").toLowerCase();
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
