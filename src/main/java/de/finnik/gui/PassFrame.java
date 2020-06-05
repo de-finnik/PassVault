@@ -278,7 +278,7 @@ public class PassFrame extends JFrame {
         Window[] toHide = {this, (Window) COMPONENTS.get("savePass"), (Window) COMPONENTS.get("settings")};
         for (Window window : toHide) {
             if (window != null)
-                window.setOpacity(0.0F);
+                window.setVisible(false);
         }
 
         DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), string -> {
@@ -289,7 +289,7 @@ public class PassFrame extends JFrame {
             INACTIVITY_LISTENER.start();
             for (Window window : toHide) {
                 if (window != null)
-                    window.setOpacity(1.0F);
+                    window.setVisible(true);
             }
         }, true);
     }

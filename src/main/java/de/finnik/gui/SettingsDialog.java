@@ -306,6 +306,12 @@ public class SettingsDialog extends JDialog {
         checkBoxShowMainPass.setFont(raleway(13));
         add(checkBoxShowMainPass, "settings.check.showMainPass");
 
+        JCheckBox checkBoxRealRandom = new JCheckBox();
+        checkBoxRealRandom.setSelected(Boolean.parseBoolean(PassProperty.REAL_RANDOM.getValue()));
+        checkBoxRealRandom.addActionListener(action -> PassProperty.REAL_RANDOM.setValue(checkBoxRealRandom.isSelected()));
+        checkBoxRealRandom.setFont(raleway(13));
+        add(checkBoxRealRandom, "settings.check.realRandom");
+
         JButton btnDrivePassword = new JButton();
         btnDrivePassword.addActionListener(action -> {
             if (!btnDrivePassword.getText().equals(LANG.getProperty("settings.btn.drivePassword"))) {

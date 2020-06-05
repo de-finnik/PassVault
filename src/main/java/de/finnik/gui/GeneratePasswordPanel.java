@@ -1,5 +1,6 @@
 package de.finnik.gui;
 
+import de.finnik.AES.RealRandom;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.PassUtils;
 import de.finnik.passvault.PasswordGenerator;
@@ -111,13 +112,12 @@ public class GeneratePasswordPanel extends JPanel {
                 chars.add(PasswordGenerator.PassChars.SPECIAL_CHARACTERS);
             }
             if (chars.size() > 0) {
-                tfPass.setFont(raleway(20));
-                String pass = PasswordGenerator.generatePassword(sliderLength.getValue(), chars.toArray(new PasswordGenerator.PassChars[0]));
-                while (getFontMetrics(tfPass.getFont()).stringWidth(pass) + 10 > tfPass.getWidth()) {
-                    tfPass.setFont(tfPass.getFont().deriveFont((float) tfPass.getFont().getSize() - 1));
+                if (Boolean.parseBoolean(PassProperty.REAL_RANDOM.getValue())) {
+                    new RealRandom().seedWithUserInput(LANG.getProperty("generate.jop.realRandom")
+                            , seed -> generate(seed, chars));
+                } else {
+                    generate(-1, chars);
                 }
-                tfPass.setText(pass);
-                LOG.info("Generated password with length: {} and chars {}! ", sliderLength.getValue(), chars);
             } else {
                 DIALOG.message(FRAME, LANG.getProperty("generate.jop.insufficientChars"));
             }
@@ -149,5 +149,19 @@ public class GeneratePasswordPanel extends JPanel {
     private void add(Component c, String key) {
         COMPONENTS.put(key, c);
         add(c);
+    }
+
+    private void generate(long seed, List<PasswordGenerator.PassChars> chars) {
+        JTextField tfPass = (JTextField) COMPONENTS.get("generate.tf.pass");
+        JSlider sliderLength = (JSlider) COMPONENTS.get("generate.slider.length");
+
+        tfPass.setFont(raleway(20));
+        PasswordGenerator generator = seed >= 0 ? new PasswordGenerator(seed) : new PasswordGenerator();
+        String pass = generator.generatePassword(sliderLength.getValue(), chars.toArray(new PasswordGenerator.PassChars[0]));
+        while (getFontMetrics(tfPass.getFont()).stringWidth(pass) + 10 > tfPass.getWidth()) {
+            tfPass.setFont(tfPass.getFont().deriveFont((float) tfPass.getFont().getSize() - 1));
+        }
+        tfPass.setText(pass);
+        LOG.info("Generated password with length: {} and chars {}! ", sliderLength.getValue(), chars);
     }
 }
