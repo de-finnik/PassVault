@@ -15,7 +15,7 @@ import static de.finnik.gui.Var.PASSWORDS;
  * The properties of the application
  */
 public enum PassProperty {
-    LANG, INACTIVITY_LOCK, INACTIVITY_TIME, DRIVE_PASSWORD, SHOW_PASSWORDS_DOTTED, SHOW_MAIN_PASSWORD, GEN_LENGTH, GEN_BIG, GEN_SMALL, GEN_NUM, GEN_SPE, REAL_RANDOM;
+    LANG, INACTIVITY_LOCK, INACTIVITY_TIME, DRIVE_PASSWORD, SHOW_PASSWORDS_DOTTED, SHOW_MAIN_PASSWORD, GEN_LOW_LENGTH, GEN_UP_LENGTH, GEN_BIG, GEN_SMALL, GEN_NUM, GEN_SPE, REAL_RANDOM;
 
     /**
      * The file where the properties are saved
@@ -108,8 +108,10 @@ public enum PassProperty {
                 return "true";
             case REAL_RANDOM:
                 return "false";
-            case GEN_LENGTH:
+            case GEN_LOW_LENGTH:
                 return "12";
+            case GEN_UP_LENGTH:
+                return "18";
             case INACTIVITY_TIME:
                 return "30";
             case DRIVE_PASSWORD:
@@ -137,7 +139,8 @@ public enum PassProperty {
             case GEN_SPE:
             case REAL_RANDOM:
                 return value.equals("true") || value.equals("false");
-            case GEN_LENGTH:
+            case GEN_LOW_LENGTH:
+            case GEN_UP_LENGTH:
                 int z = Integer.parseInt(value);
                 return z >= 5 && z <= 30;
             case INACTIVITY_TIME:

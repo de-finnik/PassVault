@@ -122,7 +122,7 @@ public class PassDrive {
                 LOG.info("Successfully synchronized with Google Drive!");
                 Files.delete(temp.toPath());
             } else {
-                String drivePass = new PasswordGenerator().generatePassword(12, PasswordGenerator.PassChars.BIG_LETTERS, PasswordGenerator.PassChars.SMALL_LETTERS, PasswordGenerator.PassChars.NUMBERS);
+                String drivePass = new PasswordGenerator().generatePassword(12, 18, PasswordGenerator.PassChars.BIG_LETTERS, PasswordGenerator.PassChars.SMALL_LETTERS, PasswordGenerator.PassChars.NUMBERS, PasswordGenerator.PassChars.SPECIAL_CHARACTERS);
 
                 java.io.File temp = java.io.File.createTempFile("pass", "vault");
                 temp.deleteOnExit();

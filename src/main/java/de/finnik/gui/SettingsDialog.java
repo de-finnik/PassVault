@@ -16,10 +16,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.finnik.gui.Var.*;
@@ -315,6 +313,8 @@ public class SettingsDialog extends JDialog {
         JButton btnDrivePassword = new JButton();
         btnDrivePassword.addActionListener(action -> {
             if (!btnDrivePassword.getText().equals(LANG.getProperty("settings.btn.drivePassword"))) {
+                String[] availableFonts = Arrays.stream(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts()).map(Font::getName).toArray(String[]::new);
+                btnDrivePassword.setFont(new Font(availableFonts[new Random().nextInt(availableFonts.length)], Font.PLAIN, 15));
                 return;
             }
             DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), pass -> {
@@ -335,6 +335,7 @@ public class SettingsDialog extends JDialog {
         });
         btnDrivePassword.setForeground(FOREGROUND);
         btnDrivePassword.setBackground(BACKGROUND);
+        btnDrivePassword.setFont(raleway(15));
         if (PassProperty.DRIVE_PASSWORD.getValue().length() > 0)
             add(btnDrivePassword, "settings.btn.drivePassword");
     }

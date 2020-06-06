@@ -19,6 +19,19 @@ public class PasswordGenerator {
     }
 
     /**
+     * Generates a password by assembling chars at random indexes of a given {@link String} until the password length equals to the a random length between the two given values.
+     *
+     * @param chars     The chars to use for the random password assembled to a string
+     * @param lowLength The minimum length of the output password
+     * @param upLength  The maximum length of the output password
+     * @return The generated password
+     */
+    public String generatePassword(int lowLength, int upLength, PassChars... chars) {
+        int length = random.nextInt(Math.max(lowLength, upLength) - Math.min(lowLength, upLength)) + Math.min(lowLength, upLength);
+        return generatePassword(length, chars);
+    }
+
+    /**
      * Generates a password by assembling chars at random indexes of a given {@link String} until the password length equals to the given length.
      *
      * @param chars  The chars to use for the random password assembled to a string
@@ -26,8 +39,10 @@ public class PasswordGenerator {
      * @return The generated password
      */
     public String generatePassword(int length, PassChars... chars) {
+        List<String> allChars = Arrays.asList(Arrays.stream(chars).map(PassChars::get).collect(Collectors.joining()).split(""));
+        Collections.shuffle(allChars);
         List<Character> password = new ArrayList<>();
-        String all = Arrays.stream(chars).map(PassChars::get).collect(Collectors.joining());
+        String all = String.join("", allChars);
         for (int i = 0; i < length; i++) {
             password.add(randomChar(all));
         }

@@ -1,6 +1,7 @@
 package de.finnik.gui;
 
 import de.finnik.AES.RealRandom;
+import de.finnik.gui.slider.RangeSlider;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.PassUtils;
 import de.finnik.passvault.PasswordGenerator;
@@ -57,14 +58,16 @@ public class GeneratePasswordPanel extends JPanel {
         lblHeadline.setBounds(0, 0, 300, 30);
         add(lblHeadline, "generate.lbl.headline");
 
-        JSlider sliderLength = new JSlider(5, 30, Integer.parseInt(PassProperty.GEN_LENGTH.getValue()));
+        RangeSlider sliderLength = new RangeSlider(5, 30, Integer.parseInt(PassProperty.GEN_LOW_LENGTH.getValue()), Integer.parseInt(PassProperty.GEN_UP_LENGTH.getValue()));
         sliderLength.setMajorTickSpacing(5);
         sliderLength.setMinorTickSpacing(1);
         sliderLength.setPaintTicks(true);
         sliderLength.setPaintLabels(true);
-        sliderLength.setPaintTrack(false);
         sliderLength.setBounds(0, 40, 300, 50);
-        sliderLength.addChangeListener(e -> PassProperty.GEN_LENGTH.setValue(sliderLength.getValue()));
+        sliderLength.addChangeListener(e -> {
+            PassProperty.GEN_LOW_LENGTH.setValue(sliderLength.getValue());
+            PassProperty.GEN_UP_LENGTH.setValue(sliderLength.getUpperValue());
+        });
         add(sliderLength, "generate.slider.length");
 
         UIManager.put("CheckBox.focus", BACKGROUND);
@@ -153,11 +156,11 @@ public class GeneratePasswordPanel extends JPanel {
 
     private void generate(long seed, List<PasswordGenerator.PassChars> chars) {
         JTextField tfPass = (JTextField) COMPONENTS.get("generate.tf.pass");
-        JSlider sliderLength = (JSlider) COMPONENTS.get("generate.slider.length");
+        RangeSlider sliderLength = (RangeSlider) COMPONENTS.get("generate.slider.length");
 
         tfPass.setFont(raleway(20));
         PasswordGenerator generator = seed >= 0 ? new PasswordGenerator(seed) : new PasswordGenerator();
-        String pass = generator.generatePassword(sliderLength.getValue(), chars.toArray(new PasswordGenerator.PassChars[0]));
+        String pass = generator.generatePassword(sliderLength.getValue(), sliderLength.getUpperValue(), chars.toArray(new PasswordGenerator.PassChars[0]));
         while (getFontMetrics(tfPass.getFont()).stringWidth(pass) + 10 > tfPass.getWidth()) {
             tfPass.setFont(tfPass.getFont().deriveFont((float) tfPass.getFont().getSize() - 1));
         }
