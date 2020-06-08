@@ -1,15 +1,36 @@
 package de.finnik.passvault;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Generates a password out of a given length and given characters
  */
 public class PasswordGenerator {
+
+    Random random;
+
+    public PasswordGenerator() {
+        random = new Random();
+    }
+
+    public PasswordGenerator(long seed) {
+        random = new Random(seed);
+    }
+
+    /**
+     * Generates a password by assembling chars at random indexes of a given {@link String} until the password length equals to the a random length between the two given values.
+     *
+     * @param chars     The chars to use for the random password assembled to a string
+     * @param lowLength The minimum length of the output password
+     * @param upLength  The maximum length of the output password
+     * @return The generated password
+     */
+    public String generatePassword(int lowLength, int upLength, PassChars... chars) {
+        int length = random.nextInt(Math.max(lowLength, upLength) - Math.min(lowLength, upLength)) + Math.min(lowLength, upLength);
+        return generatePassword(length, chars);
+    }
+
     /**
      * Generates a password by assembling chars at random indexes of a given {@link String} until the password length equals to the given length.
      *
@@ -17,9 +38,11 @@ public class PasswordGenerator {
      * @param length The length of the output password
      * @return The generated password
      */
-    public static String generatePassword(int length, PassChars... chars) {
+    public String generatePassword(int length, PassChars... chars) {
+        List<String> allChars = Arrays.asList(Arrays.stream(chars).map(PassChars::get).collect(Collectors.joining()).split(""));
+        Collections.shuffle(allChars);
         List<Character> password = new ArrayList<>();
-        String all = Arrays.stream(chars).map(PassChars::get).collect(Collectors.joining());
+        String all = String.join("", allChars);
         for (int i = 0; i < length; i++) {
             password.add(randomChar(all));
         }
@@ -33,8 +56,8 @@ public class PasswordGenerator {
         return password.stream().map(String::valueOf).collect(Collectors.joining());
     }
 
-    private static char randomChar(String chars) {
-        return chars.charAt((int) (Math.random() * chars.length()));
+    private char randomChar(String chars) {
+        return chars.charAt(random.nextInt(chars.length()));
     }
 
     /**

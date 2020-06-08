@@ -35,8 +35,6 @@ import static de.finnik.passvault.Utils.sizeFont;
 public class PassVault {
 
     public static void main(String[] args) {
-        System.out.println(PasswordGenerator.PassChars.SPECIAL_CHARACTERS.get());
-        Locale.setDefault(new Locale("en"));
         LOG = LoggerFactory.getLogger(args.length == 0 ? "APPLICATION" : "API");
 
         LOG.info("Welcome to PassVault, we're happy to see you!");

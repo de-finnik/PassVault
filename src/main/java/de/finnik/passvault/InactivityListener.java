@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class InactivityListener {
     private int inactivity;
-    private Inactivity toDo;
+    private final Inactivity toDo;
 
     private long time;
 

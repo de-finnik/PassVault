@@ -20,7 +20,7 @@ public class PasswordTest {
 
         File temp = File.createTempFile("passvault","bin");
 
-        String pass = PasswordGenerator.generatePassword((int) (Math.random() * 30) + 1, PasswordGenerator.PassChars.BIG_LETTERS);
+        String pass = new PasswordGenerator().generatePassword((int) (Math.random() * 30) + 1, PasswordGenerator.PassChars.BIG_LETTERS);
 
         Password.savePasswords(passwords, temp,pass);
         assertEquals(passwords, Password.readPasswords(temp, pass));

@@ -275,10 +275,10 @@ public class PassFrame extends JFrame {
         if (!Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()) || password.length() == 0)
             return;
 
-        Window[] toHide = {this, (Window) COMPONENTS.get("savePass"), (Window) COMPONENTS.get("settings")};
-        for (Window window : toHide) {
-            if (window != null)
-                window.setOpacity(0.0F);
+        Component[] toHide = {this, COMPONENTS.get("savePass"), COMPONENTS.get("settings")};
+        for (Component component : toHide) {
+            if (component != null)
+                component.setVisible(false);
         }
 
         DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), string -> {
@@ -287,9 +287,9 @@ public class PassFrame extends JFrame {
                 System.exit(0);
             }
             INACTIVITY_LISTENER.start();
-            for (Window window : toHide) {
-                if (window != null)
-                    window.setOpacity(1.0F);
+            for (Component component : toHide) {
+                if (component != null)
+                    component.setVisible(true);
             }
         }, true);
     }
