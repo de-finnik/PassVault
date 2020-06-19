@@ -61,7 +61,7 @@ public class PassDrive {
                     DIALOG.input(FRAME, LANG.getProperty("drive.jop.enterDrivePass"), pass -> {
                         try {
                             Password.readPasswords(DRIVE.files().get(appDataFolder.getFiles().get(0).getId()).executeMediaAsInputStream(), pass);
-                            PassProperty.DRIVE_PASSWORD.setValue(new AES(PassFrame.password).encrypt(pass));
+                            PassProperty.DRIVE_PASSWORD.setValueAndStore(pass, PassFrame.aes);
                             compare();
                         } catch (AES.WrongPasswordException e) {
                             // Lets the user delete drive passwords if password is forgotten
@@ -91,11 +91,11 @@ public class PassDrive {
                 String drivePass;
                 List<Password> drivePasswords;
                 try {
-                    drivePass = new AES(PassFrame.password).decrypt(PassProperty.DRIVE_PASSWORD.getValue());
+                    drivePass = PassProperty.DRIVE_PASSWORD.getValue();
                     drivePasswords = Password.readPasswords(DRIVE.files().get(appDataFolder.getFiles().get(0).getId()).executeMediaAsInputStream(), drivePass);
                 } catch (AES.WrongPasswordException e) {
                     // Stored DRIVE_PASSWORD is incorrect -> Reset it and restart compare function
-                    PassProperty.DRIVE_PASSWORD.setValue("");
+                    PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
                     compare();
                     return;
                 }
@@ -137,7 +137,7 @@ public class PassDrive {
                 LOG.info("Created drive file with file id {}!", newFile.getId());
                 Files.delete(temp.toPath());
 
-                PassProperty.DRIVE_PASSWORD.setValue(new AES(PassFrame.password).encrypt(drivePass));
+                PassProperty.DRIVE_PASSWORD.setValueAndStore(drivePass, PassFrame.aes);
                 DIALOG.message(FRAME, String.format(LANG.getProperty("drive.jop.createdDrivePass"), drivePass));
             }
             ((PassFrame) FRAME).refreshVisibility();

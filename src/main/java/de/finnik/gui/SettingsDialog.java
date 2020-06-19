@@ -69,8 +69,6 @@ public class SettingsDialog extends JDialog {
             if (first != null && !first.equals("")) {
                 DIALOG.input(FRAME, LANG.getProperty("jop.repeatEnteringNewMainPass"), second -> {
                     if (first.equals(second)) {
-                        if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
-                            PassProperty.DRIVE_PASSWORD.setValue(new AES(first).encrypt(new AES(PassFrame.password).decrypt(PassProperty.DRIVE_PASSWORD.getValue())));
                         PassFrame.password = first;
                         LOG.info("Changed main password!");
                         PassFrame.savePasswords();
@@ -107,12 +105,12 @@ public class SettingsDialog extends JDialog {
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
                     if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
                         new PopUp(new PopUp.PopUpItem(LANG.getProperty("settings.pop.disableDrive"), action -> {
-                            PassProperty.DRIVE_PASSWORD.setValue("");
+                            PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
                             new File("StoredCredential").delete();
                             ((PassFrame) FRAME).refreshVisibility();
                             PassDrive.restart();
                         }), new PopUp.PopUpItem(LANG.getProperty("settings.pop.changeDrive"), action -> {
-                            PassProperty.DRIVE_PASSWORD.setValue("");
+                            PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
                             new File("StoredCredential").delete();
                             PassDrive.restart();
                             PassFrame.savePasswords();
@@ -235,7 +233,7 @@ public class SettingsDialog extends JDialog {
             // Change language
             locales.stream()
                     .filter(locale -> locale.getDisplayLanguage().equals(comboBoxLanguage.getSelectedItem()))
-                    .forEach(locale -> PassProperty.LANG.setValue(locale.getLanguage()));
+                    .forEach(locale -> PassProperty.LANG.setValueAndStore(locale.getLanguage(), PassFrame.aes));
             LANG = loadLang();
             textComponents();
             adjustSizeAndCenter();
@@ -252,7 +250,7 @@ public class SettingsDialog extends JDialog {
         JCheckBox checkBoxInactivityLock = new JCheckBox();
         checkBoxInactivityLock.setSelected(Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()));
         checkBoxInactivityLock.addActionListener(action -> {
-            PassProperty.INACTIVITY_LOCK.setValue(checkBoxInactivityLock.isSelected());
+            PassProperty.INACTIVITY_LOCK.setValueAndStore(checkBoxInactivityLock.isSelected(), PassFrame.aes);
             INACTIVITY_LISTENER.start();
         });
         checkBoxInactivityLock.setFont(raleway(13));
@@ -275,7 +273,7 @@ public class SettingsDialog extends JDialog {
             }
         });
         spinnerInactivityTime.addChangeListener(e -> {
-            if (!PassProperty.INACTIVITY_TIME.setValue(spinnerInactivityTime.getValue())) {
+            if (!PassProperty.INACTIVITY_TIME.setValueAndStore(spinnerInactivityTime.getValue(), PassFrame.aes)) {
                 DIALOG.message(FRAME, String.format(LANG.getProperty("settings.jop.noValidInactivityTime"), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMinimum(), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMaximum()));
             } else {
                 INACTIVITY_LISTENER.setInactivity(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()));
@@ -292,7 +290,7 @@ public class SettingsDialog extends JDialog {
         JCheckBox checkBoxDottedPasswords = new JCheckBox();
         checkBoxDottedPasswords.setSelected(Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue()));
         checkBoxDottedPasswords.addActionListener(action -> {
-            PassProperty.SHOW_PASSWORDS_DOTTED.setValue(checkBoxDottedPasswords.isSelected());
+            PassProperty.SHOW_PASSWORDS_DOTTED.setValueAndStore(checkBoxDottedPasswords.isSelected(), PassFrame.aes);
             ((PassFrame) FRAME).passBankPanel.updateTableModel();
         });
         checkBoxDottedPasswords.setFont(raleway(13));
@@ -300,13 +298,13 @@ public class SettingsDialog extends JDialog {
 
         JCheckBox checkBoxShowMainPass = new JCheckBox();
         checkBoxShowMainPass.setSelected(Boolean.parseBoolean(PassProperty.SHOW_MAIN_PASSWORD.getValue()));
-        checkBoxShowMainPass.addActionListener(action -> PassProperty.SHOW_MAIN_PASSWORD.setValue(checkBoxShowMainPass.isSelected()));
+        checkBoxShowMainPass.addActionListener(action -> PassProperty.SHOW_MAIN_PASSWORD.setValueAndStore(checkBoxShowMainPass.isSelected(), PassFrame.aes));
         checkBoxShowMainPass.setFont(raleway(13));
         add(checkBoxShowMainPass, "settings.check.showMainPass");
 
         JCheckBox checkBoxRealRandom = new JCheckBox();
         checkBoxRealRandom.setSelected(Boolean.parseBoolean(PassProperty.REAL_RANDOM.getValue()));
-        checkBoxRealRandom.addActionListener(action -> PassProperty.REAL_RANDOM.setValue(checkBoxRealRandom.isSelected()));
+        checkBoxRealRandom.addActionListener(action -> PassProperty.REAL_RANDOM.setValueAndStore(checkBoxRealRandom.isSelected(), PassFrame.aes));
         checkBoxRealRandom.setFont(raleway(13));
         add(checkBoxRealRandom, "settings.check.realRandom");
 
@@ -322,11 +320,11 @@ public class SettingsDialog extends JDialog {
                     return;
                 }
                 try {
-                    String drivePass = new AES(pass).decrypt(PassProperty.DRIVE_PASSWORD.getValue());
+                    String drivePass = PassProperty.DRIVE_PASSWORD.getValue();
                     btnDrivePassword.setText(drivePass);
                 } catch (AES.WrongPasswordException e) {
                     if (pass.equals(PassFrame.password)) {
-                        PassProperty.DRIVE_PASSWORD.setValue("");
+                        PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
                     } else {
                         DIALOG.message(FRAME, LANG.getProperty("jop.wrongPass"));
                     }

@@ -31,6 +31,7 @@ public class PassFrame extends JFrame {
      * The main password
      */
     public static String password;
+    public static AES aes;
     /**
      * The list of saved passwords
      */
@@ -47,6 +48,7 @@ public class PassFrame extends JFrame {
      */
     PassFrame(String password, List<Password> passwordList) {
         PassFrame.password = password;
+        PassFrame.aes = new AES(password);
         PassFrame.passwordList = new ArrayList<>(passwordList);
 
         setContentPane(new JPanel());

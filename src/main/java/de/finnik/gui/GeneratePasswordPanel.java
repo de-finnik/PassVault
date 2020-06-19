@@ -65,8 +65,8 @@ public class GeneratePasswordPanel extends JPanel {
         sliderLength.setPaintLabels(true);
         sliderLength.setBounds(0, 40, 300, 50);
         sliderLength.addChangeListener(e -> {
-            PassProperty.GEN_LOW_LENGTH.setValue(sliderLength.getValue());
-            PassProperty.GEN_UP_LENGTH.setValue(sliderLength.getUpperValue());
+            PassProperty.GEN_LOW_LENGTH.setValueAndStore(sliderLength.getValue(), PassFrame.aes);
+            PassProperty.GEN_UP_LENGTH.setValueAndStore(sliderLength.getUpperValue(), PassFrame.aes);
         });
         add(sliderLength, "generate.slider.length");
 
@@ -75,25 +75,25 @@ public class GeneratePasswordPanel extends JPanel {
         JCheckBox checkBoxBigLetters = new JCheckBox();
         checkBoxBigLetters.setSelected(Boolean.parseBoolean(PassProperty.GEN_BIG.getValue()));
         checkBoxBigLetters.setBounds(0, 100, 300, 30);
-        checkBoxBigLetters.addActionListener(e -> PassProperty.GEN_BIG.setValue(checkBoxBigLetters.isSelected()));
+        checkBoxBigLetters.addActionListener(e -> PassProperty.GEN_BIG.setValueAndStore(checkBoxBigLetters.isSelected(), PassFrame.aes));
         add(checkBoxBigLetters, "generate.checkBox.bigLetters");
 
         JCheckBox checkBoxSmallLetters = new JCheckBox();
         checkBoxSmallLetters.setSelected(Boolean.parseBoolean(PassProperty.GEN_SMALL.getValue()));
         checkBoxSmallLetters.setBounds(0, 130, 300, 30);
-        checkBoxSmallLetters.addActionListener(e -> PassProperty.GEN_SMALL.setValue(checkBoxSmallLetters.isSelected()));
+        checkBoxSmallLetters.addActionListener(e -> PassProperty.GEN_SMALL.setValueAndStore(checkBoxSmallLetters.isSelected(), PassFrame.aes));
         add(checkBoxSmallLetters, "generate.checkBox.smallLetters");
 
         JCheckBox checkBoxNumbers = new JCheckBox();
         checkBoxNumbers.setSelected(Boolean.parseBoolean(PassProperty.GEN_NUM.getValue()));
         checkBoxNumbers.setBounds(0, 160, 300, 30);
-        checkBoxNumbers.addActionListener(e -> PassProperty.GEN_NUM.setValue(checkBoxNumbers.isSelected()));
+        checkBoxNumbers.addActionListener(e -> PassProperty.GEN_NUM.setValueAndStore(checkBoxNumbers.isSelected(), PassFrame.aes));
         add(checkBoxNumbers, "generate.checkBox.numbers");
 
         JCheckBox checkBoxSpecialCharacters = new JCheckBox();
         checkBoxSpecialCharacters.setSelected(Boolean.parseBoolean(PassProperty.GEN_SPE.getValue()));
         checkBoxSpecialCharacters.setBounds(0, 190, 300, 30);
-        checkBoxSpecialCharacters.addActionListener(e -> PassProperty.GEN_SPE.setValue(checkBoxSpecialCharacters.isSelected()));
+        checkBoxSpecialCharacters.addActionListener(e -> PassProperty.GEN_SPE.setValueAndStore(checkBoxSpecialCharacters.isSelected(), PassFrame.aes));
         add(checkBoxSpecialCharacters, "generate.checkBox.specials");
 
         JTextField tfPass = new JTextField();

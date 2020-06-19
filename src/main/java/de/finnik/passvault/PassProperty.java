@@ -1,12 +1,9 @@
 package de.finnik.passvault;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Properties;
+import de.finnik.AES.AES;
+
+import java.io.*;
+import java.util.*;
 
 import static de.finnik.gui.Var.LOG;
 import static de.finnik.gui.Var.PASSWORDS;
@@ -30,27 +27,51 @@ public enum PassProperty {
     /**
      * Loads the properties from {@link PassProperty#PROPERTIES}
      */
-    public static void load() {
-        Properties properties = new Properties();
-        try {
-            properties.load(new FileReader(PROPERTIES));
-        } catch (IOException e) {
-            LOG.error("Error while loading config.properties!", e);
-        }
+    public static void load(AES aes) {
+        Map<String, String> values = new HashMap<>();
+        Arrays.stream(PassProperty.values()).forEach(prop -> values.put(prop.name(), prop.getDefault()));
+        try (BufferedReader br = new BufferedReader(new FileReader(PROPERTIES))) {
+            br.lines().filter(line -> !line.startsWith("#")).forEach(line -> {
+                String[] split = line.split("#");
+                if (split.length < 2) {
+                    split = line.split("=");
+                }
+                String val = null;
+                try {
+                    if (aes != null)
+                        val = aes.decrypt(split[1]);
+                } catch (AES.WrongPasswordException ignore) {
 
+                }
+                if (val == null)
+                    val = split[1];
+                if (values.containsKey(split[0])) {
+                    // No encrypted key
+                    values.put(split[0], val);
+                } else if (aes != null && values.containsKey(aes.decrypt(split[0]))) {
+                    // Encrypted key
+                    values.put(aes.decrypt(split[0]), val);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for (PassProperty property : PassProperty.values()) {
-            property.setValue(properties.getProperty(property.name(), property.getDefault()));
+            property.setValue(values.get(property.name()));
         }
     }
 
     /**
      * Stores the properties to {@link PassProperty#PROPERTIES}
      */
-    public static void store() {
-        Properties properties = new Properties();
-        Arrays.stream(PassProperty.values()).forEach(prop -> properties.setProperty(prop.name(), String.valueOf(prop.getValue())));
-        try {
-            properties.store(new FileWriter(PROPERTIES), "PassVault Settings");
+    public static void store(AES aes) {
+        List<PassProperty> props = Arrays.asList(PassProperty.values());
+        Collections.shuffle(props);
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(PROPERTIES))) {
+            for (PassProperty property : props) {
+                bw.write((property.encrypt() ? aes.encrypt(property.name()) : property.name()) + "#" + (property.encrypt() ? aes.encrypt(property.getValue()) : property.getValue()));
+                bw.newLine();
+            }
         } catch (IOException e) {
             LOG.error("Error while saving config.properties!", e);
         }
@@ -72,19 +93,20 @@ public enum PassProperty {
      * @param value The value to be assigned to the property
      * @return Whether the input was valid or not
      */
+    public boolean setValueAndStore(Object value, AES aes) {
+        boolean matches = setValue(value);
+        store(aes);
+        return matches;
+    }
+
     public boolean setValue(Object value) {
         String s = String.valueOf(value);
         if (matches(s)) {
-            if (this.value == null) {
-                LOG.info("Loaded property {}: {}!", this.name(), s);
-            } else {
-                LOG.info("Set property {} to {}!", this.name(), s);
-            }
             this.value = s;
         } else if (this.value == null) {
             this.value = getDefault();
         }
-        store();
+        LOG.info("Set property {} to {}!", this.name(), this.value);
         return matches(s);
     }
 
@@ -127,32 +149,40 @@ public enum PassProperty {
      * @return Valid or not
      */
     private boolean matches(String value) {
-        switch (this) {
-            case LANG:
-                return PassUtils.FileUtils.availableLanguages().contains(value);
-            case INACTIVITY_LOCK:
-            case SHOW_PASSWORDS_DOTTED:
-            case SHOW_MAIN_PASSWORD:
-            case GEN_BIG:
-            case GEN_SMALL:
-            case GEN_NUM:
-            case GEN_SPE:
-            case REAL_RANDOM:
-                return value.equals("true") || value.equals("false");
-            case GEN_LOW_LENGTH:
-            case GEN_UP_LENGTH:
-                int z = Integer.parseInt(value);
-                return z >= 5 && z <= 30;
-            case INACTIVITY_TIME:
-                try {
-                    int i = Integer.parseInt(value);
-                    return i >= 10 && i <= 3600;
-                } catch (NumberFormatException ignored) {
-                }
-            case DRIVE_PASSWORD:
-                return value != null;
-            default:
-                return false;
+        try {
+            switch (this) {
+                case LANG:
+                    return PassUtils.FileUtils.availableLanguages().contains(value);
+                case INACTIVITY_LOCK:
+                case SHOW_PASSWORDS_DOTTED:
+                case SHOW_MAIN_PASSWORD:
+                case GEN_BIG:
+                case GEN_SMALL:
+                case GEN_NUM:
+                case GEN_SPE:
+                case REAL_RANDOM:
+                    return value.equals("true") || value.equals("false");
+                case GEN_LOW_LENGTH:
+                case GEN_UP_LENGTH:
+                    int z = Integer.parseInt(value);
+                    return z >= 5 && z <= 30;
+                case INACTIVITY_TIME:
+                    try {
+                        int i = Integer.parseInt(value);
+                        return i >= 10 && i <= 3600;
+                    } catch (NumberFormatException ignored) {
+                    }
+                case DRIVE_PASSWORD:
+                    return value != null;
+                default:
+                    return false;
+            }
+        } catch (Exception e) {
+            return false;
         }
+    }
+
+    private boolean encrypt() {
+        return this != PassProperty.LANG;
     }
 }

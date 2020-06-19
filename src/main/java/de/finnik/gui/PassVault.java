@@ -89,7 +89,7 @@ public class PassVault {
             LOG.error("Error while creating config.properties");
         }
 
-        PassProperty.load();
+        PassProperty.load(null);
 
         LANG = loadLang();
 
@@ -130,8 +130,6 @@ public class PassVault {
         init();
 
         EventQueue.invokeLater(() -> {
-            INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
-
             UIManager.put("ToolTip.background", FOREGROUND);
             UIManager.put("ToolTip.foreground", BACKGROUND);
             UIManager.put("ToolTip.border", BorderFactory.createEmptyBorder(2, 2, 2, 2));
@@ -144,6 +142,8 @@ public class PassVault {
                 String file = br.readLine();
                 if (file != null) {
                     FRAME = new CheckFrame((pass, passList) -> {
+                        PassProperty.load(new AES(pass));
+                        INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
                         FRAME = new PassFrame(pass, passList);
                         FRAME.setVisible(true);
                     });
