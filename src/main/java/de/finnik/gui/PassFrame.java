@@ -283,17 +283,16 @@ public class PassFrame extends JFrame {
                 component.setVisible(false);
         }
 
-        DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), string -> {
-            if (!string.equals(password)) {
-                LOG.info("User tried to log in with wrong password!");
-                System.exit(0);
-            }
-            INACTIVITY_LISTENER.start();
-            for (Component component : toHide) {
-                if (component != null)
-                    component.setVisible(true);
-            }
-        }, true);
+        String pass = DIALOG.input(LANG.getProperty("check.lbl.pass"), true);
+        if (!pass.equals(password)) {
+            LOG.info("User tried to log in with wrong password!");
+            System.exit(0);
+        }
+        INACTIVITY_LISTENER.start();
+        for (Component component : toHide) {
+            if (component != null)
+                component.setVisible(true);
+        }
     }
 
     public void refreshVisibility() {
@@ -307,18 +306,17 @@ public class PassFrame extends JFrame {
      */
     private void importBackup(File file) {
         if (file.getName().endsWith(".bin")) {
-            DIALOG.input(FRAME, LANG.getProperty("passFrame.jop.enterPass"), pass -> {
-                try {
-                    PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> PassFrame.passwordList.stream().noneMatch(p1 -> p1.id().equals(p.id()))).collect(Collectors.toList()));
-                    LOG.info("Imported passwords from {}!", file.getAbsolutePath());
-                    savePasswords();
-                } catch (AES.WrongPasswordException e) {
-                    if (pass.length() > 0)
-                        DIALOG.message(FRAME, LANG.getProperty("jop.wrongPass"));
-                }
-            }, true);
+            String pass = DIALOG.input(LANG.getProperty("passFrame.jop.enterPass"), true);
+            try {
+                PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> PassFrame.passwordList.stream().noneMatch(p1 -> p1.id().equals(p.id()))).collect(Collectors.toList()));
+                LOG.info("Imported passwords from {}!", file.getAbsolutePath());
+                savePasswords();
+            } catch (AES.WrongPasswordException e) {
+                if (pass.length() > 0)
+                    DIALOG.message(LANG.getProperty("jop.wrongPass"));
+            }
         } else {
-            DIALOG.message(FRAME, LANG.getProperty("passFrame.jop.noSupportedFile"));
+            DIALOG.message(LANG.getProperty("passFrame.jop.noSupportedFile"));
         }
     }
 }

@@ -122,7 +122,7 @@ public class GeneratePasswordPanel extends JPanel {
                     generate(-1, chars);
                 }
             } else {
-                DIALOG.message(FRAME, LANG.getProperty("generate.jop.insufficientChars"));
+                DIALOG.message(LANG.getProperty("generate.jop.insufficientChars"));
             }
         });
         add(btnGenerate, "generate.btn.generate");

@@ -145,11 +145,13 @@ public class PassVault {
                         PassProperty.load(new AES(pass));
                         INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
                         FRAME = new PassFrame(pass, passList);
+                        DIALOG.OWNER = FRAME;
                         FRAME.setVisible(true);
                     });
                 } else {
                     FRAME = new PassFrame("", new ArrayList<>());
                 }
+                DIALOG.OWNER = FRAME;
                 FRAME.setVisible(true);
             } catch (Exception e) {
                 LOG.error("Error while reading password file!", e);
@@ -277,7 +279,7 @@ public class PassVault {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
                     passwordField.setText("");
-                    DIALOG.message(this, LANG.getProperty("jop.wrongPass"));
+                    DIALOG.message(LANG.getProperty("jop.wrongPass"));
                     return;
                 }
                 LOG.info("User logged in!");

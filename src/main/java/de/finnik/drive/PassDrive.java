@@ -58,33 +58,29 @@ public class PassDrive {
             if (appDataFolder.getFiles().size() > 0) {
                 // Checks whether DRIVE_PASSWORD property is not set
                 if (PassProperty.DRIVE_PASSWORD.getValue().length() == 0) {
-                    DIALOG.input(FRAME, LANG.getProperty("drive.jop.enterDrivePass"), pass -> {
-                        try {
-                            Password.readPasswords(DRIVE.files().get(appDataFolder.getFiles().get(0).getId()).executeMediaAsInputStream(), pass);
-                            PassProperty.DRIVE_PASSWORD.setValueAndStore(pass, PassFrame.aes);
-                            compare();
-                        } catch (AES.WrongPasswordException e) {
-                            // Lets the user delete drive passwords if password is forgotten
-                            DIALOG.confirm(FRAME, LANG.getProperty("drive.jop.wrongDrivePass"), b -> {
-                                if (b) {
-                                    DIALOG.input(FRAME, LANG.getProperty("drive.jop.deleteAllDrivePasswords"), string -> {
-                                        if (string.replace("'", "").equals(LANG.getProperty("drive.jop.deleteAllDrivePasswords").split("'")[1])) {
-                                            appDataFolder.getFiles().forEach(file -> {
-                                                try {
-                                                    DRIVE.files().delete(file.getId()).execute();
-                                                    compare();
-                                                } catch (IOException ioException) {
-                                                    LOG.error("Error while deleting pass file {}", file.getId(), ioException);
-                                                }
-                                            });
-                                        }
-                                    });
-                                }
-                            });
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                    String drivePass = DIALOG.input(LANG.getProperty("drive.jop.enterDrivePass"), true);
+                    try {
+                        Password.readPasswords(DRIVE.files().get(appDataFolder.getFiles().get(0).getId()).executeMediaAsInputStream(), drivePass);
+                        PassProperty.DRIVE_PASSWORD.setValueAndStore(drivePass, PassFrame.aes);
+                        compare();
+                    } catch (AES.WrongPasswordException e) {
+                        // Lets the user delete drive passwords if password is forgotten
+                        if (DIALOG.confirm(LANG.getProperty("drive.jop.wrongDrivePass"))) {
+                            String confirm = DIALOG.input(LANG.getProperty("drive.jop.deleteAllDrivePasswords"));
+                            if (confirm.replace("'", "").equals(LANG.getProperty("drive.jop.deleteAllDrivePasswords").split("'")[1])) {
+                                appDataFolder.getFiles().forEach(file -> {
+                                    try {
+                                        DRIVE.files().delete(file.getId()).execute();
+                                        compare();
+                                    } catch (IOException ioException) {
+                                        LOG.error("Error while deleting pass file {}", file.getId(), ioException);
+                                    }
+                                });
+                            }
                         }
-                    }, true);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return;
                 }
                 LOG.info("Synchronizing...");
@@ -138,7 +134,7 @@ public class PassDrive {
                 Files.delete(temp.toPath());
 
                 PassProperty.DRIVE_PASSWORD.setValueAndStore(drivePass, PassFrame.aes);
-                DIALOG.message(FRAME, String.format(LANG.getProperty("drive.jop.createdDrivePass"), drivePass));
+                DIALOG.message(String.format(LANG.getProperty("drive.jop.createdDrivePass"), drivePass));
             }
             ((PassFrame) FRAME).refreshVisibility();
             INACTIVITY_LISTENER.start();
@@ -158,7 +154,7 @@ public class PassDrive {
             url = new URL("http://www.googleapis.com");
             url.openConnection().connect();
         } catch (UnknownHostException e) {
-            DIALOG.message(FRAME, String.format(LANG.getProperty("drive.jop.noInternet"), url.getHost()));
+            DIALOG.message(String.format(LANG.getProperty("drive.jop.noInternet"), url.getHost()));
             return;
         } catch (IOException ioException) {
             LOG.error("Connection error", ioException);

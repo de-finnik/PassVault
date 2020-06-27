@@ -7,32 +7,33 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.function.Consumer;
 
 
 /**
  * With an instance you can show small dialogs for simple actions
  */
 public class PassDialog {
-    private BufferedImage CLOSE;
-    private BufferedImage[] IMAGES;
-    private Color FOREGROUND, BACKGROUND;
-    private Font FONT;
+    private final BufferedImage CLOSE;
+    private final BufferedImage[] IMAGES;
+    private final Color FOREGROUND, BACKGROUND;
+    private final Font FONT;
+    public Window OWNER;
 
     private final Cursor HAND_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 
     /**
      * Predefines settings that will be used later
+     *
      * @param foreground The foreground of the dialogs
      * @param background The background of the dialogs
-     * @param font The font that will be used for the dialogs
-     * @param close An image which will be displayed by a button that closes the dialog
-     * @param images An array of images that will be used for icons in the dialogs
-     *               (images[0] in {@link PassDialog#message(Window, String)}, images[1] in {@link PassDialog#input(Window, String, Consumer)}
-     *               images[2] in {@link PassDialog#confirm(Window, String, Consumer)}
-     *               and images[3] as the button in {@link PassDialog#confirm(Window, String, Consumer)} with that the user confirms the dialog
+     * @param font       The font that will be used for the dialogs
+     * @param close      An image which will be displayed by a button that closes the dialog
+     * @param images     An array of images that will be used for icons in the dialogs
+     *                   (images[0] in {@link PassDialog#message(String)}, images[1] in {@link PassDialog#input(String)}
+     *                   images[2] in {@link PassDialog#confirm(String)}
+     *                   and images[3] as the button in {@link PassDialog#confirm(String)} with that the user confirms the dialog
      */
-    PassDialog(Color foreground, Color background, Font font, BufferedImage close, BufferedImage... images) {
+    public PassDialog(Color foreground, Color background, Font font, BufferedImage close, BufferedImage... images) {
         this.CLOSE = close;
         this.IMAGES = images;
         this.FOREGROUND = foreground;
@@ -43,13 +44,13 @@ public class PassDialog {
     /**
      * Displays a message dialog which displays a simple message
      *
-     * @param owner   The window that owns the dialog
      * @param message The message which the user should see
      */
-    public void message(Window owner, String message) {
+    public void message(String message) {
         Toolkit.getDefaultToolkit().beep();
 
-        JDialog dialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(OWNER);
+        dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 
         JPanel content = new JPanel();
 
@@ -90,7 +91,9 @@ public class PassDialog {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_ENTER: case KeyEvent.VK_ESCAPE: case KeyEvent.VK_SPACE:
+                    case KeyEvent.VK_ENTER:
+                    case KeyEvent.VK_ESCAPE:
+                    case KeyEvent.VK_SPACE:
                         lblClose.getMouseListeners()[0].mouseClicked(null);
                 }
             }
@@ -108,24 +111,25 @@ public class PassDialog {
 
     /**
      * Displays an input dialog which displays a message and lets the user enter something
-     * @param owner The window that owns the dialog
+     *
      * @param message The message which the user should see
-     * @param toDo A consumer that accepts the string, that the user inputs
      */
-    public void input(Window owner, String message, Consumer<String> toDo) {
-        input(owner, message, toDo, false);
+    public String input(String message) {
+        return input(message, false);
     }
 
     /**
-     * Displays the same input dialog as {@link PassDialog#input(Window, String, Consumer)} but accepts a boolean to let the user input a password
+     * Displays the same input dialog as {@link PassDialog#input(String)} but accepts a boolean to let the user input a password
      *
-     * @param owner   The window that owns the dialog
      * @param message The message which the user should see
-     * @param toDo    A consumer that accepts the string, that the user inputs
      * @param pass    A boolean whether the input is a password
+     * @return The user's input
      */
-    public void input(Window owner, String message, Consumer<String> toDo, boolean pass) {
-        JDialog dialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);
+    public String input(String message, boolean pass) {
+        JDialog dialog = new JDialog(OWNER);
+        dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+
+        String[] result = new String[1];
 
         JPanel content = new JPanel(new FlowLayout());
 
@@ -161,7 +165,7 @@ public class PassDialog {
                 super.addNotify();
                 requestFocus();
             }
-        }:new JTextField() {
+        } : new JTextField() {
             @Override
             public void addNotify() {
                 super.addNotify();
@@ -173,11 +177,10 @@ public class PassDialog {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    result[0] = tfInput.getText();
                     dialog.dispose();
-                    toDo.accept(tfInput.getText());
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    dialog.dispose();
-                    toDo.accept("");
+                    result[0] = "";
                 }
             }
         });
@@ -192,8 +195,8 @@ public class PassDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                result[0] = tfInput.getText();
                 dialog.dispose();
-                toDo.accept(tfInput.getText());
             }
         });
         lblYes.setIcon(new ImageIcon(IMAGES[3]));
@@ -204,8 +207,8 @@ public class PassDialog {
         lblClose.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                result[0] = "";
                 dialog.dispose();
-                toDo.accept("");
             }
         });
         lblClose.setIcon(new ImageIcon(CLOSE));
@@ -217,20 +220,23 @@ public class PassDialog {
         dialog.setSize(content.getLayout().preferredLayoutSize(content));
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
+        return result[0];
     }
 
 
     /**
      * Displays a confirm dialog which displays a question that the user can answer with yes or no
      *
-     * @param owner Th window that owns the dialog
      * @param message The message which the user should see
-     * @param toDo A consumer which accepts a boolean whether the user agreed to the question or not
+     * @return The user's confirmation
      */
-    public void confirm(Window owner, String message, Consumer<Boolean> toDo) {
-        JDialog dialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);
+    public boolean confirm(String message) {
+        JDialog dialog = new JDialog(OWNER);
+        dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
 
         JPanel content = new JPanel();
+
+        boolean[] result = new boolean[1];
 
         dialog.setContentPane(content);
         dialog.setUndecorated(true);
@@ -247,7 +253,7 @@ public class PassDialog {
 
         JLabel lblMessage = new JLabel(message);
         lblMessage.setFont(FONT.deriveFont(13f));
-        lblMessage.setPreferredSize(new Dimension(Math.max(lblMessage.getPreferredSize().width+20, 100), 20));
+        lblMessage.setPreferredSize(new Dimension(Math.max(lblMessage.getPreferredSize().width + 20, 100), 20));
         lblMessage.setForeground(FOREGROUND);
 
         content.add(lblMessage);
@@ -264,20 +270,19 @@ public class PassDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                result[0] = true;
                 dialog.dispose();
-                toDo.accept(true);
             }
         });
         lblYes.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
-                if(e.getKeyCode()==KeyEvent.VK_ENTER) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     dialog.dispose();
-                    toDo.accept(true);
-                } else if(e.getKeyCode()==KeyEvent.VK_ESCAPE){
+                } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    result[0] = false;
                     dialog.dispose();
-                    toDo.accept(false);
                 }
             }
         });
@@ -290,8 +295,8 @@ public class PassDialog {
         lblClose.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                result[0] = false;
                 dialog.dispose();
-                toDo.accept(false);
             }
         });
         lblClose.setIcon(new ImageIcon(CLOSE));
@@ -303,5 +308,6 @@ public class PassDialog {
         dialog.setSize(content.getLayout().preferredLayoutSize(content));
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
+        return result[0];
     }
 }

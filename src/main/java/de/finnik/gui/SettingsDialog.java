@@ -65,19 +65,17 @@ public class SettingsDialog extends JDialog {
      * Lets the user change his main password by entering it two times
      */
     static void changeMainPass() {
-        DIALOG.input(FRAME, LANG.getProperty("jop.enterNewMainPass"), first -> {
-            if (first != null && !first.equals("")) {
-                DIALOG.input(FRAME, LANG.getProperty("jop.repeatEnteringNewMainPass"), second -> {
-                    if (first.equals(second)) {
-                        PassFrame.password = first;
-                        LOG.info("Changed main password!");
-                        PassFrame.savePasswords();
-                    } else {
-                        DIALOG.message(FRAME, LANG.getProperty("jop.wrongPass"));
-                    }
-                }, true);
+        String mainPass = DIALOG.input(LANG.getProperty("jop.enterNewMainPass"), true);
+        if (mainPass != null && !mainPass.isEmpty()) {
+            String validation = DIALOG.input(LANG.getProperty("jop.repeatEnteringNewMainPass"), true);
+            if (mainPass.equals(validation)) {
+                PassFrame.password = mainPass;
+                LOG.info("Changed main password!");
+                PassFrame.savePasswords();
+            } else {
+                DIALOG.message(LANG.getProperty("jop.wrongPass"));
             }
-        }, true);
+        }
     }
 
     private void components() {
@@ -143,7 +141,7 @@ public class SettingsDialog extends JDialog {
                         Password.savePasswords(PassFrame.passwordList, backup, PassFrame.password);
                         LOG.info("Exported password to {}!", jfc.getSelectedFile().getAbsolutePath());
                     } else {
-                        DIALOG.message(FRAME, String.format(LANG.getProperty("jop.fileExistsAlready"), backup.getAbsolutePath()));
+                        DIALOG.message(String.format(LANG.getProperty("jop.fileExistsAlready"), backup.getAbsolutePath()));
                     }
                 }
             }
@@ -206,13 +204,12 @@ public class SettingsDialog extends JDialog {
         btnChangeMainPass.addActionListener(action -> {
             if (!PassFrame.password.equals("")) {
                 // Validates the user via inserting current main pass
-                DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), main -> {
-                    if (main.equals(PassFrame.password)) {
-                        changeMainPass();
-                    } else {
-                        DIALOG.message(this, LANG.getProperty("jop.wrongPass"));
-                    }
-                }, true);
+                String mainPass = DIALOG.input(LANG.getProperty("check.lbl.pass"), true);
+                if (mainPass.equals(PassFrame.password)) {
+                    changeMainPass();
+                } else {
+                    DIALOG.message(LANG.getProperty("jop.wrongPass"));
+                }
             } else {
                 changeMainPass();
             }
@@ -274,7 +271,7 @@ public class SettingsDialog extends JDialog {
         });
         spinnerInactivityTime.addChangeListener(e -> {
             if (!PassProperty.INACTIVITY_TIME.setValueAndStore(spinnerInactivityTime.getValue(), PassFrame.aes)) {
-                DIALOG.message(FRAME, String.format(LANG.getProperty("settings.jop.noValidInactivityTime"), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMinimum(), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMaximum()));
+                DIALOG.message(String.format(LANG.getProperty("settings.jop.noValidInactivityTime"), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMinimum(), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMaximum()));
             } else {
                 INACTIVITY_LISTENER.setInactivity(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()));
             }
@@ -315,21 +312,20 @@ public class SettingsDialog extends JDialog {
                 btnDrivePassword.setFont(new Font(availableFonts[new Random().nextInt(availableFonts.length)], Font.PLAIN, 15));
                 return;
             }
-            DIALOG.input(FRAME, LANG.getProperty("check.lbl.pass"), pass -> {
-                if (PassProperty.DRIVE_PASSWORD.getValue().length() == 0) {
-                    return;
+            // Validates main password
+            if (PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
+                return;
+            }
+            String mainPass = DIALOG.input(LANG.getProperty("check.lbl.pass"), true);
+            try {
+                btnDrivePassword.setText(PassProperty.DRIVE_PASSWORD.getValue());
+            } catch (AES.WrongPasswordException e) {
+                if (mainPass.equals(PassFrame.password)) {
+                    PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
+                } else {
+                    DIALOG.message(LANG.getProperty("jop.wrongPass"));
                 }
-                try {
-                    String drivePass = PassProperty.DRIVE_PASSWORD.getValue();
-                    btnDrivePassword.setText(drivePass);
-                } catch (AES.WrongPasswordException e) {
-                    if (pass.equals(PassFrame.password)) {
-                        PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
-                    } else {
-                        DIALOG.message(FRAME, LANG.getProperty("jop.wrongPass"));
-                    }
-                }
-            }, true);
+            }
         });
         btnDrivePassword.setForeground(FOREGROUND);
         btnDrivePassword.setBackground(BACKGROUND);

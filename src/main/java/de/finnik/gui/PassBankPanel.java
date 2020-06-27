@@ -153,14 +153,12 @@ class PassBankPanel extends JPanel {
                 super.keyReleased(e);
                 // Lets you delete a password via pressing delete
                 if (e.getKeyCode() == KeyEvent.VK_DELETE && tablePassBank.getSelectedRow() >= 0) {
-                    DIALOG.confirm(FRAME, LANG.getProperty("jop.deletePass"), confirm -> {
-                        if (confirm) {
-                            Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
-                            PassUtils.deletePassword(password);
-                            LOG.info(Password.log(password, "Deleted password"));
-                            PassFrame.savePasswords();
-                        }
-                    });
+                    if (DIALOG.confirm(LANG.getProperty("jop.deletePass"))) {
+                        Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
+                        PassUtils.deletePassword(password);
+                        LOG.info(Password.log(password, "Deleted password"));
+                        PassFrame.savePasswords();
+                    }
                 }
             }
         });
@@ -195,7 +193,7 @@ class PassBankPanel extends JPanel {
                     Utils.copyToClipboard(password.getPass());
                     LOG.info(Password.log(password, "Copied password to clipboard"));
                 } catch (IndexOutOfBoundsException ex) {
-                    DIALOG.message(FRAME, LANG.getProperty("passBank.jop.noEntrySelected"));
+                    DIALOG.message(LANG.getProperty("passBank.jop.noEntrySelected"));
                 }
             }
         });
