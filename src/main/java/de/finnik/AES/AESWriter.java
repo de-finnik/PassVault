@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 public class AESWriter extends BufferedWriter {
-    private AES aes;
+    private final AES aes;
 
     public AESWriter(Writer out, AES aes) {
         super(out);

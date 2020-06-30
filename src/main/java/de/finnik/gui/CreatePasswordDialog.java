@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -40,9 +41,9 @@ public class CreatePasswordDialog extends JDialog {
         this.message = message;
         this.images = images;
         this.weak = weak;
-        if (images.getOrDefault("close", null) == null ||
-                images.getOrDefault("hide", null) == null ||
-                images.getOrDefault("show", null) == null) {
+        if (images.getOrDefault("CLOSE", null) == null ||
+                images.getOrDefault("HIDE", null) == null ||
+                images.getOrDefault("SHOW", null) == null) {
             throw new IllegalArgumentException("Missing images in map!");
         }
     }
@@ -102,7 +103,7 @@ public class CreatePasswordDialog extends JDialog {
         components.add(panelToolbar);
 
         JLabel lblClose = new JLabel();
-        lblClose.setIcon(new ImageIcon(images.get("close")));
+        lblClose.setIcon(new ImageIcon(images.get("CLOSE")));
         lblClose.setBorder(BorderFactory.createEmptyBorder(10, 5, 10, 0));
         lblClose.addMouseListener(new MouseAdapter() {
             @Override
@@ -117,7 +118,7 @@ public class CreatePasswordDialog extends JDialog {
 
         JLabel lblPassword = new JLabel(message);
         lblPassword.setForeground(colors[1]);
-        lblPassword.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 0));
+        lblPassword.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
         lblPassword.setFont(font.deriveFont(15f));
         lblPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelToolbar.setMaximumSize(new Dimension(panelToolbar.getMaximumSize().width, lblPassword.getPreferredSize().height));
@@ -135,7 +136,7 @@ public class CreatePasswordDialog extends JDialog {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
-                BufferedImage img = images.get(show.get() ? "hide" : "show");
+                BufferedImage img = images.get(show.get() ? "HIDE" : "SHOW");
                 int x = getWidth() - img.getWidth() - 5;
                 int y = (getHeight() - img.getHeight()) / 2;
                 g.drawImage(img, x, y, null);
@@ -154,8 +155,6 @@ public class CreatePasswordDialog extends JDialog {
                 }
             }
         });
-        System.out.println(passwordField.getCursor())
-        ;
         passwordField.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
@@ -175,7 +174,7 @@ public class CreatePasswordDialog extends JDialog {
             @Override
             public void keyReleased(KeyEvent e) {
                 Strength strength = new Zxcvbn().measure(new String(passwordField.getPassword()));
-                textAreaFeedback.setText(strength.getFeedback().getWarning());
+                textAreaFeedback.setText(strength.getFeedback().withResourceBundle(ResourceBundle.getBundle("zxcvbn")).getWarning());
                 int index = passwordField.getPassword().length > 0 ? strength.getScore() + 2 : 0;
                 fadeBackgroundTo(colors[index], panelStrength);
             }
@@ -186,6 +185,8 @@ public class CreatePasswordDialog extends JDialog {
                     if (new Zxcvbn().measure(new String(passwordField.getPassword())).getScore() > 2 || weak.get()) {
                         password = passwordField.getPassword();
                         dispose();
+                    } else {
+                        passwordField.requestFocus();
                     }
                 }
             }
@@ -225,7 +226,7 @@ public class CreatePasswordDialog extends JDialog {
         setLocationRelativeTo(null);
     }
 
-    public static class RoundPanel extends JPanel {
+    private static class RoundPanel extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
             g.setColor(getBackground());

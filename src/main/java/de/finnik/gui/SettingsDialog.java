@@ -14,7 +14,9 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
@@ -65,8 +67,14 @@ public class SettingsDialog extends JDialog {
      * Lets the user change his main password by entering it two times
      */
     static void changeMainPass() {
-        String mainPass = DIALOG.input(LANG.getProperty("jop.enterNewMainPass"), true);
-        if (mainPass != null && !mainPass.isEmpty()) {
+        String mainPass = new String(new CreatePasswordDialog(FRAME, LANG.getProperty("jop.enterNewMainPass"), Arrays.stream(Var.class.getFields()).filter(name -> Arrays.asList("CLOSE", "HIDE", "SHOW").contains(name.getName())).collect(Collectors.toMap(Field::getName, f -> {
+            try {
+                return (BufferedImage) f.get(f);
+            } catch (IllegalAccessException e) {
+                return CLOSE;
+            }
+        })), () -> DIALOG.confirm(LANG.getProperty("jop.useWeakMainPass"))).open());
+        if (!mainPass.isEmpty()) {
             String validation = DIALOG.input(LANG.getProperty("jop.repeatEnteringNewMainPass"), true);
             if (mainPass.equals(validation)) {
                 PassFrame.password = mainPass;

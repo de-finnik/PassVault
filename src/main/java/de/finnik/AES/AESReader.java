@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 public class AESReader extends BufferedReader {
-    private AES aes;
+    private final AES aes;
 
     public AESReader(Reader in, AES aes) {
         super(in);

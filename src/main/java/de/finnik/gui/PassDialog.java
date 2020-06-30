@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /**
@@ -51,6 +52,7 @@ public class PassDialog {
 
         JDialog dialog = new JDialog(OWNER);
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setAlwaysOnTop(true);
 
         JPanel content = new JPanel();
 
@@ -128,6 +130,7 @@ public class PassDialog {
     public String input(String message, boolean pass) {
         JDialog dialog = new JDialog(OWNER);
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setAlwaysOnTop(true);
 
         String[] result = new String[1];
 
@@ -233,10 +236,11 @@ public class PassDialog {
     public boolean confirm(String message) {
         JDialog dialog = new JDialog(OWNER);
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setAlwaysOnTop(true);
 
         JPanel content = new JPanel();
 
-        boolean[] result = new boolean[1];
+        AtomicBoolean result = new AtomicBoolean(false);
 
         dialog.setContentPane(content);
         dialog.setUndecorated(true);
@@ -270,7 +274,7 @@ public class PassDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                result[0] = true;
+                result.set(true);
                 dialog.dispose();
             }
         });
@@ -281,7 +285,7 @@ public class PassDialog {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     dialog.dispose();
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    result[0] = false;
+                    result.set(false);
                     dialog.dispose();
                 }
             }
@@ -295,7 +299,7 @@ public class PassDialog {
         lblClose.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                result[0] = false;
+                result.set(false);
                 dialog.dispose();
             }
         });
@@ -308,6 +312,6 @@ public class PassDialog {
         dialog.setSize(content.getLayout().preferredLayoutSize(content));
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
-        return result[0];
+        return result.get();
     }
 }

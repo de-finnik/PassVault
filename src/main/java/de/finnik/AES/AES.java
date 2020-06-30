@@ -35,7 +35,9 @@ public class AES {
         }
     }
 
-    /**Encrypts a string via a given key with Advanced Encrpytion Standard (AES).
+    /**
+     * Encrypts a string via a given key with Advanced Encrpytion Standard (AES).
+     *
      * @param strToEncrypt String to encrypt
      * @return Encrypted key
      */
