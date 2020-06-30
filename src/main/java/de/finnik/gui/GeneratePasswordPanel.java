@@ -116,13 +116,13 @@ public class GeneratePasswordPanel extends JPanel {
             }
             if (chars.size() > 0) {
                 if (Boolean.parseBoolean(PassProperty.REAL_RANDOM.getValue())) {
-                    new RealRandom().seedWithUserInput(LANG.getProperty("generate.jop.realRandom")
+                    new RealRandom().seedWithUserInput(LANG.getString("generate.jop.realRandom")
                             , seed -> generate(seed, chars));
                 } else {
                     generate(-1, chars);
                 }
             } else {
-                DIALOG.message(LANG.getProperty("generate.jop.insufficientChars"));
+                DIALOG.message(LANG.getString("generate.jop.insufficientChars"));
             }
         });
         add(btnGenerate, "generate.btn.generate");

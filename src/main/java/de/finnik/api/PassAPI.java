@@ -105,7 +105,7 @@ public class PassAPI {
             }
 
             LOG.info("User got information about passwords containing {}!", args[0]);
-        }, String.format(LANG.getProperty("api.get.warning"), args[0])).setVisible(true);
+        }, String.format(LANG.getString("api.get.warning"), args[0])).setVisible(true);
     }
 
     /**

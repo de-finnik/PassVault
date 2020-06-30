@@ -283,7 +283,7 @@ public class PassFrame extends JFrame {
                 component.setVisible(false);
         }
 
-        String pass = DIALOG.input(LANG.getProperty("check.lbl.pass"), true);
+        String pass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
         if (!pass.equals(password)) {
             LOG.info("User tried to log in with wrong password!");
             System.exit(0);
@@ -306,17 +306,17 @@ public class PassFrame extends JFrame {
      */
     private void importBackup(File file) {
         if (file.getName().endsWith(".bin")) {
-            String pass = DIALOG.input(LANG.getProperty("passFrame.jop.enterPass"), true);
+            String pass = DIALOG.input(LANG.getString("passFrame.jop.enterPass"), true);
             try {
                 PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> PassFrame.passwordList.stream().noneMatch(p1 -> p1.id().equals(p.id()))).collect(Collectors.toList()));
                 LOG.info("Imported passwords from {}!", file.getAbsolutePath());
                 savePasswords();
             } catch (AES.WrongPasswordException e) {
                 if (pass.length() > 0)
-                    DIALOG.message(LANG.getProperty("jop.wrongPass"));
+                    DIALOG.message(LANG.getString("jop.wrongPass"));
             }
         } else {
-            DIALOG.message(LANG.getProperty("passFrame.jop.noSupportedFile"));
+            DIALOG.message(LANG.getString("passFrame.jop.noSupportedFile"));
         }
     }
 }

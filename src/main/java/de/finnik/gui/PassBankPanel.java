@@ -119,7 +119,7 @@ class PassBankPanel extends JPanel {
             }
         });
 
-        tableModelPassBank = new DefaultTableModel(new String[0][4], LANG.getProperty("passBank.table.header").split("#"));
+        tableModelPassBank = new DefaultTableModel(new String[0][4], LANG.getString("passBank.table.header").split("#"));
         tableModelPassBank.addTableModelListener(e -> {
             /* Lets you edit a password
              * Note: Editing a password so that it would has no information, will delete it after confirming
@@ -153,7 +153,7 @@ class PassBankPanel extends JPanel {
                 super.keyReleased(e);
                 // Lets you delete a password via pressing delete
                 if (e.getKeyCode() == KeyEvent.VK_DELETE && tablePassBank.getSelectedRow() >= 0) {
-                    if (DIALOG.confirm(LANG.getProperty("jop.deletePass"))) {
+                    if (DIALOG.confirm(LANG.getString("jop.deletePass"))) {
                         Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
                         PassUtils.deletePassword(password);
                         LOG.info(Password.log(password, "Deleted password"));
@@ -193,7 +193,7 @@ class PassBankPanel extends JPanel {
                     Utils.copyToClipboard(password.getPass());
                     LOG.info(Password.log(password, "Copied password to clipboard"));
                 } catch (IndexOutOfBoundsException ex) {
-                    DIALOG.message(LANG.getProperty("passBank.jop.noEntrySelected"));
+                    DIALOG.message(LANG.getString("passBank.jop.noEntrySelected"));
                 }
             }
         });

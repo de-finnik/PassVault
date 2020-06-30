@@ -279,7 +279,7 @@ public class PassVault {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
                     passwordField.setText("");
-                    DIALOG.message(LANG.getProperty("jop.wrongPass"));
+                    DIALOG.message(LANG.getString("jop.wrongPass"));
                     return;
                 }
                 LOG.info("User logged in!");

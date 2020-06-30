@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.ResourceBundle;
 
 /**
  * All static variables that concern multiple classes
@@ -40,7 +42,7 @@ public class Var {
     /**
      * Language properties that contain texts for all components
      */
-    public static Properties LANG;
+    public static ResourceBundle LANG;
     /**
      * Images for the application components and dialogs
      */
@@ -67,8 +69,8 @@ public class Var {
      *
      * @return The language properties for property {@link PassProperty#LANG}
      */
-    public static Properties loadLang() {
-        return PassUtils.FileUtils.loadLang(PassProperty.LANG.getValue());
+    public static ResourceBundle loadLang() {
+        return ResourceBundle.getBundle("passvault", new Locale(PassProperty.LANG.getValue()));
     }
 
     /**

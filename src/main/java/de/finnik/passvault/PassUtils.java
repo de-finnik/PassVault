@@ -84,23 +84,23 @@ public class PassUtils {
          * @param components All components with their matching names
          * @param lang       The language properties containing component names and matching texts
          */
-        public static void textComponents(Map<String, Component> components, Properties lang) {
+        public static void textComponents(Map<String, Component> components, ResourceBundle lang) {
             for (String name : components.keySet()) {
                 Component component = components.get(name);
                 if (lang.keySet().stream().anyMatch(prop -> prop.toString().startsWith(name))) {
                     if (component.getClass() == JButton.class) {
-                        ((JButton) component).setText(lang.getProperty(name));
+                        ((JButton) component).setText(lang.getString(name));
                     } else if (component.getClass() == JLabel.class) {
-                        ((JLabel) component).setText(lang.getProperty(name));
+                        ((JLabel) component).setText(lang.getString(name));
                     } else if (component.getClass() == JCheckBox.class) {
-                        ((JCheckBox) component).setText(lang.getProperty(name));
+                        ((JCheckBox) component).setText(lang.getString(name));
                     } else if (component.getClass() == JTable.class) {
-                        ((DefaultTableModel) ((JTable) component).getModel()).setColumnIdentifiers(lang.getProperty(name + ".header").split("#"));
+                        ((DefaultTableModel) ((JTable) component).getModel()).setColumnIdentifiers(lang.getString(name + ".header").split("#"));
                     }
                 }
                 if (lang.keySet().stream().anyMatch(prop -> prop.toString().startsWith("tt." + name))) {
                     assert component instanceof JComponent;
-                    ((JComponent) component).setToolTipText(lang.getProperty("tt." + name));
+                    ((JComponent) component).setToolTipText(lang.getString("tt." + name));
                 }
             }
         }
