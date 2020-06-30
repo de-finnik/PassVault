@@ -17,11 +17,11 @@ import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
 import de.finnik.AES.AES;
 import de.finnik.gui.Animation;
-import de.finnik.gui.PassFrame;
+import de.finnik.gui.mainFrame.PassFrame;
 import de.finnik.passvault.PassProperty;
-import de.finnik.passvault.Password;
-import de.finnik.passvault.PasswordGenerator;
-import de.finnik.passvault.Utils;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.passwords.PasswordGenerator;
+import de.finnik.passvault.utils.Utils;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

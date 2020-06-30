@@ -1,4 +1,4 @@
-package de.finnik.passvault;
+package de.finnik.passvault.passwords;
 
 import java.util.*;
 import java.util.stream.Collectors;

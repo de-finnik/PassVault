@@ -1,9 +1,10 @@
-package de.finnik.gui;
+package de.finnik.gui.mainFrame;
 
+import de.finnik.gui.Var;
 import de.finnik.passvault.PassProperty;
-import de.finnik.passvault.PassUtils;
-import de.finnik.passvault.Password;
-import de.finnik.passvault.Utils;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.PassUtils;
+import de.finnik.passvault.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -24,7 +25,7 @@ import static de.finnik.gui.Var.*;
 /**
  * Observing your passwords via inserting a parameter
  */
-class PassBankPanel extends JPanel {
+public class PassBankPanel extends JPanel {
 
     private static JTextField tfSearch;
     private static DefaultTableModel tableModelPassBank;
@@ -34,7 +35,7 @@ class PassBankPanel extends JPanel {
     /**
      * Creates the panel
      */
-    PassBankPanel() {
+    public PassBankPanel() {
         setBackground(BACKGROUND);
         setLayout(null);
 

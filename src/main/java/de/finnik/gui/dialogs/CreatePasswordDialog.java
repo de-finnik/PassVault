@@ -1,4 +1,4 @@
-package de.finnik.gui;
+package de.finnik.gui.dialogs;
 
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;

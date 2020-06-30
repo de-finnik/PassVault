@@ -1,11 +1,14 @@
-package de.finnik.gui;
+package de.finnik.gui.dialogs;
 
 import de.finnik.AES.AES;
 import de.finnik.drive.PassDrive;
+import de.finnik.gui.PopUp;
+import de.finnik.gui.Var;
+import de.finnik.gui.mainFrame.PassFrame;
 import de.finnik.passvault.PassProperty;
-import de.finnik.passvault.PassUtils;
-import de.finnik.passvault.Password;
-import de.finnik.passvault.Utils;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.PassUtils;
+import de.finnik.passvault.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.plaf.ColorUIResource;
@@ -38,7 +41,7 @@ public class SettingsDialog extends JDialog {
     /**
      * Creates the frame
      */
-    SettingsDialog(Window owner) {
+    public SettingsDialog(Window owner) {
         super(owner, ModalityType.APPLICATION_MODAL);
 
         setContentPane(new JPanel());

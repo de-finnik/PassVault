@@ -1,6 +1,7 @@
-package de.finnik.passvault;
+package de.finnik.passvault.utils;
 
 import de.finnik.gui.PassVault;
+import de.finnik.passvault.passwords.Password;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;

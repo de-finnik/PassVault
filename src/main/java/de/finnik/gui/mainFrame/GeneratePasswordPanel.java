@@ -1,10 +1,12 @@
-package de.finnik.gui;
+package de.finnik.gui.mainFrame;
 
 import de.finnik.AES.RealRandom;
+import de.finnik.gui.Var;
+import de.finnik.gui.dialogs.SavePassDialog;
 import de.finnik.gui.slider.RangeSlider;
 import de.finnik.passvault.PassProperty;
-import de.finnik.passvault.PassUtils;
-import de.finnik.passvault.PasswordGenerator;
+import de.finnik.passvault.passwords.PasswordGenerator;
+import de.finnik.passvault.utils.PassUtils;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,5 +1,5 @@
-import de.finnik.passvault.Password;
-import de.finnik.passvault.PasswordGenerator;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.passwords.PasswordGenerator;
 import org.junit.Test;
 
 import java.io.File;

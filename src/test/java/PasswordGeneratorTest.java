@@ -1,11 +1,11 @@
-import de.finnik.passvault.PasswordGenerator;
+import de.finnik.passvault.passwords.PasswordGenerator;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static de.finnik.passvault.PasswordGenerator.PassChars;
+import static de.finnik.passvault.passwords.PasswordGenerator.PassChars;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

@@ -1,4 +1,4 @@
-package de.finnik.gui;
+package de.finnik.gui.dialogs;
 
 import javax.swing.*;
 import java.awt.*;

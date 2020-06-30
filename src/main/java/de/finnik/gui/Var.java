@@ -1,9 +1,10 @@
 package de.finnik.gui;
 
+import de.finnik.gui.dialogs.PassDialog;
 import de.finnik.passvault.InactivityListener;
 import de.finnik.passvault.PassProperty;
-import de.finnik.passvault.PassUtils;
-import de.finnik.passvault.Utils;
+import de.finnik.passvault.utils.PassUtils;
+import de.finnik.passvault.utils.Utils;
 import org.slf4j.Logger;
 
 import java.awt.*;

@@ -2,7 +2,13 @@ package de.finnik.gui;
 
 import de.finnik.AES.AES;
 import de.finnik.api.PassAPI;
-import de.finnik.passvault.*;
+import de.finnik.gui.dialogs.PassDialog;
+import de.finnik.gui.mainFrame.PassFrame;
+import de.finnik.passvault.InactivityListener;
+import de.finnik.passvault.LogErrorStream;
+import de.finnik.passvault.PassProperty;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.Utils;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
@@ -21,7 +27,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import static de.finnik.gui.Var.*;
-import static de.finnik.passvault.Utils.sizeFont;
+import static de.finnik.passvault.utils.Utils.sizeFont;
 
 /**
  * The PassVault program implements an application that saves passwords encrypted

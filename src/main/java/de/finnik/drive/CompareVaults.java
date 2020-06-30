@@ -1,6 +1,6 @@
 package de.finnik.drive;
 
-import de.finnik.passvault.Password;
+import de.finnik.passvault.passwords.Password;
 
 import java.util.ArrayList;
 import java.util.Arrays;

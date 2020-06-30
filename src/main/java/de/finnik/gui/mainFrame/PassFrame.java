@@ -1,10 +1,13 @@
-package de.finnik.gui;
+package de.finnik.gui.mainFrame;
 
 import de.finnik.AES.AES;
 import de.finnik.drive.PassDrive;
+import de.finnik.gui.Animation;
+import de.finnik.gui.Var;
+import de.finnik.gui.dialogs.SettingsDialog;
 import de.finnik.passvault.PassProperty;
-import de.finnik.passvault.Password;
-import de.finnik.passvault.Utils;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -46,7 +49,7 @@ public class PassFrame extends JFrame {
      * @param password     The main password which will be saved to {@link PassFrame#password}
      * @param passwordList The list of {@link Password}s which will be saved to {@link PassFrame#passwordList}
      */
-    PassFrame(String password, List<Password> passwordList) {
+    public PassFrame(String password, List<Password> passwordList) {
         PassFrame.password = password;
         PassFrame.aes = new AES(password);
         PassFrame.passwordList = new ArrayList<>(passwordList);

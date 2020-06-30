@@ -1,6 +1,7 @@
 package de.finnik.passvault;
 
 import de.finnik.AES.AES;
+import de.finnik.passvault.utils.PassUtils;
 
 import java.io.*;
 import java.util.*;

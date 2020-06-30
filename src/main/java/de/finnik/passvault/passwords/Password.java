@@ -1,4 +1,4 @@
-package de.finnik.passvault;
+package de.finnik.passvault.passwords;
 
 import com.google.gson.Gson;
 import de.finnik.AES.AES;

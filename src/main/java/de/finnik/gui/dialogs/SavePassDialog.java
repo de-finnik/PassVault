@@ -1,8 +1,10 @@
-package de.finnik.gui;
+package de.finnik.gui.dialogs;
 
-import de.finnik.passvault.PassUtils;
-import de.finnik.passvault.Password;
-import de.finnik.passvault.Utils;
+import de.finnik.gui.Var;
+import de.finnik.gui.mainFrame.PassFrame;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.PassUtils;
+import de.finnik.passvault.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +22,7 @@ import static de.finnik.gui.Var.*;
 /**
  * Save a new password with its parameters to your passwords.
  */
-class SavePassDialog extends JDialog {
+public class SavePassDialog extends JDialog {
 
     /**
      * A list of {@link javax.swing.JComponent}s which are generated in {@link SavePassDialog#components(String)}
@@ -34,7 +36,7 @@ class SavePassDialog extends JDialog {
      * @param owner The window that owns the dialog
      * @param pass  A generated password that will be inserted to the Password {@link JTextField}
      */
-    SavePassDialog(Window owner, String pass) {
+    public SavePassDialog(Window owner, String pass) {
         super(owner, ModalityType.APPLICATION_MODAL);
 
         setContentPane(new JPanel());

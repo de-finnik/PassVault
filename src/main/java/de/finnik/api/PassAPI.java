@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import de.finnik.gui.PassVault;
-import de.finnik.passvault.PassUtils;
-import de.finnik.passvault.Password;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.PassUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;

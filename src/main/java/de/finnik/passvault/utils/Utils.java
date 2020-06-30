@@ -1,4 +1,4 @@
-package de.finnik.passvault;
+package de.finnik.passvault.utils;
 
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;

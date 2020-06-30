@@ -1,6 +1,6 @@
 package de.finnik.gui;
 
-import de.finnik.passvault.Utils;
+import de.finnik.passvault.utils.Utils;
 
 import java.awt.image.BufferedImage;
 
