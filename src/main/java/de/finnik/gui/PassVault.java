@@ -146,12 +146,11 @@ public class PassVault {
              */
             try (BufferedReader br = new BufferedReader(new FileReader(PASSWORDS))) {
                 String file = br.readLine();
-                if (file != null) {
+                if (file != null && !file.isEmpty()) {
                     FRAME = new CheckFrame((pass, passList) -> {
                         PassProperty.load(new AES(pass));
                         INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
-                        FRAME = new PassFrame(pass, passList);
-                        DIALOG.OWNER = FRAME;
+                        DIALOG.OWNER = FRAME = new PassFrame(pass, passList);
                         FRAME.setVisible(true);
                     });
                 } else {

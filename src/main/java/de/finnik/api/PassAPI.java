@@ -3,6 +3,7 @@ package de.finnik.api;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import de.finnik.AES.AES;
 import de.finnik.gui.PassVault;
 import de.finnik.passvault.passwords.Password;
 import de.finnik.passvault.utils.PassUtils;
@@ -77,7 +78,7 @@ public class PassAPI {
 
         new PassVault.CheckFrame((pass, passwords) -> {
             passwords.add(finalPassword);
-            Password.savePasswords(passwords, PASSWORDS, pass);
+            Password.savePasswords(passwords, PASSWORDS, new AES(pass));
             LOG.info(Password.log(finalPassword, "User added password"));
         }).setVisible(true);
     }

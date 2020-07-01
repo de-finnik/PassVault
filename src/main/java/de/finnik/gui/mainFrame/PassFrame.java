@@ -33,7 +33,6 @@ public class PassFrame extends JFrame {
     /**
      * The main password
      */
-    public static String password;
     public static AES aes;
     /**
      * The list of saved passwords
@@ -46,11 +45,10 @@ public class PassFrame extends JFrame {
     /**
      * Creates the frame
      *
-     * @param password     The main password which will be saved to {@link PassFrame#password}
+     * @param password     The main password which will be saved to {@link PassFrame#aes}
      * @param passwordList The list of {@link Password}s which will be saved to {@link PassFrame#passwordList}
      */
     public PassFrame(String password, List<Password> passwordList) {
-        PassFrame.password = password;
         PassFrame.aes = new AES(password);
         PassFrame.passwordList = new ArrayList<>(passwordList);
 
@@ -83,7 +81,7 @@ public class PassFrame extends JFrame {
                     jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                     jfc.setFileFilter(new FileNameExtensionFilter(".bin", "bin"));
                     int result = jfc.showOpenDialog(null);
-                    if (result == JFileChooser.APPROVE_OPTION && PassFrame.password.length() > 0) {
+                    if (result == JFileChooser.APPROVE_OPTION && PassFrame.aes.passIsSet()) {
                         importBackup(jfc.getSelectedFile());
                     }
                 }
@@ -158,15 +156,17 @@ public class PassFrame extends JFrame {
         Arrays.stream(getMatchingComponents("passFrame.lbl"))
                 .forEach(c -> c.setCursor(Var.HAND_CURSOR));
 
-        INACTIVITY_LISTENER.start();
+        if (INACTIVITY_LISTENER != null)
+            INACTIVITY_LISTENER.start();
     }
 
     /**
-     * Saves the password stored in {@link PassFrame#passwordList} encrypted with the password {@link PassFrame#password}
+     * Saves the password stored in {@link PassFrame#passwordList} encrypted with {@link PassFrame#aes}
      * to the passwords file {@link Var#PASSWORDS}
      */
     public static void savePasswords() {
-        Password.savePasswords(passwordList, PASSWORDS, password);
+        if (aes.passIsSet())
+            Password.savePasswords(passwordList, PASSWORDS, aes);
         if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
             PassDrive.compare(((PassFrame) FRAME).passBankPanel::updateTableModel);
         ((PassFrame) FRAME).passBankPanel.updateTableModel();
@@ -277,7 +277,7 @@ public class PassFrame extends JFrame {
      * and can just be reentered by inputting the main password
      */
     public void inactive() {
-        if (!Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()) || password.length() == 0)
+        if (!Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()) || aes.getPass().length() == 0)
             return;
 
         Component[] toHide = {this, COMPONENTS.get("savePass"), COMPONENTS.get("settings")};
@@ -287,7 +287,7 @@ public class PassFrame extends JFrame {
         }
 
         String pass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
-        if (!pass.equals(password)) {
+        if (!pass.equals(aes.getPass())) {
             LOG.info("User tried to log in with wrong password!");
             System.exit(0);
         }

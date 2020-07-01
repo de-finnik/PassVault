@@ -60,6 +60,7 @@ public enum PassProperty {
         for (PassProperty property : PassProperty.values()) {
             property.setValue(values.get(property.name()));
         }
+        LOG.info("Loaded properties!");
     }
 
     /**
@@ -96,7 +97,10 @@ public enum PassProperty {
      */
     public boolean setValueAndStore(Object value, AES aes) {
         boolean matches = setValue(value);
-        store(aes);
+        if (matches)
+            LOG.info("Changed property {}", name());
+        if (aes.passIsSet())
+            store(aes);
         return matches;
     }
 
@@ -107,7 +111,6 @@ public enum PassProperty {
         } else if (this.value == null) {
             this.value = getDefault();
         }
-        LOG.info("Set property {} to {}!", this.name(), this.value);
         return matches(s);
     }
 

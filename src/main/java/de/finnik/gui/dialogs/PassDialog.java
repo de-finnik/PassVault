@@ -283,6 +283,7 @@ public class PassDialog {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    result.set(true);
                     dialog.dispose();
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     result.set(false);

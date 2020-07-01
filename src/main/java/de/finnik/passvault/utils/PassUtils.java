@@ -6,7 +6,6 @@ import de.finnik.passvault.passwords.Password;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.InputStream;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,13 +29,9 @@ public class PassUtils {
         public static List<String> availableLanguages() {
             List<String> languages = new ArrayList<>();
             try {
-                InputStream is;
                 for (Locale availableLocale : Locale.getAvailableLocales()) {
-                    is = PassUtils.class.getResourceAsStream("/lang/" + availableLocale.getLanguage() + ".properties");
-                    if (!languages.contains(availableLocale.getLanguage()) && is != null) {
+                    if (ResourceBundle.getBundle("passvault", availableLocale).getLocale().equals(availableLocale)) {
                         languages.add(availableLocale.getLanguage());
-                        is.close();
-
                     }
                 }
             } catch (Exception e) {
@@ -88,7 +83,7 @@ public class PassUtils {
         public static void textComponents(Map<String, Component> components, ResourceBundle lang) {
             for (String name : components.keySet()) {
                 Component component = components.get(name);
-                if (lang.keySet().stream().anyMatch(prop -> prop.toString().startsWith(name))) {
+                if (lang.keySet().stream().anyMatch(prop -> prop.startsWith(name))) {
                     if (component.getClass() == JButton.class) {
                         ((JButton) component).setText(lang.getString(name));
                     } else if (component.getClass() == JLabel.class) {
@@ -99,7 +94,7 @@ public class PassUtils {
                         ((DefaultTableModel) ((JTable) component).getModel()).setColumnIdentifiers(lang.getString(name + ".header").split("#"));
                     }
                 }
-                if (lang.keySet().stream().anyMatch(prop -> prop.toString().startsWith("tt." + name))) {
+                if (lang.keySet().stream().anyMatch(prop -> prop.startsWith("tt." + name))) {
                     assert component instanceof JComponent;
                     ((JComponent) component).setToolTipText(lang.getString("tt." + name));
                 }

@@ -229,6 +229,8 @@ public class CreatePasswordDialog extends JDialog {
     private static class RoundPanel extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {
+            g.setColor(getParent().getBackground());
+            g.fillRect(0, 0, getWidth(), getHeight());
             g.setColor(getBackground());
             g.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 5, 5);
             g.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 5, 5);

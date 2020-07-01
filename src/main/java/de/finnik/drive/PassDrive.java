@@ -102,11 +102,11 @@ public class PassDrive {
                 PassFrame.passwordList = compared;
 
                 // Not PassFrame.savePasswords() because it would call this function again -> endless loop
-                Password.savePasswords(PassFrame.passwordList, PASSWORDS, PassFrame.password);
+                Password.savePasswords(PassFrame.passwordList, PASSWORDS, PassFrame.aes);
 
                 java.io.File temp = java.io.File.createTempFile("pass", "vault");
                 temp.deleteOnExit();
-                Password.savePasswords(PassFrame.passwordList, temp, drivePass);
+                Password.savePasswords(PassFrame.passwordList, temp, new AES(drivePass));
 
                 File old = appDataFolder.getFiles().get(0);
                 File file = new File();
@@ -122,7 +122,7 @@ public class PassDrive {
 
                 java.io.File temp = java.io.File.createTempFile("pass", "vault");
                 temp.deleteOnExit();
-                Password.savePasswords(PassFrame.passwordList, temp, drivePass);
+                Password.savePasswords(PassFrame.passwordList, temp, new AES(drivePass));
                 File file = new File();
                 file.setParents(Collections.singletonList("appDataFolder"));
                 file.setName(PASSWORDS.getName());

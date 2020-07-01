@@ -1,3 +1,4 @@
+import de.finnik.AES.AES;
 import de.finnik.passvault.passwords.Password;
 import de.finnik.passvault.passwords.PasswordGenerator;
 import org.junit.Test;
@@ -22,7 +23,7 @@ public class PasswordTest {
 
         String pass = new PasswordGenerator().generatePassword((int) (Math.random() * 30) + 1, PasswordGenerator.PassChars.BIG_LETTERS);
 
-        Password.savePasswords(passwords, temp,pass);
+        Password.savePasswords(passwords, temp, new AES(pass));
         assertEquals(passwords, Password.readPasswords(temp, pass));
 
         temp.deleteOnExit();

@@ -56,10 +56,10 @@ public class Password {
      *
      * @param passwords List of {@link Password} objects
      * @param file      The file to save the encrypted passwords to
-     * @param pass      The password to encrypt
+     * @param aes       The aes to encrypt
      */
-    public static void savePasswords(List<Password> passwords, File file, String pass) {
-        try (AESWriter aesWriter = new AESWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), new AES(pass))) {
+    public static void savePasswords(List<Password> passwords, File file, AES aes) {
+        try (AESWriter aesWriter = new AESWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), aes)) {
             aesWriter.write(new Gson().toJson(passwords.toArray()));
         } catch (Exception e) {
             LOG.error("Error while saving passwords to {}!", file.getAbsolutePath(), e);

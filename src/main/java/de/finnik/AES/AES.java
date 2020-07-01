@@ -13,8 +13,10 @@ import java.util.Map;
 public class AES {
 
     private final Map<String, SecretKeySpec> secretKeySpec;
+    private final String pass;
 
     public AES(String pass) {
+        this.pass = pass;
         secretKeySpec = new HashMap<>();
         for (String encryption : new String[]{"SHA-256", "SHA-1"}) {
             secretKeySpec.put(encryption, getSecretKey(pass, encryption));
@@ -33,6 +35,14 @@ public class AES {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error while creating Secret key: " + e.getMessage());
         }
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public boolean passIsSet() {
+        return !pass.isEmpty();
     }
 
     /**

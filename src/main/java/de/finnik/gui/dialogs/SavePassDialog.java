@@ -147,11 +147,11 @@ public class SavePassDialog extends JDialog {
 
             if (!newPass.isEmpty()) {
                 // Checks whether the user has set a main password
-                if (PassFrame.password.length() == 0) {
+                if (!PassFrame.aes.passIsSet()) {
                     SettingsDialog.changeMainPass();
                 }
 
-                if (PassFrame.password.equals("")) {
+                if (!PassFrame.aes.passIsSet()) {
                     return;
                 }
 

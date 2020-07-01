@@ -70,17 +70,19 @@ public class SettingsDialog extends JDialog {
      * Lets the user change his main password by entering it two times
      */
     static void changeMainPass() {
-        String mainPass = new String(new CreatePasswordDialog(FRAME, LANG.getString("jop.enterNewMainPass"), Arrays.stream(Var.class.getFields()).filter(name -> Arrays.asList("CLOSE", "HIDE", "SHOW").contains(name.getName())).collect(Collectors.toMap(Field::getName, f -> {
+        CreatePasswordDialog createPasswordDialog = new CreatePasswordDialog(FRAME, LANG.getString("jop.enterNewMainPass"), Arrays.stream(Var.class.getFields()).filter(name -> Arrays.asList("CLOSE", "HIDE", "SHOW").contains(name.getName())).collect(Collectors.toMap(Field::getName, f -> {
             try {
                 return (BufferedImage) f.get(f);
             } catch (IllegalAccessException e) {
                 return CLOSE;
             }
-        })), () -> DIALOG.confirm(LANG.getString("jop.useWeakMainPass"))).open());
+        })), () -> DIALOG.confirm(LANG.getString("jop.useWeakMainPass")));
+        createPasswordDialog.font = raleway(15);
+        String mainPass = new String(createPasswordDialog.open());
         if (!mainPass.isEmpty()) {
             String validation = DIALOG.input(LANG.getString("jop.repeatEnteringNewMainPass"), true);
             if (mainPass.equals(validation)) {
-                PassFrame.password = mainPass;
+                PassFrame.aes = new AES(mainPass);
                 LOG.info("Changed main password!");
                 PassFrame.savePasswords();
             } else {
@@ -115,12 +117,16 @@ public class SettingsDialog extends JDialog {
                     if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
                         new PopUp(new PopUp.PopUpItem(LANG.getString("settings.pop.disableDrive"), action -> {
                             PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
-                            new File("StoredCredential").delete();
+                            if (new File("StoredCredential").delete()) {
+                                LOG.info("Deleted StoredCredential");
+                            }
                             ((PassFrame) FRAME).refreshVisibility();
                             PassDrive.restart();
                         }), new PopUp.PopUpItem(LANG.getString("settings.pop.changeDrive"), action -> {
                             PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
-                            new File("StoredCredential").delete();
+                            if (new File("StoredCredential").delete()) {
+                                LOG.info("Deleted StoredCredential");
+                            }
                             PassDrive.restart();
                             PassFrame.savePasswords();
                             ((PassFrame) FRAME).refreshVisibility();
@@ -128,7 +134,7 @@ public class SettingsDialog extends JDialog {
                 }
             }
         });
-        if (!PassFrame.password.isEmpty())
+        if (PassFrame.aes.passIsSet())
             toolBar.add(lblDrive);
 
         JLabel lblExtract = new JLabel();
@@ -142,14 +148,14 @@ public class SettingsDialog extends JDialog {
                 JFileChooser jfc = new JFileChooser();
                 jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 int result = jfc.showOpenDialog(null);
-                if (result == JFileChooser.APPROVE_OPTION && PassFrame.password.length() > 0 && PassFrame.passwordList.size() > 0) {
+                if (result == JFileChooser.APPROVE_OPTION && PassFrame.aes.passIsSet() && PassFrame.passwordList.size() > 0) {
                     SimpleDateFormat formatter = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss");
                     Date date = new Date();
                     File backup = new File(jfc.getSelectedFile(), "PassVault_" + formatter.format(date) + ".bin");
 
                     // Check whether target file exists already
                     if (!backup.exists()) {
-                        Password.savePasswords(PassFrame.passwordList, backup, PassFrame.password);
+                        Password.savePasswords(PassFrame.passwordList, backup, PassFrame.aes);
                         LOG.info("Exported password to {}!", jfc.getSelectedFile().getAbsolutePath());
                     } else {
                         DIALOG.message(String.format(LANG.getString("jop.fileExistsAlready"), backup.getAbsolutePath()));
@@ -213,10 +219,10 @@ public class SettingsDialog extends JDialog {
         JButton btnChangeMainPass = new JButton();
         btnChangeMainPass.setFont(raleway(13));
         btnChangeMainPass.addActionListener(action -> {
-            if (!PassFrame.password.equals("")) {
+            if (PassFrame.aes.passIsSet()) {
                 // Validates the user via inserting current main pass
                 String mainPass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
-                if (mainPass.equals(PassFrame.password)) {
+                if (mainPass.equals(PassFrame.aes.getPass())) {
                     changeMainPass();
                 } else {
                     DIALOG.message(LANG.getString("jop.wrongPass"));
@@ -331,7 +337,7 @@ public class SettingsDialog extends JDialog {
             try {
                 btnDrivePassword.setText(PassProperty.DRIVE_PASSWORD.getValue());
             } catch (AES.WrongPasswordException e) {
-                if (mainPass.equals(PassFrame.password)) {
+                if (mainPass.equals(PassFrame.aes.getPass())) {
                     PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
                 } else {
                     DIALOG.message(LANG.getString("jop.wrongPass"));
