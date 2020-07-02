@@ -15,16 +15,16 @@ public class PasswordTest {
     @Test
     public void testWriteAndReadPasswords() throws IOException {
         List<Password> passwords = new ArrayList<>();
-        passwords.add(new Password("pass","site","user","other"));
-        passwords.add(new Password("pass2","site2","user2","other2"));
-        passwords.add(new Password("pass3","site3","user3","other3"));
+        passwords.add(new Password("pass", "site", "user", "other"));
+        passwords.add(new Password("pass2", "site2", "user2", "other2"));
+        passwords.add(new Password("pass3", "site3", "user3", "other3"));
 
-        File temp = File.createTempFile("passvault","bin");
+        File temp = File.createTempFile("passvault", "bin");
 
-        String pass = new PasswordGenerator().generatePassword((int) (Math.random() * 30) + 1, PasswordGenerator.PassChars.BIG_LETTERS);
+        AES aes = new AES(new PasswordGenerator().generatePassword((int) (Math.random() * 30) + 1, PasswordGenerator.PassChars.BIG_LETTERS));
 
-        Password.savePasswords(passwords, temp, new AES(pass));
-        assertEquals(passwords, Password.readPasswords(temp, pass));
+        Password.savePasswords(passwords, temp, aes);
+        assertEquals(passwords, Password.readPasswords(temp, aes));
 
         temp.deleteOnExit();
     }

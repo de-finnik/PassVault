@@ -311,7 +311,7 @@ public class PassFrame extends JFrame {
         if (file.getName().endsWith(".bin")) {
             String pass = DIALOG.input(LANG.getString("passFrame.jop.enterPass"), true);
             try {
-                PassFrame.passwordList.addAll(Password.readPasswords(file, pass).stream().filter(p -> PassFrame.passwordList.stream().noneMatch(p1 -> p1.id().equals(p.id()))).collect(Collectors.toList()));
+                PassFrame.passwordList.addAll(Password.readPasswords(file, new AES(pass)).stream().filter(p -> PassFrame.passwordList.stream().noneMatch(p1 -> p1.id().equals(p.id()))).collect(Collectors.toList()));
                 LOG.info("Imported passwords from {}!", file.getAbsolutePath());
                 savePasswords();
             } catch (AES.WrongPasswordException e) {

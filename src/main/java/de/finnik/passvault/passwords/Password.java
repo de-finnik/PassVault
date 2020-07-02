@@ -70,13 +70,13 @@ public class Password {
      * This static method returns all passwords with all of their parameters that are saved to an encrypted file
      *
      * @param file The encrypted file
-     * @param pass The password to decrypt
+     * @param aes  The aes to decrypt
      * @return The List of {@link Password} objects
      * @throws AES.WrongPasswordException If password is wrong
      */
-    public static List<Password> readPasswords(File file, String pass) throws AES.WrongPasswordException {
+    public static List<Password> readPasswords(File file, AES aes) throws AES.WrongPasswordException {
         try (InputStream is = new FileInputStream(file)) {
-            return readPasswords(is, pass);
+            return readPasswords(is, aes);
         } catch (AES.WrongPasswordException w) {
             throw new AES.WrongPasswordException();
         } catch (IOException e) {
@@ -89,11 +89,11 @@ public class Password {
      * This static method returns all passwords with all of their parameters that are saved to an encrypted file
      *
      * @param inputStream The encrypted inputStream
-     * @param pass        The password to decrypt
+     * @param aes         The aes to decrypt
      * @return The List of {@link Password} objects
      */
-    public static List<Password> readPasswords(InputStream inputStream, String pass) throws AES.WrongPasswordException, IOException {
-        try (AESReader aesReader = new AESReader(new InputStreamReader(inputStream), new AES(pass))) {
+    public static List<Password> readPasswords(InputStream inputStream, AES aes) throws AES.WrongPasswordException, IOException {
+        try (AESReader aesReader = new AESReader(new InputStreamReader(inputStream), aes)) {
             return new ArrayList<>(Arrays.asList(new Gson().fromJson(aesReader.readLine(), Password[].class)));
         } catch (AES.WrongPasswordException e) {
             // Wrong password

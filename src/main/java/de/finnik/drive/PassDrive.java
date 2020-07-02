@@ -58,10 +58,10 @@ public class PassDrive {
             if (appDataFolder.getFiles().size() > 0) {
                 // Checks whether DRIVE_PASSWORD property is not set
                 if (PassProperty.DRIVE_PASSWORD.getValue().length() == 0) {
-                    String drivePass = DIALOG.input(LANG.getString("drive.jop.enterDrivePass"), true);
+                    AES drivePass = new AES(DIALOG.input(LANG.getString("drive.jop.enterDrivePass"), true));
                     try {
                         Password.readPasswords(DRIVE.files().get(appDataFolder.getFiles().get(0).getId()).executeMediaAsInputStream(), drivePass);
-                        PassProperty.DRIVE_PASSWORD.setValueAndStore(drivePass, PassFrame.aes);
+                        PassProperty.DRIVE_PASSWORD.setValueAndStore(drivePass.getPass(), PassFrame.aes);
                         compare();
                     } catch (AES.WrongPasswordException e) {
                         // Lets the user delete drive passwords if password is forgotten
@@ -84,10 +84,10 @@ public class PassDrive {
                     return;
                 }
                 LOG.info("Synchronizing...");
-                String drivePass;
+                AES drivePass;
                 List<Password> drivePasswords;
                 try {
-                    drivePass = PassProperty.DRIVE_PASSWORD.getValue();
+                    drivePass = new AES(PassProperty.DRIVE_PASSWORD.getValue());
                     drivePasswords = Password.readPasswords(DRIVE.files().get(appDataFolder.getFiles().get(0).getId()).executeMediaAsInputStream(), drivePass);
                 } catch (AES.WrongPasswordException e) {
                     // Stored DRIVE_PASSWORD is incorrect -> Reset it and restart compare function
@@ -106,7 +106,7 @@ public class PassDrive {
 
                 java.io.File temp = java.io.File.createTempFile("pass", "vault");
                 temp.deleteOnExit();
-                Password.savePasswords(PassFrame.passwordList, temp, new AES(drivePass));
+                Password.savePasswords(PassFrame.passwordList, temp, drivePass);
 
                 File old = appDataFolder.getFiles().get(0);
                 File file = new File();

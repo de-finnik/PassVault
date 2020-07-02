@@ -279,7 +279,7 @@ public class PassVault {
                 // The login
                 List<Password> passwordList;
                 try {
-                    passwordList = Password.readPasswords(PASSWORDS, new String(passwordField.getPassword()));
+                    passwordList = Password.readPasswords(PASSWORDS, new AES(new String(passwordField.getPassword())));
                 } catch (AES.WrongPasswordException e) {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
