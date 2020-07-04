@@ -2,6 +2,7 @@ package de.finnik.gui;
 
 import de.finnik.AES.AES;
 import de.finnik.api.PassAPI;
+import de.finnik.drive.DriveLocalHelper;
 import de.finnik.gui.dialogs.PassDialog;
 import de.finnik.gui.mainFrame.PassFrame;
 import de.finnik.passvault.InactivityListener;
@@ -110,6 +111,8 @@ public class PassVault {
         DIALOG = new PassDialog(FOREGROUND, BACKGROUND, RALEWAY, CLOSE, WARNING, ICON_SMALL, QUESTION_MARK, CHECK_MARK);
 
         COMPONENTS = new HashMap<>();
+
+        DRIVE = new DriveLocalHelper();
     }
 
     /**

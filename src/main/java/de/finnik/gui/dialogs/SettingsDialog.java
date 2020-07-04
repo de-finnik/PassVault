@@ -1,7 +1,6 @@
 package de.finnik.gui.dialogs;
 
 import de.finnik.AES.AES;
-import de.finnik.drive.PassDrive;
 import de.finnik.gui.PopUp;
 import de.finnik.gui.Var;
 import de.finnik.gui.mainFrame.PassFrame;
@@ -109,10 +108,14 @@ public class SettingsDialog extends JDialog {
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    PassDrive.compare(() -> {
-                        ((PassFrame) FRAME).passBankPanel.updateTableModel();
-                        ((PassFrame) FRAME).refreshVisibility();
-                    });
+                    try {
+                        DRIVE.synchronize(() -> {
+                            ((PassFrame) FRAME).passBankPanel.updateTableModel();
+                            ((PassFrame) FRAME).refreshDriveVisibility();
+                        });
+                    } catch (Exception exception) {
+                        LOG.error("Error while synchronizing with Drive", exception);
+                    }
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
                     if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
                         new PopUp(new PopUp.PopUpItem(LANG.getString("settings.pop.disableDrive"), action -> {
@@ -120,17 +123,10 @@ public class SettingsDialog extends JDialog {
                             if (new File("StoredCredential").delete()) {
                                 LOG.info("Deleted StoredCredential");
                             }
-                            ((PassFrame) FRAME).refreshVisibility();
-                            PassDrive.restart();
-                        }), new PopUp.PopUpItem(LANG.getString("settings.pop.changeDrive"), action -> {
-                            PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
-                            if (new File("StoredCredential").delete()) {
-                                LOG.info("Deleted StoredCredential");
-                            }
-                            PassDrive.restart();
-                            PassFrame.savePasswords();
-                            ((PassFrame) FRAME).refreshVisibility();
-                        })).show(e.getComponent(), e.getX(), e.getY());
+                            ((PassFrame) FRAME).refreshDriveVisibility();
+                            textComponents();
+                            refreshShowPassTextField();
+                        }));
                 }
             }
         });
@@ -347,8 +343,8 @@ public class SettingsDialog extends JDialog {
         btnDrivePassword.setForeground(FOREGROUND);
         btnDrivePassword.setBackground(BACKGROUND);
         btnDrivePassword.setFont(raleway(15));
-        if (PassProperty.DRIVE_PASSWORD.getValue().length() > 0)
-            add(btnDrivePassword, "settings.btn.drivePassword");
+        add(btnDrivePassword, "settings.btn.drivePassword");
+        refreshShowPassTextField();
     }
 
     /**
@@ -379,5 +375,9 @@ public class SettingsDialog extends JDialog {
     private void adjustSizeAndCenter() {
         setSize(new Dimension((getContentPane().getLayout().preferredLayoutSize(getContentPane())).width + 50, (getContentPane().getLayout().preferredLayoutSize(getContentPane())).height + 60));
         setLocationRelativeTo(null);
+    }
+
+    private void refreshShowPassTextField() {
+        COMPONENTS.get("settings.btn.drivePassword").setVisible(PassProperty.DRIVE_PASSWORD.getValue().length() > 0);
     }
 }

@@ -1,7 +1,6 @@
 package de.finnik.gui.mainFrame;
 
 import de.finnik.AES.AES;
-import de.finnik.drive.PassDrive;
 import de.finnik.gui.Animation;
 import de.finnik.gui.Var;
 import de.finnik.gui.dialogs.SettingsDialog;
@@ -167,8 +166,13 @@ public class PassFrame extends JFrame {
     public static void savePasswords() {
         if (aes.passIsSet())
             Password.savePasswords(passwordList, PASSWORDS, aes);
-        if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
-            PassDrive.compare(((PassFrame) FRAME).passBankPanel::updateTableModel);
+        if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
+            try {
+                DRIVE.synchronize(((PassFrame) FRAME).passBankPanel::updateTableModel);
+            } catch (Exception e) {
+                LOG.error("Error while synchronizing with Google Drive", e);
+            }
+        }
         ((PassFrame) FRAME).passBankPanel.updateTableModel();
     }
 
@@ -219,7 +223,7 @@ public class PassFrame extends JFrame {
         });
         lblRefresh.setBounds(50, 10, 31, 30);
         add(lblRefresh, "passFrame.lbl.refresh");
-        refreshVisibility();
+        refreshDriveVisibility();
 
         JLabel lblClose = new JLabel();
         lblClose.setIcon(new ImageIcon(CLOSE));
@@ -298,7 +302,7 @@ public class PassFrame extends JFrame {
         }
     }
 
-    public void refreshVisibility() {
+    public void refreshDriveVisibility() {
         COMPONENTS.get("passFrame.lbl.refresh").setVisible(!PassProperty.DRIVE_PASSWORD.getValue().isEmpty());
     }
 
