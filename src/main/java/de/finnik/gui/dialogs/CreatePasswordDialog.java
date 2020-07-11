@@ -41,9 +41,9 @@ public class CreatePasswordDialog extends JDialog {
         this.message = message;
         this.images = images;
         this.weak = weak;
-        if (images.getOrDefault("CLOSE", null) == null ||
-                images.getOrDefault("HIDE", null) == null ||
-                images.getOrDefault("SHOW", null) == null) {
+        if (!images.containsKey("CLOSE") ||
+                !images.containsKey("HIDE") ||
+                !images.containsKey("SHOW")) {
             throw new IllegalArgumentException("Missing images in map!");
         }
     }
@@ -182,7 +182,7 @@ public class CreatePasswordDialog extends JDialog {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (new Zxcvbn().measure(new String(passwordField.getPassword())).getScore() > 2 || weak.get()) {
+                    if (new Zxcvbn().measure(new String(passwordField.getPassword())).getScore() > 2 || passwordField.getPassword().length == 0 || weak.get()) {
                         password = passwordField.getPassword();
                         dispose();
                     } else {

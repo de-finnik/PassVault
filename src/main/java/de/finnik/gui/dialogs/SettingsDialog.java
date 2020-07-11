@@ -117,7 +117,7 @@ public class SettingsDialog extends JDialog {
                         LOG.error("Error while synchronizing with Drive", exception);
                     }
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
-                    if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty())
+                    if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
                         new PopUp(new PopUp.PopUpItem(LANG.getString("settings.pop.disableDrive"), action -> {
                             PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
                             if (new File("StoredCredential").delete()) {
@@ -126,7 +126,8 @@ public class SettingsDialog extends JDialog {
                             ((PassFrame) FRAME).refreshDriveVisibility();
                             textComponents();
                             refreshShowPassTextField();
-                        }));
+                        })).show(e.getComponent(), e.getX(), e.getY());
+                    }
                 }
             }
         });
