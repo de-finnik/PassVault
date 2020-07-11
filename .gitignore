@@ -2,3 +2,4 @@ target/
 Main.iml
 build/
 src/main/resources/credentials.json
+bin/

@@ -1,6 +1,7 @@
 package de.finnik.gui.dialogs;
 
 import javax.swing.*;
+import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -18,9 +19,8 @@ public class PassDialog {
     private final BufferedImage[] IMAGES;
     private final Color FOREGROUND, BACKGROUND;
     private final Font FONT;
-    public Window OWNER;
-
     private final Cursor HAND_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+    public Window OWNER;
 
     /**
      * Predefines settings that will be used later
@@ -68,11 +68,24 @@ public class PassDialog {
         lblLogo.setSize(lblLogo.getPreferredSize());
         content.add(lblLogo, BorderLayout.WEST);
 
-
-        JLabel lblMessage = new JLabel(message);
-        lblMessage.setFont(FONT.deriveFont(13f));
-        lblMessage.setForeground(FOREGROUND);
-        content.add(lblMessage, BorderLayout.CENTER);
+        JTextPane textPaneMessage = new JTextPane();
+        textPaneMessage.setFont(FONT.deriveFont(13f));
+        textPaneMessage.setBackground(BACKGROUND);
+        textPaneMessage.setForeground(FOREGROUND);
+        textPaneMessage.setEditable(false);
+        textPaneMessage.setEditorKit(new CenteredEditorKit());
+        try {
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_CENTER);
+            StyledDocument doc = (StyledDocument) textPaneMessage.getDocument();
+            doc.insertString(0, message, attrs);
+            doc.setParagraphAttributes(0, doc.getLength() - 1, attrs, false);
+        } catch (Exception ex) {
+            throw new RuntimeException("Exception while setting message text for JTextPane in PassDialog", ex);
+        }
+        textPaneMessage.setSize(new Dimension(Math.min(textPaneMessage.getPreferredSize().width, OWNER.getWidth()), 10));
+        textPaneMessage.setPreferredSize(new Dimension(textPaneMessage.getSize().width, textPaneMessage.getPreferredSize().height));
+        content.add(textPaneMessage, BorderLayout.CENTER);
 
         JLabel lblClose = new JLabel() {
             @Override
@@ -105,7 +118,6 @@ public class PassDialog {
         lblClose.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
         content.add(lblClose, BorderLayout.EAST);
 
-        dialog.setSize(new Dimension(content.getLayout().preferredLayoutSize(content).width + 50, content.getLayout().preferredLayoutSize(content).height + 50));
         dialog.setSize(content.getLayout().preferredLayoutSize(content));
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
@@ -155,12 +167,17 @@ public class PassDialog {
         panel.setBorder(BorderFactory.createEmptyBorder(5, 0, 10, 0));
         content.add(panel, BorderLayout.CENTER);
 
-        JLabel lblMessage = new JLabel(message);
-        lblMessage.setFont(FONT.deriveFont(13f));
-        lblMessage.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
-        lblMessage.setForeground(FOREGROUND);
+        JTextPane textPaneMessage = new JTextPane();
+        textPaneMessage.setText(message);
+        textPaneMessage.setFont(FONT.deriveFont(13f));
+        textPaneMessage.setBackground(BACKGROUND);
+        textPaneMessage.setForeground(FOREGROUND);
+        textPaneMessage.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+        textPaneMessage.setEditable(false);
+        textPaneMessage.setSize(new Dimension(Math.min(textPaneMessage.getPreferredSize().width, OWNER.getWidth()), 10));
+        textPaneMessage.setPreferredSize(new Dimension(textPaneMessage.getSize().width, textPaneMessage.getPreferredSize().height));
 
-        panel.add(lblMessage, BorderLayout.NORTH);
+        panel.add(textPaneMessage, BorderLayout.NORTH);
 
         JTextField tfInput = pass ? new JPasswordField() {
             @Override
@@ -188,7 +205,7 @@ public class PassDialog {
             }
         });
         tfInput.setFont(FONT.deriveFont(pass ? 20f : 15f));
-        tfInput.setPreferredSize(new Dimension(Math.max(lblMessage.getPreferredSize().width + 100, 250), 25));
+        tfInput.setPreferredSize(new Dimension(Math.max(textPaneMessage.getPreferredSize().width + 100, 250), 25));
         tfInput.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
         panel.add(tfInput, BorderLayout.CENTER);
 
@@ -255,12 +272,24 @@ public class PassDialog {
         lblLogo.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 0));
         content.add(lblLogo);
 
-        JLabel lblMessage = new JLabel(message);
-        lblMessage.setFont(FONT.deriveFont(13f));
-        lblMessage.setPreferredSize(new Dimension(Math.max(lblMessage.getPreferredSize().width + 20, 100), 20));
-        lblMessage.setForeground(FOREGROUND);
-
-        content.add(lblMessage);
+        JTextPane textPaneMessage = new JTextPane();
+        textPaneMessage.setFont(FONT.deriveFont(13f));
+        textPaneMessage.setBackground(BACKGROUND);
+        textPaneMessage.setForeground(FOREGROUND);
+        textPaneMessage.setEditable(false);
+        textPaneMessage.setEditorKit(new CenteredEditorKit());
+        try {
+            SimpleAttributeSet attrs = new SimpleAttributeSet();
+            StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_CENTER);
+            StyledDocument doc = (StyledDocument) textPaneMessage.getDocument();
+            doc.insertString(0, message, attrs);
+            doc.setParagraphAttributes(0, doc.getLength() - 1, attrs, false);
+        } catch (Exception ex) {
+            throw new RuntimeException("Exception while setting message text for JTextPane in PassDialog", ex);
+        }
+        textPaneMessage.setSize(new Dimension(Math.min(textPaneMessage.getPreferredSize().width, OWNER.getWidth()), 10));
+        textPaneMessage.setPreferredSize(new Dimension(textPaneMessage.getSize().width, textPaneMessage.getPreferredSize().height));
+        content.add(textPaneMessage);
 
         JLabel lblYes = new JLabel() {
             @Override
@@ -314,5 +343,51 @@ public class PassDialog {
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
         return result.get();
+    }
+
+    private static class CenteredEditorKit extends StyledEditorKit {
+        public ViewFactory getViewFactory() {
+            return new StyledViewFactory();
+        }
+
+        static class StyledViewFactory implements ViewFactory {
+            public View create(Element elem) {
+                String kind = elem.getName();
+                if (kind != null) {
+                    switch (kind) {
+                        case AbstractDocument.ContentElementName:
+
+                            return new LabelView(elem);
+                        case AbstractDocument.ParagraphElementName:
+                            return new ParagraphView(elem);
+                        case AbstractDocument.SectionElementName:
+                            return new BoxView(elem, View.Y_AXIS) {
+                                protected void layoutMajorAxis(int targetSpan, int axis, int[] offsets, int[] spans) {
+
+                                    super.layoutMajorAxis(targetSpan, axis, offsets, spans);
+                                    int textBlockHeight = 0;
+                                    int offset;
+                                    for (int span : spans) {
+                                        textBlockHeight = span;
+                                    }
+                                    offset = (targetSpan - textBlockHeight) / 2;
+                                    for (int i = 0; i < offsets.length; i++) {
+                                        offsets[i] += offset;
+                                    }
+
+                                }
+                            };
+                        case StyleConstants.ComponentElementName:
+                            return new ComponentView(elem);
+                        case StyleConstants.IconElementName:
+
+                            return new IconView(elem);
+                    }
+                }
+
+                return new LabelView(elem);
+            }
+
+        }
     }
 }
