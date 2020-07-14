@@ -6,16 +6,37 @@ import de.finnik.passvault.passwords.Password;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static de.finnik.gui.Var.LOG;
+import static de.finnik.gui.Var.*;
 
 /**
  * Contains useful methods that concern this application
  */
 public class PassUtils {
+
+    public static List<Password> getAllMatchingPasswords(String key, List<Password> passwords) {
+        return passwords.stream().filter(pass -> pass.getValues().anyMatch(arg -> arg.toLowerCase().contains(key.toLowerCase()))).collect(Collectors.toList());
+    }
+
+    public static void deletePassword(Password password) {
+        password.setPass("");
+        password.setSite("");
+        password.setUser("");
+        password.setOther("");
+    }
+
+    public static void copyToClipboard(String string) throws IOException {
+        if (!HINTS.triggerHint("hints.windows.clipboardHistory", t -> {
+            if (System.getProperty("os.name").toLowerCase().contains("win"))
+                DIALOG.message(LANG.getString(t));
+        })) {
+            Utils.copyToClipboard(string);
+        }
+    }
 
     /**
      * Contains useful methods that do stuff with the saved data
@@ -114,16 +135,5 @@ public class PassUtils {
                 component.setBackground(background);
             }
         }
-    }
-
-    public static List<Password> getAllMatchingPasswords(String key, List<Password> passwords) {
-        return passwords.stream().filter(pass -> pass.getValues().anyMatch(arg -> arg.toLowerCase().contains(key.toLowerCase()))).collect(Collectors.toList());
-    }
-
-    public static void deletePassword(Password password) {
-        password.setPass("");
-        password.setSite("");
-        password.setUser("");
-        password.setOther("");
     }
 }

@@ -4,6 +4,7 @@ import de.finnik.AES.AES;
 import de.finnik.api.PassAPI;
 import de.finnik.drive.DriveLocalHelper;
 import de.finnik.gui.dialogs.PassDialog;
+import de.finnik.gui.hints.Hints;
 import de.finnik.gui.mainFrame.PassFrame;
 import de.finnik.passvault.InactivityListener;
 import de.finnik.passvault.LogErrorStream;
@@ -104,6 +105,12 @@ public class PassVault {
             RALEWAY = Font.createFont(Font.TRUETYPE_FONT, is);
         } catch (Exception e) {
             LOG.error("Error while loading Raleway font!", e);
+        }
+
+        try {
+            HINTS = new Hints(new File(dir, "hints"));
+        } catch (IOException e) {
+            LOG.error("Error while loading hints!", e);
         }
 
         loadImages(Arrays.stream(Var.class.getFields()).filter(field -> field.getType() == BufferedImage.class).toArray(Field[]::new));

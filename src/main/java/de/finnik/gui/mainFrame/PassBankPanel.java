@@ -4,7 +4,6 @@ import de.finnik.gui.Var;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;
 import de.finnik.passvault.utils.PassUtils;
-import de.finnik.passvault.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -15,6 +14,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -89,7 +89,7 @@ public class PassBankPanel extends JPanel {
         scrollPanePassBank.setViewportView(tablePassBank);
         scrollPanePassBank.getViewport().setBackground(BACKGROUND);
         scrollPanePassBank.setBorder(BorderFactory.createEmptyBorder());
-        scrollPanePassBank.setBounds(0, 70, 350, 280);
+        scrollPanePassBank.setBounds(0, 70, 500, 280);
 
         tablePassBank.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tablePassBank.setShowGrid(false);
@@ -191,10 +191,12 @@ public class PassBankPanel extends JPanel {
                 try {
                     int row = tablePassBank.getRowCount() == 1 ? 0 : tablePassBank.getSelectedRow();
                     Password password = getAllMatchingPasswords().get(row);
-                    Utils.copyToClipboard(password.getPass());
+                    PassUtils.copyToClipboard(password.getPass());
                     LOG.info(Password.log(password, "Copied password to clipboard"));
                 } catch (IndexOutOfBoundsException ex) {
                     DIALOG.message(LANG.getString("passBank.jop.noEntrySelected"));
+                } catch (IOException ioException) {
+                    LOG.error("Error while checking for hints!");
                 }
             }
         });

@@ -2,6 +2,7 @@ package de.finnik.gui;
 
 import de.finnik.drive.DriveLocalHelper;
 import de.finnik.gui.dialogs.PassDialog;
+import de.finnik.gui.hints.Hints;
 import de.finnik.passvault.InactivityListener;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.utils.PassUtils;
@@ -67,6 +68,8 @@ public class Var {
     public static InactivityListener INACTIVITY_LISTENER;
 
     public static DriveLocalHelper DRIVE;
+
+    public static Hints HINTS;
 
     /**
      * Overrides {@link PassUtils.FileUtils#loadLang} method with matching variables from this class

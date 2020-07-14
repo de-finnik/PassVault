@@ -12,6 +12,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -160,7 +161,11 @@ public class SavePassDialog extends JDialog {
             }
 
             PassFrame.savePasswords();
-            Utils.copyToClipboard(newPass.getPass());
+            try {
+                PassUtils.copyToClipboard(newPass.getPass());
+            } catch (IOException ioException) {
+                LOG.error("Error while checking for hints!");
+            }
 
             dispose();
         });
