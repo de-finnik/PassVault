@@ -138,7 +138,7 @@ public class PassAPI {
      * @param command The command to get more information from
      */
     private void printHelp(String command) {
-        InputStream inputStream = PassVault.class.getResourceAsStream("/api_help/" + command + ".help");
+        InputStream inputStream = PassVault.class.getResourceAsStream("/help/api_help/" + command + ".help");
         if (inputStream == null)
             return;
         Arrays.stream(PassAPI.class.getDeclaredMethods())

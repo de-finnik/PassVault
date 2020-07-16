@@ -1,6 +1,8 @@
 package de.finnik.passvault.utils;
 
 import de.finnik.gui.PassVault;
+import de.finnik.gui.hints.HintBrowser;
+import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;
 
 import javax.swing.*;
@@ -31,8 +33,15 @@ public class PassUtils {
 
     public static void copyToClipboard(String string) throws IOException {
         if (!HINTS.triggerHint("hints.windows.clipboardHistory", t -> {
-            if (System.getProperty("os.name").toLowerCase().contains("win"))
-                DIALOG.message(LANG.getString(t));
+            if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                if (DIALOG.confirm(LANG.getString(t))) {
+                    try {
+                        HintBrowser.show(FRAME, t, PassProperty.LANG.getValue());
+                    } catch (IOException e) {
+                        LOG.error("Error while loading hint {}", t, e);
+                    }
+                }
+            }
         })) {
             Utils.copyToClipboard(string);
         }
