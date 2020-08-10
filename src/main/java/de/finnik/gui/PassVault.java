@@ -4,7 +4,6 @@ import de.finnik.AES.AES;
 import de.finnik.api.PassAPI;
 import de.finnik.drive.DriveLocalHelper;
 import de.finnik.gui.dialogs.PassDialog;
-import de.finnik.gui.hints.HintBrowser;
 import de.finnik.gui.hints.Hints;
 import de.finnik.gui.mainFrame.PassFrame;
 import de.finnik.passvault.InactivityListener;
@@ -164,7 +163,6 @@ public class PassVault {
                         DIALOG.OWNER = FRAME = new PassFrame(pass, passList);
                         FRAME.setVisible(true);
                     });
-                    HintBrowser.show(FRAME, "hints.windows.clipboardHistory", "de");
                 } else {
                     FRAME = new PassFrame("", new ArrayList<>());
                 }

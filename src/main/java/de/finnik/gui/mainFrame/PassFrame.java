@@ -3,6 +3,7 @@ package de.finnik.gui.mainFrame;
 import de.finnik.AES.AES;
 import de.finnik.gui.Animation;
 import de.finnik.gui.Var;
+import de.finnik.gui.dialogs.CompareDialog;
 import de.finnik.gui.dialogs.SettingsDialog;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;
@@ -19,7 +20,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static de.finnik.gui.Var.*;
 
@@ -81,7 +81,7 @@ public class PassFrame extends JFrame {
                     jfc.setFileFilter(new FileNameExtensionFilter(".bin", "bin"));
                     int result = jfc.showOpenDialog(null);
                     if (result == JFileChooser.APPROVE_OPTION && PassFrame.aes.passIsSet()) {
-                        importBackup(jfc.getSelectedFile());
+                        startImport(jfc.getSelectedFile());
                     }
                 }
             }
@@ -142,7 +142,7 @@ public class PassFrame extends JFrame {
                     return false;
                 }
                 for (File file : files) {
-                    importBackup(file);
+                    startImport(file);
                 }
                 return true;
             }
@@ -311,19 +311,31 @@ public class PassFrame extends JFrame {
      *
      * @param file The location of the backup
      */
-    private void importBackup(File file) {
+    private void startImport(File file) {
         if (file.getName().endsWith(".bin")) {
-            String pass = DIALOG.input(LANG.getString("passFrame.jop.enterPass"), true);
             try {
-                PassFrame.passwordList.addAll(Password.readPasswords(file, new AES(pass)).stream().filter(p -> PassFrame.passwordList.stream().noneMatch(p1 -> p1.id().equals(p.id()))).collect(Collectors.toList()));
-                LOG.info("Imported passwords from {}!", file.getAbsolutePath());
-                savePasswords();
+                importBackup(file, PassFrame.aes);
             } catch (AES.WrongPasswordException e) {
-                if (pass.length() > 0)
+                AES aes = new AES(DIALOG.input(LANG.getString("passFrame.jop.enterPass"), true));
+                try {
+                    importBackup(file, aes);
+                } catch (AES.WrongPasswordException e1) {
                     DIALOG.message(LANG.getString("jop.wrongPass"));
+                }
             }
         } else {
             DIALOG.message(LANG.getString("passFrame.jop.noSupportedFile"));
         }
+    }
+
+    private void importBackup(File file, AES aes) throws AES.WrongPasswordException {
+        List<Password> backup = Password.readPasswords(file, aes);
+
+        List<Password> compared = new CompareDialog(FRAME, PassFrame.passwordList, backup).open();
+        if (compared == null)
+            return;
+        PassFrame.passwordList = compared;
+        LOG.info("Imported passwords from {}!", file.getAbsolutePath());
+        savePasswords();
     }
 }

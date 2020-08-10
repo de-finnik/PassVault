@@ -9,8 +9,10 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static de.finnik.gui.Var.*;
@@ -142,6 +144,22 @@ public class PassUtils {
             for (Component component : components) {
                 component.setForeground(foreground);
                 component.setBackground(background);
+            }
+        }
+
+        public static void doForAllComponents(JComponent container, Consumer<Component> consumer, Type... types) {
+            List<Component> components = new ArrayList<>();
+            addChildComponents(container, components);
+            components
+                    .stream()
+                    .filter(c -> Arrays.asList(types).contains(c.getClass()))
+                    .forEach(consumer);
+        }
+
+        private static void addChildComponents(JComponent container, List<Component> components) {
+            for (Component component : container.getComponents()) {
+                components.add(component);
+                addChildComponents((JComponent) component, components);
             }
         }
     }

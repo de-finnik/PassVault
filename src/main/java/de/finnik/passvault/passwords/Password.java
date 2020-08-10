@@ -134,6 +134,13 @@ public class Password {
         }
     }
 
+    public static boolean equalsInformation(Password one, Password two) {
+        return one.getPass().equals(two.getPass()) &&
+                one.getSite().equals(two.getSite()) &&
+                one.getUser().equals(two.getUser()) &&
+                one.getOther().equals(two.getOther());
+    }
+
     public String getPass() {
         return pass;
     }

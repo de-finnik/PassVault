@@ -41,17 +41,18 @@ public enum PassProperty {
                 try {
                     if (aes != null)
                         val = aes.decrypt(split[1]);
+
+                    if (val == null)
+                        val = split[1];
+                    if (values.containsKey(split[0])) {
+                        // No encrypted key
+                        values.put(split[0], val);
+                    } else if (aes != null && values.containsKey(aes.decrypt(split[0]))) {
+                        // Encrypted key
+                        values.put(aes.decrypt(split[0]), val);
+                    }
                 } catch (AES.WrongPasswordException ignore) {
 
-                }
-                if (val == null)
-                    val = split[1];
-                if (values.containsKey(split[0])) {
-                    // No encrypted key
-                    values.put(split[0], val);
-                } else if (aes != null && values.containsKey(aes.decrypt(split[0]))) {
-                    // Encrypted key
-                    values.put(aes.decrypt(split[0]), val);
                 }
             });
         } catch (IOException e) {

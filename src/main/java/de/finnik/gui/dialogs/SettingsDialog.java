@@ -84,6 +84,7 @@ public class SettingsDialog extends JDialog {
                 PassFrame.aes = new AES(mainPass);
                 LOG.info("Changed main password!");
                 PassFrame.savePasswords();
+                PassProperty.store(PassFrame.aes);
             } else {
                 DIALOG.message(LANG.getString("jop.wrongPass"));
             }

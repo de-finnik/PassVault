@@ -89,7 +89,7 @@ public class PassBankPanel extends JPanel {
         scrollPanePassBank.setViewportView(tablePassBank);
         scrollPanePassBank.getViewport().setBackground(BACKGROUND);
         scrollPanePassBank.setBorder(BorderFactory.createEmptyBorder());
-        scrollPanePassBank.setBounds(0, 70, 500, 280);
+        scrollPanePassBank.setBounds(0, 70, 350, 280);
 
         tablePassBank.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tablePassBank.setShowGrid(false);
