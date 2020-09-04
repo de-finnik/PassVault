@@ -1,14 +1,10 @@
 package de.finnik.gui.mainFrame;
 
 import de.finnik.gui.Var;
-import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;
 import de.finnik.passvault.utils.PassUtils;
 
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -28,7 +24,7 @@ import static de.finnik.gui.Var.*;
 public class PassBankPanel extends JPanel {
 
     private static JTextField tfSearch;
-    private static DefaultTableModel tableModelPassBank;
+    private static ListPasswordPanel listPasswordPanel;
     private static JButton btnShowPass;
     private static JLabel lblCopy;
 
@@ -74,97 +70,17 @@ public class PassBankPanel extends JPanel {
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
-                if (e.getKeyCode() == KeyEvent.VK_ENTER && tableModelPassBank.getRowCount() > 0) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && getAllMatchingPasswords().size() > 0) {
                     lblCopy.getMouseListeners()[0].mouseClicked(null);
                 }
             }
         });
         add(tfSearch, "passBank.tf.search");
 
-        JScrollPane scrollPanePassBank = new JScrollPane();
-        JTable tablePassBank = new JTable();
-        COMPONENTS.put("passBank.table", tablePassBank);
-
-
-        scrollPanePassBank.setViewportView(tablePassBank);
-        scrollPanePassBank.getViewport().setBackground(BACKGROUND);
-        scrollPanePassBank.setBorder(BorderFactory.createEmptyBorder());
-        scrollPanePassBank.setBounds(0, 70, 350, 280);
-
-        tablePassBank.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        tablePassBank.setShowGrid(false);
-        tablePassBank.setAutoCreateRowSorter(true);
-        tablePassBank.setFillsViewportHeight(true);
-
-        tablePassBank.getTableHeader().setBackground(BACKGROUND);
-        tablePassBank.getTableHeader().setForeground(FOREGROUND);
-        tablePassBank.getTableHeader().setResizingAllowed(false);
-        tablePassBank.getTableHeader().setReorderingAllowed(false);
-
-
-        tablePassBank.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-                if (column == 0 && Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue())) {
-                    JTextField textField = new JPasswordField();
-                    textField.setText(value.toString());
-                    return textField;
-                }
-                setBackground(FOREGROUND);
-                setForeground(BACKGROUND);
-                if (hasFocus) {
-                    setBorder(BorderFactory.createLineBorder(BACKGROUND));
-                }
-                return this;
-            }
-        });
-
-        tableModelPassBank = new DefaultTableModel(new String[0][4], LANG.getString("passBank.table.header").split("#"));
-        tableModelPassBank.addTableModelListener(e -> {
-            /* Lets you edit a password
-             * Note: Editing a password so that it would has no information, will delete it after confirming
-             */
-            if (e.getType() == TableModelEvent.UPDATE && tablePassBank.getSelectedRow() >= 0) {
-                Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
-
-                // Edits the password
-                switch (e.getColumn()) {
-                    case 0:
-                        password.setPass((String) tableModelPassBank.getValueAt(e.getFirstRow(), e.getColumn()));
-                        break;
-                    case 1:
-                        password.setSite((String) tableModelPassBank.getValueAt(e.getFirstRow(), e.getColumn()));
-                        break;
-                    case 2:
-                        password.setUser((String) tableModelPassBank.getValueAt(e.getFirstRow(), e.getColumn()));
-                        break;
-                    case 3:
-                        password.setOther((String) tableModelPassBank.getValueAt(e.getFirstRow(), e.getColumn()));
-                        break;
-
-                }
-                LOG.info(Password.log(password, "Edited password"));
-                PassFrame.savePasswords();
-            }
-        });
-        tablePassBank.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                super.keyReleased(e);
-                // Lets you delete a password via pressing delete
-                if (e.getKeyCode() == KeyEvent.VK_DELETE && tablePassBank.getSelectedRow() >= 0) {
-                    if (DIALOG.confirm(LANG.getString("jop.deletePass"))) {
-                        Password password = getAllMatchingPasswords().get(tablePassBank.getSelectedRow());
-                        PassUtils.deletePassword(password);
-                        LOG.info(Password.log(password, "Deleted password"));
-                        PassFrame.savePasswords();
-                    }
-                }
-            }
-        });
-        tablePassBank.setModel(tableModelPassBank);
-        add(scrollPanePassBank);
+        listPasswordPanel = new ListPasswordPanel();
+        listPasswordPanel.setBackground(Color.pink);
+        listPasswordPanel.setBounds(0, 70, 350, 280);
+        add(listPasswordPanel, "passBank.listPasswordPanel");
 
         btnShowPass = new JButton();
         btnShowPass.setBounds(240, 30, 60, 30);
@@ -189,11 +105,10 @@ public class PassBankPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                    int row = tablePassBank.getRowCount() == 1 ? 0 : tablePassBank.getSelectedRow();
-                    Password password = getAllMatchingPasswords().get(row);
+                    Password password = listPasswordPanel.getSelectedPassword();
                     PassUtils.copyToClipboard(password.getPass());
                     LOG.info(Password.log(password, "Copied password to clipboard"));
-                } catch (IndexOutOfBoundsException ex) {
+                } catch (NullPointerException ex) {
                     DIALOG.message(LANG.getString("passBank.jop.noEntrySelected"));
                 } catch (IOException ioException) {
                     LOG.error("Error while checking for hints!");
@@ -216,10 +131,10 @@ public class PassBankPanel extends JPanel {
     }
 
     /**
-     * Checks via {@link PassBankPanel#showAll()} whether {@link PassBankPanel#tableModelPassBank} should display all passwords
+     * Checks via {@link PassBankPanel#showAll()} whether {@link PassBankPanel#listPasswordPanel} should display all passwords
      * or just the ones matching to the input from {@link PassBankPanel#tfSearch}
      *
-     * @return All passwords to be currently displayed in {@link PassBankPanel#tableModelPassBank}
+     * @return All passwords to be currently displayed in {@link PassBankPanel#listPasswordPanel}
      */
     private List<Password> getAllMatchingPasswords() {
         if (showAll()) {
@@ -231,17 +146,14 @@ public class PassBankPanel extends JPanel {
     }
 
     /**
-     * Updates {@link PassBankPanel#tableModelPassBank} via adding all passwords from {@link PassBankPanel#getAllMatchingPasswords()} to {@link PassBankPanel#tableModelPassBank}
+     * Updates {@link PassBankPanel#listPasswordPanel} via adding all passwords from {@link PassBankPanel#getAllMatchingPasswords()} to {@link PassBankPanel#listPasswordPanel}
      */
     public void updateTableModel() {
-        tableModelPassBank.setRowCount(0);
-        for (Password password : getAllMatchingPasswords()) {
-            tableModelPassBank.addRow(new String[]{password.getPass(), password.getSite(), password.getUser(), password.getOther()});
-        }
+        listPasswordPanel.display(getAllMatchingPasswords());
     }
 
     /**
-     * Checks whether {@link PassBankPanel#tableModelPassBank} should display all passwords or just the ones that match with the user input
+     * Checks whether {@link PassBankPanel#listPasswordPanel} should display all passwords or just the ones that match with the user input
      *
      * @return A boolean (true=All passwords should be displayed; false=passwords matching to user input should be displayed)
      */

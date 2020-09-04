@@ -304,12 +304,12 @@ public class CompareDialog extends JDialog {
     /**
      * A helper class to handle the passwords from {@link CompareDialog}
      */
-    private static class PassComp {
+    public static class PassComp {
         private final Password password;
         private final JPanel panel;
         private boolean isSelected;
 
-        private PassComp(Password password, JPanel panel) {
+        public PassComp(Password password, JPanel panel) {
             this.password = password;
             this.panel = panel;
             isSelected = false;

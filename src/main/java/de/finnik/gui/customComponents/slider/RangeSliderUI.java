@@ -1,4 +1,4 @@
-package de.finnik.gui.slider;
+package de.finnik.gui.customComponents.slider;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
