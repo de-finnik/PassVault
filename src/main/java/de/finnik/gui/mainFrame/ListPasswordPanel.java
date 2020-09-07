@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static de.finnik.gui.Var.*;
@@ -66,11 +67,16 @@ public class ListPasswordPanel extends JPanel {
      * @return The selected password or {@code null}
      */
     public Password getSelectedPassword() {
-        return Arrays.stream(passwords.getComponents())
+        List<PasswordPanel> passwordPanels = Arrays.stream(passwords.getComponents())
                 .filter(c -> c.getClass() == PasswordPanel.class)
-                .filter(itemPanel -> ((PasswordPanel) itemPanel).isSelected())
-                .map(itemPanel -> ((PasswordPanel) itemPanel).getPassword())
-                .findAny().orElse(null);
+                .map(c -> ((PasswordPanel) c))
+                .collect(Collectors.toList());
+        if (passwordPanels.isEmpty())
+            return null;
+        return passwordPanels.size() == 1 ? passwordPanels.get(0).getPassword() :
+                passwordPanels.stream().filter(PasswordPanel::isSelected)
+                        .map(PasswordPanel::getPassword)
+                        .findAny().orElse(null);
     }
 
     /**
@@ -95,8 +101,7 @@ public class ListPasswordPanel extends JPanel {
         PasswordPanel outerPanel = new PasswordPanel(new BorderLayout(), password);
         outerPanel.setBorder(BorderFactory.createLineBorder(FOREGROUND));
 
-        GridLayout gridLayout = new GridLayout(2, 2);
-        gridLayout.setHgap(10);
+        GridLayout gridLayout = new GridLayout(2, 2, 10, 10);
         JPanel innerPanel = new JPanel(gridLayout);
         outerPanel.add(innerPanel, BorderLayout.CENTER);
 
@@ -112,16 +117,16 @@ public class ListPasswordPanel extends JPanel {
         innerPanel.setBackground(BACKGROUND);
         innerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        Stream.of(parameterToTextField(true, password.getPass(), password::setPass),
-                parameterToTextField(false, password.getSite(), password::setSite),
-                parameterToTextField(false, password.getUser(), password::setUser),
-                parameterToTextField(false, password.getOther(), password::setOther))
+        Stream.of(parameterToPanel(true, LANG.getString("savePass.lbl.pass"), password.getPass(), password::setPass),
+                parameterToPanel(false, LANG.getString("savePass.lbl.site"), password.getSite(), password::setSite),
+                parameterToPanel(false, LANG.getString("savePass.lbl.user"), password.getUser(), password::setUser),
+                parameterToPanel(false, LANG.getString("savePass.lbl.other"), password.getOther(), password::setOther))
                 .forEach(tf -> {
-                    tf.addMouseListener(highlight);
+                    PassUtils.GUIUtils.doForAllComponents(tf, c -> c.addMouseListener(highlight), JPanel.class, JTextField.class, JLabel.class);
                     innerPanel.add(tf);
                 });
 
-        outerPanel.setSize(getWidth(), (getHeight() - 20) / 3);
+        outerPanel.setSize(getWidth(), (getHeight() - 20) / 2);
         outerPanel.setMaximumSize(new Dimension(outerPanel.getMaximumSize().width, outerPanel.getHeight()));
         outerPanel.setPreferredSize(outerPanel.getSize());
 
@@ -129,19 +134,29 @@ public class ListPasswordPanel extends JPanel {
     }
 
     /**
-     * Creates a {@link JTextField} to be added to a new {@link PasswordPanel} by taking a {@code String} to be displayed inside the TextField
+     * Creates a {@link JPanel} to be added to a new {@link PasswordPanel} by taking two {@code String} objects to be displayed inside the Panel as a title and a content
      *
      * @param pass        {@link JTextField} -> {@code false}; {@link JPasswordField} -> {@code true}
-     * @param parameter   The string to be displayed inside the TextField
+     * @param title       The string to be displayed as a title inside the top label
+     * @param content     The string to be displayed inside the TextField
      * @param keyListener A {@link Consumer} that takes a {@link String} and accepts the user input after he made changes to the TextField
-     * @return The created {@link JTextField}
+     * @return The created {@link JPanel}
      */
-    private JTextField parameterToTextField(boolean pass, String parameter, Consumer<String> keyListener) {
+    private JPanel parameterToPanel(boolean pass, String title, String content, Consumer<String> keyListener) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(BACKGROUND);
+
+        JLabel label = new JLabel(title);
+        label.setFont(raleway(13));
+        label.setForeground(Color.LIGHT_GRAY);
+        panel.add(label);
+
         JTextField textField;
         if (!pass) {
-            textField = new JTextField(parameter);
+            textField = new JTextField(content);
         } else {
-            textField = Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue()) ? new JPasswordField(parameter) : new JTextField(parameter);
+            textField = Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue()) ? new JPasswordField(content) : new JTextField(content);
         }
         AtomicBoolean focus = new AtomicBoolean(false);
         textField.addKeyListener(new KeyAdapter() {
@@ -182,7 +197,9 @@ public class ListPasswordPanel extends JPanel {
         textField.setBackground(BACKGROUND);
         textField.setFont(raleway(18));
         textField.setBorder(new BottomBorder(FOREGROUND, 1));
-        return textField;
+        panel.add(textField);
+
+        return panel;
     }
 
     /**
