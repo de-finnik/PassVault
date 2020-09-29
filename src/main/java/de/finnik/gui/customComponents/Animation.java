@@ -1,4 +1,4 @@
-package de.finnik.gui;
+package de.finnik.gui.customComponents;
 
 import de.finnik.passvault.utils.Utils;
 

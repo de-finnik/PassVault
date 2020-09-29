@@ -1,8 +1,8 @@
 package de.finnik.gui.mainFrame;
 
 import de.finnik.AES.AES;
-import de.finnik.gui.Animation;
 import de.finnik.gui.Var;
+import de.finnik.gui.customComponents.Animation;
 import de.finnik.gui.dialogs.CompareDialog;
 import de.finnik.gui.dialogs.SettingsDialog;
 import de.finnik.passvault.PassProperty;
@@ -44,11 +44,11 @@ public class PassFrame extends JFrame {
     /**
      * Creates the frame
      *
-     * @param password     The main password which will be saved to {@link PassFrame#aes}
+     * @param aes          The {@link AES} object which will be saved to {@link PassFrame#aes}
      * @param passwordList The list of {@link Password}s which will be saved to {@link PassFrame#passwordList}
      */
-    public PassFrame(String password, List<Password> passwordList) {
-        PassFrame.aes = new AES(password);
+    public PassFrame(AES aes, List<Password> passwordList) {
+        PassFrame.aes = aes;
         PassFrame.passwordList = new ArrayList<>(passwordList);
 
         setContentPane(new JPanel());

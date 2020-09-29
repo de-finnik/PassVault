@@ -158,13 +158,13 @@ public class PassVault {
                 String file = br.readLine();
                 if (file != null && !file.isEmpty()) {
                     FRAME = new CheckFrame((pass, passList) -> {
-                        PassProperty.load(new AES(pass));
+                        PassProperty.load(pass);
                         INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
                         DIALOG.OWNER = FRAME = new PassFrame(pass, passList);
                         FRAME.setVisible(true);
                     });
                 } else {
-                    FRAME = new PassFrame("", new ArrayList<>());
+                    FRAME = new PassFrame(new AES(""), new ArrayList<>());
                 }
                 DIALOG.OWNER = FRAME;
                 FRAME.setVisible(true);
@@ -179,13 +179,13 @@ public class PassVault {
      * It´s created on beginning and you won´t enter {@link PassFrame} unless you haven´t typed in the correct password.
      */
     public static class CheckFrame extends JDialog {
-        private final BiConsumer<String, List<Password>> todo;
+        private final BiConsumer<AES, List<Password>> todo;
         private final String message;
 
         /**
          * Creates the frame
          */
-        public CheckFrame(BiConsumer<String, List<Password>> todo, String message) {
+        public CheckFrame(BiConsumer<AES, List<Password>> todo, String message) {
             this.todo = todo;
             this.message = message;
 
@@ -211,7 +211,7 @@ public class PassVault {
             textComponents();
         }
 
-        public CheckFrame(BiConsumer<String, List<Password>> todo) {
+        public CheckFrame(BiConsumer<AES, List<Password>> todo) {
             this(todo, null);
         }
 
@@ -298,7 +298,7 @@ public class PassVault {
                     return;
                 }
                 LOG.info("User logged in!");
-                todo.accept(new String(passwordField.getPassword()), passwordList);
+                todo.accept(new AES(new String(passwordField.getPassword())), passwordList);
                 dispose();
             });
             add(btnLogin, "check.btn.login");

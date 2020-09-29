@@ -2,7 +2,7 @@ package de.finnik.drive;
 
 import de.finnik.AES.AES;
 import de.finnik.AES.RealRandom;
-import de.finnik.gui.Animation;
+import de.finnik.gui.customComponents.Animation;
 import de.finnik.gui.mainFrame.PassFrame;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;

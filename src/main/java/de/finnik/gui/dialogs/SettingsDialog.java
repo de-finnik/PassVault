@@ -119,7 +119,7 @@ public class SettingsDialog extends JDialog {
                     }
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
                     if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
-                        new PopUp(new PopUp.PopUpItem(LANG.getString("settings.pop.disableDrive"), action -> {
+                        new PopUp.PassPopUp(new PopUp.PopUpItem(LANG.getString("settings.pop.disableDrive"), action -> {
                             PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
                             if (new File("StoredCredential").delete()) {
                                 LOG.info("Deleted StoredCredential");

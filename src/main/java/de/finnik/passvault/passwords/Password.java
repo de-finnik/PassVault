@@ -29,7 +29,7 @@ public class Password {
         this.site = site;
         this.user = user;
         this.other = other;
-        lastModified = System.currentTimeMillis();
+        updateModified();
         ID = UUID.randomUUID().toString();
     }
 
@@ -38,7 +38,7 @@ public class Password {
         site = "";
         user = "";
         other = "";
-        lastModified = System.currentTimeMillis();
+        updateModified();
         ID = UUID.randomUUID().toString();
     }
 
@@ -147,7 +147,7 @@ public class Password {
 
     public void setPass(String pass) {
         this.pass = pass;
-        lastModified = System.currentTimeMillis();
+        updateModified();
     }
 
     public String getSite() {
@@ -156,7 +156,7 @@ public class Password {
 
     public void setSite(String site) {
         this.site = site;
-        lastModified = System.currentTimeMillis();
+        updateModified();
     }
 
     public String getUser() {
@@ -165,7 +165,7 @@ public class Password {
 
     public void setUser(String user) {
         this.user = user;
-        lastModified = System.currentTimeMillis();
+        updateModified();
     }
 
     public String getOther() {
@@ -174,6 +174,10 @@ public class Password {
 
     public void setOther(String other) {
         this.other = other;
+        updateModified();
+    }
+
+    public void updateModified() {
         lastModified = System.currentTimeMillis();
     }
 

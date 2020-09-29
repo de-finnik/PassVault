@@ -6,7 +6,7 @@ add <input>
 
     Examples:
 
-    ...add {pass=test123,site=gmail.com,user=John}
+    ...add "{pass=test123,site=gmail.com,user=John}"
     -> The input mustn't contain all four keys
 
     Error codes:

@@ -37,13 +37,14 @@ public enum PassProperty {
                 if (split.length < 2) {
                     split = line.split("=");
                 }
-                String val = null;
+                String val;
                 try {
-                    if (aes != null)
+                    try {
                         val = aes.decrypt(split[1]);
-
-                    if (val == null)
+                    } catch (AES.WrongPasswordException | NullPointerException e) {
                         val = split[1];
+                    }
+
                     if (values.containsKey(split[0])) {
                         // No encrypted key
                         values.put(split[0], val);
@@ -51,7 +52,7 @@ public enum PassProperty {
                         // Encrypted key
                         values.put(aes.decrypt(split[0]), val);
                     }
-                } catch (AES.WrongPasswordException ignore) {
+                } catch (AES.WrongPasswordException | ArrayIndexOutOfBoundsException ignore) {
 
                 }
             });
@@ -188,6 +189,7 @@ public enum PassProperty {
     }
 
     private boolean encrypt() {
-        return this != PassProperty.LANG;
+        return this != PassProperty.LANG
+                && this != PassProperty.SHOW_MAIN_PASSWORD;
     }
 }

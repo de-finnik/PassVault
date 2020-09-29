@@ -15,10 +15,10 @@ It also generates new passwords with a given length and given parameters.
 
 # Installation & Quick Start
 1. Make sure you have [java](https://www.java.com/download/) installed on your computer
-2. [Download](https://t1p.de/passvault) the latest PassVault_Installer.exe file or a .jar file in the other versions folder
-3. Installer: execute the .exe file and follow the instructions (Attention: Probably your anti-virus program will warn you against this file because it isn´t signed, you can ignore this warning for sure)
+2. [Download](https://t1p.de/passvault) the latest PassVault_Installer.exe file, or a .jar file in the other versions folder
+3. Installer: execute the .exe file and follow the instructions (Attention: Probably your anti-virus program will warn you against this file because it isn't signed, you can ignore this warning for sure)
 4. .jar file: Execute the file (Note: application files will be created in the execution directory)
-5. After installing you should be able to see the main window of the PassVault application:
+5. After installing, you should be able to see the main window of the PassVault application:
 
 ![Main frame](screenshots/main_frame.png)
 
@@ -29,7 +29,7 @@ This window is mainly divided into two parts:
 # Generate a new password
 
 In the left part of the PassVault window you can generate a random and safe password. 
-You can choose the length of it and which characters the new password should contain. 
+You can choose an interval of password lengths and which characters the new password should contain. 
 The “Generate” button (who would have thought it) generates the password and displays it in the area below. 
 By clicking on the “Save password” button, you open a new window where you can hand in some information about your password. 
 A generated password will automatically be filled into the password field:
@@ -43,7 +43,7 @@ When you save a password for the first time, you´ll have to enter a main passwo
 # Manage your passwords
 In the right part of the PassVault window you can manage your passwords. 
 By entering some information in the “Search password” field, the table below will display all matching passwords. 
-And if you want to fill a password to a form fast, you can select an entry and click the copy button right above the table to copy it to your clipboard. 
+If you want to fill a password to a form fast, you can select an entry and click the copy button right above the table to copy it to your clipboard. 
 If you are searching a password with the field and the table displays just one entry, you can also press enter to copy it directly to the clipboard.
 
 The “All” button toggles between the searching mode and the display all mode. 
@@ -64,13 +64,13 @@ By clicking on the i(nformation) icon in the left top corner, you open the setti
 
 ## Google Drive
 PassVault lets you synchronize your passwords with all of your devices via Google Drive. 
-To start you'll have to click the button with the Google Drive icon in the top right corner.
+To get started, you'll have to click the button with the Google Drive icon in the top right corner.
 Now you'll have to log in to your Google Account and allow PassVault to save your passwords encrypted to your Google Drive. 
 When you synchronize your passwords the first time, PassVault will generate a random drive password for you, with that your passwords will be encrypted in your Google Drive. 
 You'll need this password later if you want to log in from another device.
 After logging in, PassVault will always synchronize your passwords with your drive on startup, after adding, deleting or editing a password 
 or if you click the "synchronize with Drive" button in the top left corner of the main frame.
-If you forget your drive password, you'll be able to show it after clicking on the "Your Google Drive password" button and entering your main password.
+If you forget your drive password, you'll be able to show it after clicking the "Your Google Drive password" button below and entering your main password.
 
 ## Changing your main password
 You can easily change your main password by hitting the button. 
@@ -97,11 +97,28 @@ After selecting the backup file, you’ll have to enter the main password with t
 If the password is correct, all passwords that are not already saved, will be added to your passwords.
 
 ## Inactivity
-From PassVault 2.0, there's a feature that allows you to lock PassVault after a certain time of inactivity.
+Since PassVault 2.0, there's a feature that allows you to lock PassVault after a certain time of inactivity.
 
 With the tick box you can enable/disable this feature.
 In the textfield you can enter the time after that PassVault will be locked in seconds. (Valid values between 10 and 3600)
 
+## Password visibility
+Since PassVault 3.0, there's a feature that allows you to hide your passwords inside the application (show dots instead)
+
+With the tick box you can enable/disable this feature.
+
+## Main password visibility
+If you want to be really secure, there's a feature with that not even the dots will be displayed when entering your main password.
+
+This makes brute force attacks a lot more difficult because the attacker doesn't even know the length of your main password.
+
+## Using real coincidence
+A pc can't produce real coincidence. He always picks a seed from a pre-given list, which every hacker can get access to.
+
+To make sure that no hacker can predict which password will be generated the next time you press the "Generate" button.
+By enabling this feature, you create real coincidence yourself by hitting some random keys on your keyboard
+every time you generate a password.
+Now you can sleep calmly because you know that your passwords are unpredictable.
 ## Get help
 The help icon will lead you to this GitHub repository. 
 If you need more help, you can contact us: [de.finnik@gmx.net](mailto:de.finnik@gmx.net)
@@ -122,7 +139,7 @@ and append help as an argument. You will get a list of all available commands an
 The default installation folder of PassVault is C:\\Users\\%username%\\AppData\\Local\\Programs\\PassVault
 
 Example for adding a password to the users' password list:
-![API Sample](screenshots/api_sample.PNG)
+![API Sample](screenshots/api_sample.png)
 # Credits
 Raleway font:
 - Matt McInerney ([matt@pixelspread.com](mailto:matt@pixelspread.com))
@@ -131,7 +148,9 @@ Raleway font:
 
 QOS.ch [Logback](http://logback.qos.ch) framework
 
-Google Inc [Gson](https://github.com/google/gson) API
+Google Inc [Gson](https://github.com/google/gson) library
+
+Google Inc [Drive](https://developers.google.com/drive) API
 
 Thanks to B. for designing the finnik logo
 

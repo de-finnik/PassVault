@@ -152,7 +152,7 @@ public class PassUtils {
             addChildComponents(container, components);
             components
                     .stream()
-                    .filter(c -> Arrays.asList(types).contains(c.getClass()))
+                    .filter(c -> types.length == 0 || Arrays.asList(types).contains(c.getClass()))
                     .forEach(consumer);
         }
 

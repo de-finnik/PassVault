@@ -1,6 +1,9 @@
 package de.finnik.gui;
 
+import de.finnik.passvault.utils.PassUtils;
+
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
 
 public class PopUp extends JPopupMenu {
@@ -27,6 +30,17 @@ public class PopUp extends JPopupMenu {
 
         public ActionListener getListener() {
             return listener;
+        }
+    }
+
+    public static class PassPopUp extends PopUp {
+        public PassPopUp(PopUpItem... items) {
+            super(items);
+            setBorder(BorderFactory.createLineBorder(Color.WHITE));
+            PassUtils.GUIUtils.doForAllComponents(this, menuItem -> {
+                menuItem.setForeground(Color.WHITE);
+                menuItem.setBackground(Color.BLACK);
+            }, JMenuItem.class);
         }
     }
 }

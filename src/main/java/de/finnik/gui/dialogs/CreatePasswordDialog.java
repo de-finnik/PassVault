@@ -2,6 +2,7 @@ package de.finnik.gui.dialogs;
 
 import com.nulabinc.zxcvbn.Strength;
 import com.nulabinc.zxcvbn.Zxcvbn;
+import de.finnik.passvault.PassProperty;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,10 +11,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -174,7 +173,7 @@ public class CreatePasswordDialog extends JDialog {
             @Override
             public void keyReleased(KeyEvent e) {
                 Strength strength = new Zxcvbn().measure(new String(passwordField.getPassword()));
-                textAreaFeedback.setText(strength.getFeedback().withResourceBundle(ResourceBundle.getBundle("zxcvbn")).getWarning());
+                textAreaFeedback.setText(strength.getFeedback().withResourceBundle(ResourceBundle.getBundle("zxcvbn", new Locale(PassProperty.LANG.getValue()))).getWarning());
                 int index = passwordField.getPassword().length > 0 ? strength.getScore() + 2 : 0;
                 fadeBackgroundTo(colors[index], panelStrength);
             }

@@ -1,5 +1,6 @@
 package de.finnik.gui.mainFrame;
 
+import de.finnik.gui.PopUp;
 import de.finnik.gui.customComponents.BottomBorder;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;
@@ -7,10 +8,13 @@ import de.finnik.passvault.utils.PassUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -49,6 +53,8 @@ public class ListPasswordPanel extends JPanel {
         passwords.setBackground(BACKGROUND);
         scrollPane.setBounds(0, 0, getWidth(), getHeight());
         add(scrollPane);
+
+        passwordList.sort(Comparator.comparing(Password::getSite));
 
         for (int i = 0; i < passwordList.size(); i++) {
             passwords.add(convert(passwordList.get(i)));
@@ -121,14 +127,21 @@ public class ListPasswordPanel extends JPanel {
                 parameterToPanel(false, LANG.getString("savePass.lbl.site"), password.getSite(), password::setSite),
                 parameterToPanel(false, LANG.getString("savePass.lbl.user"), password.getUser(), password::setUser),
                 parameterToPanel(false, LANG.getString("savePass.lbl.other"), password.getOther(), password::setOther))
-                .forEach(tf -> {
-                    PassUtils.GUIUtils.doForAllComponents(tf, c -> c.addMouseListener(highlight), JPanel.class, JTextField.class, JLabel.class);
-                    innerPanel.add(tf);
-                });
+                .forEach(innerPanel::add);
 
         outerPanel.setSize(getWidth(), (getHeight() - 20) / 2);
         outerPanel.setMaximumSize(new Dimension(outerPanel.getMaximumSize().width, outerPanel.getHeight()));
         outerPanel.setPreferredSize(outerPanel.getSize());
+
+        PassUtils.GUIUtils.doForAllComponents(outerPanel, c -> c.addMouseListener(highlight));
+        PassUtils.GUIUtils.doForAllComponents(outerPanel, c -> c.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    new PopUp.PassPopUp(new PopUp.PopUpItem(LANG.getString("passBank.popUp.delete"), a -> deleteSelectedPassword())).show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        }));
 
         return outerPanel;
     }
@@ -158,7 +171,6 @@ public class ListPasswordPanel extends JPanel {
         } else {
             textField = Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue()) ? new JPasswordField(content) : new JTextField(content);
         }
-        AtomicBoolean focus = new AtomicBoolean(false);
         textField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -166,31 +178,7 @@ public class ListPasswordPanel extends JPanel {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                     keyListener.accept(textField.getText());
                     PassFrame.savePasswords();
-                } else if (e.getKeyCode() == KeyEvent.VK_DELETE && focus.get()) {
-                    deleteSelectedPassword();
                 }
-            }
-        });
-        textField.setEditable(false);
-        textField.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                if (focus.get()) {
-                    textField.setEditable(true);
-                    textField.getCaret().setVisible(true);
-                    focus.set(false);
-                }
-            }
-        });
-        textField.addFocusListener(new FocusAdapter() {
-            @Override
-            public void focusLost(FocusEvent e) {
-                textField.setEditable(false);
-            }
-
-            @Override
-            public void focusGained(FocusEvent e) {
-                focus.set(true);
             }
         });
         textField.setForeground(FOREGROUND);

@@ -171,7 +171,10 @@ public class CompareDialog extends JDialog {
             elements.stream()
                     .filter(PassComp::isSelected)
                     .map(PassComp::getPassword)
-                    .forEach(chosen::add);
+                    .forEach(e -> {
+                        e.updateModified();
+                        chosen.add(e);
+                    });
         }
         return chosen;
     }

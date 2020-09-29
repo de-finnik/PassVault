@@ -27,7 +27,7 @@ public class PasswordGenerator {
      * @return The generated password
      */
     public String generatePassword(int lowLength, int upLength, PassChars... chars) {
-        int length = random.nextInt(Math.max(lowLength, upLength) - Math.min(lowLength, upLength)) + Math.min(lowLength, upLength);
+        int length = lowLength == upLength ? lowLength : random.nextInt(Math.max(lowLength, upLength) - Math.min(lowLength, upLength)) + Math.min(lowLength, upLength);
         return generatePassword(length, chars);
     }
 

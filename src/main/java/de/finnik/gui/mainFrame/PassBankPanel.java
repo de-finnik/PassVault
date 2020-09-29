@@ -150,6 +150,7 @@ public class PassBankPanel extends JPanel {
      */
     public void updateTableModel() {
         listPasswordPanel.display(getAllMatchingPasswords());
+        tfSearch.requestFocus();
     }
 
     /**
