@@ -6,10 +6,7 @@ import de.finnik.passvault.PassProperty;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
@@ -45,6 +42,26 @@ public class CreatePasswordDialog extends JDialog {
                 !images.containsKey("SHOW")) {
             throw new IllegalArgumentException("Missing images in map!");
         }
+
+        addWindowListener(new WindowAdapter() {
+            /*
+            This listener makes sure that the dialog will be disposed when it's activated after the user was inactive
+             */
+            boolean inactive = false;
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+                if (inactive) {
+                    dispose();
+                    System.out.println("disposed");
+                }
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+                inactive = true;
+            }
+        });
     }
 
     private static void fadeBackgroundTo(Color to, Component c) {

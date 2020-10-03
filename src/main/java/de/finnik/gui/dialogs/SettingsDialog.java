@@ -77,7 +77,10 @@ public class SettingsDialog extends JDialog {
             }
         })), () -> DIALOG.confirm(LANG.getString("jop.useWeakMainPass")));
         createPasswordDialog.font = raleway(15);
-        String mainPass = new String(createPasswordDialog.open());
+        char[] chars = createPasswordDialog.open();
+        if (!FRAME.isVisible())
+            return;
+        String mainPass = new String(chars);
         if (!mainPass.isEmpty()) {
             String validation = DIALOG.input(LANG.getString("jop.repeatEnteringNewMainPass"), true);
             if (mainPass.equals(validation)) {
@@ -214,15 +217,19 @@ public class SettingsDialog extends JDialog {
         panelVersion.setSize(new Dimension(lblVersion.getSize().width + lblFinnik.getSize().width, lblVersion.getSize().height + lblFinnik.getSize().height));
         components.add(panelVersion);
 
+
         JButton btnChangeMainPass = new JButton();
         btnChangeMainPass.setFont(raleway(13));
         btnChangeMainPass.addActionListener(action -> {
             if (PassFrame.aes.passIsSet()) {
                 // Validates the user via inserting current main pass
                 String mainPass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
+                if (mainPass == null) {
+                    return;
+                }
                 if (mainPass.equals(PassFrame.aes.getPass())) {
                     changeMainPass();
-                } else {
+                } else if (!mainPass.isEmpty()) {
                     DIALOG.message(LANG.getString("jop.wrongPass"));
                 }
             } else {
@@ -263,7 +270,8 @@ public class SettingsDialog extends JDialog {
         checkBoxInactivityLock.setSelected(Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()));
         checkBoxInactivityLock.addActionListener(action -> {
             PassProperty.INACTIVITY_LOCK.setValueAndStore(checkBoxInactivityLock.isSelected(), PassFrame.aes);
-            INACTIVITY_LISTENER.start();
+            if (INACTIVITY_LISTENER != null)
+                INACTIVITY_LISTENER.start();
         });
         checkBoxInactivityLock.setFont(raleway(13));
         COMPONENTS.put("settings.check.inactivityLock", checkBoxInactivityLock);
@@ -332,14 +340,10 @@ public class SettingsDialog extends JDialog {
                 return;
             }
             String mainPass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
-            try {
+            if (mainPass.equals(PassFrame.aes.getPass())) {
                 btnDrivePassword.setText(PassProperty.DRIVE_PASSWORD.getValue());
-            } catch (AES.WrongPasswordException e) {
-                if (mainPass.equals(PassFrame.aes.getPass())) {
-                    PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
-                } else {
-                    DIALOG.message(LANG.getString("jop.wrongPass"));
-                }
+            } else if (!mainPass.isEmpty()) {
+                DIALOG.message(LANG.getString("jop.wrongPass"));
             }
         });
         btnDrivePassword.setForeground(FOREGROUND);

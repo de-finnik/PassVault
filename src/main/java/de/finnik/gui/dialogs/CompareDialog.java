@@ -7,6 +7,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,6 +28,8 @@ public class CompareDialog extends JDialog {
      * The list of passwords that the user selects
      */
     List<Password> chosen;
+
+    boolean closed;
 
     /**
      * Creates but not displays the dialog. To make it visible, call {@link CompareDialog#open()}
@@ -66,6 +70,25 @@ public class CompareDialog extends JDialog {
 
         setSize(getPreferredSize().width, getPreferredSize().height + 100);
         setLocationRelativeTo(null);
+
+        addWindowListener(new WindowAdapter() {
+            /*
+            This listener makes sure that the dialog will be disposed when it's activated after the user was inactive
+             */
+            boolean inactive = false;
+
+            @Override
+            public void windowActivated(WindowEvent e) {
+                if (inactive)
+                    dispose();
+            }
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {
+                inactive = true;
+            }
+        });
+        closed = false;
     }
 
     /**

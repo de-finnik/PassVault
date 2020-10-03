@@ -284,11 +284,7 @@ public class PassFrame extends JFrame {
         if (!Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()) || aes.getPass().length() == 0)
             return;
 
-        Component[] toHide = {this, COMPONENTS.get("savePass"), COMPONENTS.get("settings")};
-        for (Component component : toHide) {
-            if (component != null)
-                component.setVisible(false);
-        }
+        setVisible(false);
 
         String pass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
         if (!pass.equals(aes.getPass())) {
@@ -296,10 +292,7 @@ public class PassFrame extends JFrame {
             System.exit(0);
         }
         INACTIVITY_LISTENER.start();
-        for (Component component : toHide) {
-            if (component != null)
-                component.setVisible(true);
-        }
+        setVisible(true);
     }
 
     public void refreshDriveVisibility() {
@@ -331,8 +324,10 @@ public class PassFrame extends JFrame {
     private void importBackup(File file, AES aes) throws AES.WrongPasswordException {
         List<Password> backup = Password.readPasswords(file, aes);
 
-        List<Password> compared = new CompareDialog(FRAME, PassFrame.passwordList, backup).open();
-        if (compared == null)
+        CompareDialog compareDialog = new CompareDialog(FRAME, PassFrame.passwordList, backup);
+        COMPONENTS.put("compare", compareDialog);
+        List<Password> compared = compareDialog.open();
+        if (compared == null || !isVisible())
             return;
         PassFrame.passwordList = compared;
         LOG.info("Imported passwords from {}!", file.getAbsolutePath());

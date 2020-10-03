@@ -10,9 +10,8 @@ import java.util.concurrent.TimeUnit;
  * Checks whether the user is inactive for a given period of time
  */
 public class InactivityListener {
-    private int inactivity;
     private final Inactivity toDo;
-
+    private int inactivity;
     private long time;
 
     private AWTEventListener listener;
