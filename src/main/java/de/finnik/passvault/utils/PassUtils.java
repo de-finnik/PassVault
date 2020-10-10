@@ -33,10 +33,10 @@ public class PassUtils {
         password.setOther("");
     }
 
-    public static void copyToClipboard(String string) throws IOException {
+    public static void copyToClipboard(Window owner, String string) throws IOException {
         if (!HINTS.triggerHint("hints.windows.clipboardHistory", t -> {
             if (System.getProperty("os.name").toLowerCase().contains("win")) {
-                if (DIALOG.confirm(LANG.getString(t))) {
+                if (DIALOG.confirm(owner, LANG.getString(t))) {
                     try {
                         HintBrowser.show(FRAME, t, PassProperty.LANG.getValue());
                     } catch (IOException e) {
@@ -126,7 +126,7 @@ public class PassUtils {
                         ((DefaultTableModel) ((JTable) component).getModel()).setColumnIdentifiers(lang.getString(name + ".header").split("#"));
                     }
                 }
-                if (lang.keySet().stream().anyMatch(prop -> prop.startsWith("tt." + name))) {
+                if (lang.keySet().stream().anyMatch(prop -> prop.equals("tt." + name))) {
                     assert component instanceof JComponent;
                     ((JComponent) component).setToolTipText(lang.getString("tt." + name));
                 }

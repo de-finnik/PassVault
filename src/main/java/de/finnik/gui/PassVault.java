@@ -71,9 +71,12 @@ public class PassVault {
     }
 
     private static void init() {
-        final File dir = new File("bin");
+        APP_DIR = new File(System.getProperty("user.home") + "/.passvault");
+        if (APP_DIR.mkdirs()) {
+            LOG.info("Created main directory {}", APP_DIR.getAbsolutePath());
+        }
 
-        PASSWORDS = new File(dir, "pass");
+        PASSWORDS = new File(APP_DIR, "pass");
         try {
             if (PASSWORDS.createNewFile()) {
                 LOG.info("Created pass file in main directory! ({})!", PASSWORDS.getAbsolutePath());
@@ -108,7 +111,7 @@ public class PassVault {
         }
 
         try {
-            HINTS = new Hints(new File(dir, "hints"));
+            HINTS = new Hints(new File(APP_DIR, "hints"));
         } catch (IOException e) {
             LOG.error("Error while loading hints!", e);
         }
@@ -160,13 +163,12 @@ public class PassVault {
                     FRAME = new CheckFrame((pass, passList) -> {
                         PassProperty.load(pass);
                         INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
-                        DIALOG.OWNER = FRAME = new PassFrame(pass, passList);
+                        FRAME = new PassFrame(pass, passList);
                         FRAME.setVisible(true);
                     });
                 } else {
                     FRAME = new PassFrame(new AES(""), new ArrayList<>());
                 }
-                DIALOG.OWNER = FRAME;
                 FRAME.setVisible(true);
             } catch (Exception e) {
                 LOG.error("Error while reading password file!", e);
@@ -294,7 +296,7 @@ public class PassVault {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
                     passwordField.setText("");
-                    DIALOG.message(LANG.getString("jop.wrongPass"));
+                    DIALOG.message(CheckFrame.this, LANG.getString("jop.wrongPass"));
                     return;
                 }
                 LOG.info("User logged in!");

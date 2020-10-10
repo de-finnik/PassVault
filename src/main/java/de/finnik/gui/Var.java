@@ -31,6 +31,11 @@ public class Var {
      * The PassDialog with matching settings for this application
      */
     public static PassDialog DIALOG;
+
+    /**
+     * The parent directory where all files will be stored
+     */
+    public static File APP_DIR;
     /**
      * The file where passwords are saved
      */

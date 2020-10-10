@@ -128,6 +128,49 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <controlDir>build/control</controlDir>
+                            <dataSet>
+                                <data>
+                                    <src>build/${project.build.finalName}-jar-with-dependencies.jar</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/passvault</prefix>
+                                    </mapper>
+                                </data>
+                                <data>
+                                    <src>build/deb/icon.ico</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/passvault</prefix>
+                                    </mapper>
+                                </data>
+                                <data>
+                                    <src>build/deb/PassVault.desktop</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <prefix>/usr/share/applications</prefix>
+                                    </mapper>
+                                </data>
+                            </dataSet>
+                            <buildDirectory>build</buildDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
         <resources>
             <resource>

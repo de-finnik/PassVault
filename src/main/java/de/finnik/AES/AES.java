@@ -12,23 +12,23 @@ import java.util.Map;
 
 public class AES {
 
-    private final Map<String, SecretKeySpec> secretKeySpec;
+    private final Map<HashMode, SecretKeySpec> secretKeySpec;
     private final String pass;
 
     public AES(String pass) {
         this.pass = pass;
         secretKeySpec = new HashMap<>();
-        for (String encryption : new String[]{"SHA-256", "SHA-1"}) {
-            secretKeySpec.put(encryption, getSecretKey(pass, encryption));
+        for (HashMode hashMode : HashMode.values()) {
+            secretKeySpec.put(hashMode, getSecretKey(pass, hashMode));
         }
     }
 
-    private static SecretKeySpec getSecretKey(String myKey, String encryption) {
+    private static SecretKeySpec getSecretKey(String myKey, HashMode hashMode) {
         MessageDigest sha;
         byte[] key;
         try {
             key = myKey.getBytes(StandardCharsets.UTF_8);
-            sha = MessageDigest.getInstance(encryption);
+            sha = hashMode.digest();
             key = sha.digest(key);
             key = Arrays.copyOf(key, 16);
             return new SecretKeySpec(key, "AES");
@@ -54,7 +54,7 @@ public class AES {
     public String encrypt(String strToEncrypt) {
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec.get("SHA-256"));
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec.get(HashMode.SHA_256));
             return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             throw new RuntimeException("Error while encrypting: " + e.toString());
@@ -70,9 +70,9 @@ public class AES {
      */
     public String decrypt(String strToDecrypt) throws WrongPasswordException {
         try {
-            return decrypt(strToDecrypt, "SHA-256");
+            return decrypt(strToDecrypt, HashMode.SHA_256);
         } catch (Exception e) {
-            return decrypt(strToDecrypt, "SHA-1");
+            return decrypt(strToDecrypt, HashMode.SHA_1);
         }
     }
 
@@ -83,13 +83,21 @@ public class AES {
      * @return Decrypted key
      * @throws WrongPasswordException Wrong password!
      */
-    private String decrypt(String strToDecrypt, String encryption) throws WrongPasswordException {
+    private String decrypt(String strToDecrypt, HashMode hashMode) throws WrongPasswordException {
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec.get(encryption));
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec.get(hashMode));
             return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt.getBytes(StandardCharsets.UTF_8))));
         } catch (Exception e) {
             throw new WrongPasswordException();
+        }
+    }
+
+    public enum HashMode {
+        SHA_256, SHA_1;
+
+        public MessageDigest digest() throws NoSuchAlgorithmException {
+            return MessageDigest.getInstance(name().replace("_", "-"));
         }
     }
 

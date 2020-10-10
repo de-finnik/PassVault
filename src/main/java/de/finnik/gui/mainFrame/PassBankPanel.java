@@ -106,10 +106,10 @@ public class PassBankPanel extends JPanel {
             public void mouseClicked(MouseEvent e) {
                 try {
                     Password password = listPasswordPanel.getSelectedPassword();
-                    PassUtils.copyToClipboard(password.getPass());
+                    PassUtils.copyToClipboard(FRAME, password.getPass());
                     LOG.info(Password.log(password, "Copied password to clipboard"));
                 } catch (NullPointerException ex) {
-                    DIALOG.message(LANG.getString("passBank.jop.noEntrySelected"));
+                    DIALOG.message(FRAME, LANG.getString("passBank.jop.noEntrySelected"));
                 } catch (IOException ioException) {
                     LOG.error("Error while checking for hints!");
                 }

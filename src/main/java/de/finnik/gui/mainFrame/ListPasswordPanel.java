@@ -195,7 +195,7 @@ public class ListPasswordPanel extends JPanel {
      * the taking the selected password from {@link ListPasswordPanel#getSelectedPassword()} and deleting it via {@link PassUtils#deletePassword(Password)}
      */
     private void deleteSelectedPassword() {
-        if (DIALOG.confirm(LANG.getString("jop.deletePass"))) {
+        if (DIALOG.confirm(FRAME, LANG.getString("jop.deletePass"))) {
             PassUtils.deletePassword(getSelectedPassword());
             PassFrame.savePasswords();
         }

@@ -15,11 +15,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
+import java.util.function.Function;
+
+import static de.finnik.gui.Var.LANG;
 
 public class CreatePasswordDialog extends JDialog {
     private final String message;
-    private final Supplier<Boolean> weak;
+    private final Function<Window, Boolean> weak;
     private final Map<String, BufferedImage> images;
 
     public Color[] colors = new Color[]{new Color(0, 0, 0), new Color(255, 255, 255), new Color(255, 0, 0), new Color(255, 60, 0), new Color(255, 191, 0), new Color(35, 136, 35), new Color(0, 112, 0)};
@@ -31,7 +33,7 @@ public class CreatePasswordDialog extends JDialog {
      */
     private List<JComponent> components;
 
-    public CreatePasswordDialog(Window owner, String message, Map<String, BufferedImage> images, Supplier<Boolean> weak) {
+    public CreatePasswordDialog(Window owner, String message, Map<String, BufferedImage> images, Function<Window, Boolean> weak) {
         super(owner);
         setModalityType(ModalityType.APPLICATION_MODAL);
         this.message = message;
@@ -53,7 +55,6 @@ public class CreatePasswordDialog extends JDialog {
             public void windowActivated(WindowEvent e) {
                 if (inactive) {
                     dispose();
-                    System.out.println("disposed");
                 }
             }
 
@@ -148,6 +149,9 @@ public class CreatePasswordDialog extends JDialog {
         final Rectangle[] rectangle = {null};
         AtomicBoolean show = new AtomicBoolean(false);
 
+
+        JButton btnSubmit = new JButton(LANG.getString("compare.btn.finish"));
+
         JPasswordField passwordField = new JPasswordField() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -198,12 +202,7 @@ public class CreatePasswordDialog extends JDialog {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    if (new Zxcvbn().measure(new String(passwordField.getPassword())).getScore() > 2 || passwordField.getPassword().length == 0 || weak.get()) {
-                        password = passwordField.getPassword();
-                        dispose();
-                    } else {
-                        passwordField.requestFocus();
-                    }
+                    btnSubmit.doClick();
                 }
             }
         });
@@ -222,6 +221,19 @@ public class CreatePasswordDialog extends JDialog {
         textAreaFeedback.setBackground(colors[0]);
         textAreaFeedback.setEditable(false);
         components.add(textAreaFeedback);
+
+        btnSubmit.setForeground(colors[1]);
+        btnSubmit.setBackground(colors[0]);
+        btnSubmit.setFont(font.deriveFont(15f));
+        btnSubmit.addActionListener(a -> {
+            if (new Zxcvbn().measure(new String(passwordField.getPassword())).getScore() > 2 || passwordField.getPassword().length == 0 || weak.apply(CreatePasswordDialog.this)) {
+                password = passwordField.getPassword();
+                dispose();
+            } else {
+                passwordField.requestFocus();
+            }
+        });
+        components.add(btnSubmit);
     }
 
     /**

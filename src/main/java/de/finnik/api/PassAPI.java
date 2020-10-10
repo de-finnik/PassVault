@@ -80,7 +80,6 @@ public class PassAPI {
             Password.savePasswords(passwords, PASSWORDS, pass);
             LOG.info(Password.log(finalPassword, "User added password"));
         });
-        DIALOG.OWNER = checkFrame;
         checkFrame.setVisible(true);
     }
 
@@ -110,7 +109,6 @@ public class PassAPI {
 
             LOG.info("User got information about passwords containing {}!", args[0]);
         }, String.format(LANG.getString("api.get.warning"), args[0]));
-        DIALOG.OWNER = checkFrame;
         checkFrame.setVisible(true);
     }
 

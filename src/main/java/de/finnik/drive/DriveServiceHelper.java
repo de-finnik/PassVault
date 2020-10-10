@@ -28,8 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static de.finnik.gui.Var.APP_INFO;
-import static de.finnik.gui.Var.LOG;
+import static de.finnik.gui.Var.*;
 
 public class DriveServiceHelper {
     private static final String FILE_NAME = "pass";
@@ -124,7 +123,7 @@ public class DriveServiceHelper {
             // Build flow and trigger user authorization request.
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                     HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, Collections.singletonList(DriveScopes.DRIVE_APPDATA))
-                    .setDataStoreFactory(new FileDataStoreFactory(new java.io.File("")))
+                    .setDataStoreFactory(new FileDataStoreFactory(APP_DIR))
                     .setAccessType("offline")
                     .build();
             LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();

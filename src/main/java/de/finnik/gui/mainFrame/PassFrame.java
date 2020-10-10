@@ -284,9 +284,10 @@ public class PassFrame extends JFrame {
         if (!Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()) || aes.getPass().length() == 0)
             return;
 
+        DIALOG.disposeDialogs();
         setVisible(false);
 
-        String pass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
+        String pass = DIALOG.input(FRAME, LANG.getString("check.lbl.pass"), true);
         if (!pass.equals(aes.getPass())) {
             LOG.info("User tried to log in with wrong password!");
             System.exit(0);
@@ -309,15 +310,15 @@ public class PassFrame extends JFrame {
             try {
                 importBackup(file, PassFrame.aes);
             } catch (AES.WrongPasswordException e) {
-                AES aes = new AES(DIALOG.input(LANG.getString("passFrame.jop.enterPass"), true));
+                AES aes = new AES(DIALOG.input(FRAME, LANG.getString("passFrame.jop.enterPass"), true));
                 try {
                     importBackup(file, aes);
                 } catch (AES.WrongPasswordException e1) {
-                    DIALOG.message(LANG.getString("jop.wrongPass"));
+                    DIALOG.message(FRAME, LANG.getString("jop.wrongPass"));
                 }
             }
         } else {
-            DIALOG.message(LANG.getString("passFrame.jop.noSupportedFile"));
+            DIALOG.message(FRAME, LANG.getString("passFrame.jop.noSupportedFile"));
         }
     }
 

@@ -4,6 +4,7 @@ import de.finnik.AES.AES;
 import de.finnik.gui.PopUp;
 import de.finnik.gui.Var;
 import de.finnik.gui.mainFrame.PassFrame;
+import de.finnik.passvault.InactivityListener;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;
 import de.finnik.passvault.utils.PassUtils;
@@ -68,28 +69,31 @@ public class SettingsDialog extends JDialog {
     /**
      * Lets the user change his main password by entering it two times
      */
-    static void changeMainPass() {
-        CreatePasswordDialog createPasswordDialog = new CreatePasswordDialog(FRAME, LANG.getString("jop.enterNewMainPass"), Arrays.stream(Var.class.getFields()).filter(name -> Arrays.asList("CLOSE", "HIDE", "SHOW").contains(name.getName())).collect(Collectors.toMap(Field::getName, f -> {
+    public static void changeMainPass(Window owner) {
+        CreatePasswordDialog createPasswordDialog = new CreatePasswordDialog(owner, LANG.getString("jop.enterNewMainPass"), Arrays.stream(Var.class.getFields()).filter(name -> Arrays.asList("CLOSE", "HIDE", "SHOW").contains(name.getName())).collect(Collectors.toMap(Field::getName, f -> {
             try {
                 return (BufferedImage) f.get(f);
             } catch (IllegalAccessException e) {
                 return CLOSE;
             }
-        })), () -> DIALOG.confirm(LANG.getString("jop.useWeakMainPass")));
+        })), d -> DIALOG.confirm(d, LANG.getString("jop.useWeakMainPass")));
         createPasswordDialog.font = raleway(15);
         char[] chars = createPasswordDialog.open();
         if (!FRAME.isVisible())
             return;
         String mainPass = new String(chars);
         if (!mainPass.isEmpty()) {
-            String validation = DIALOG.input(LANG.getString("jop.repeatEnteringNewMainPass"), true);
+            String validation = DIALOG.input(owner, LANG.getString("jop.repeatEnteringNewMainPass"), true);
             if (mainPass.equals(validation)) {
                 PassFrame.aes = new AES(mainPass);
                 LOG.info("Changed main password!");
                 PassFrame.savePasswords();
                 PassProperty.store(PassFrame.aes);
+                System.out.println(PassProperty.INACTIVITY_TIME.getValue());
+                INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
+                INACTIVITY_LISTENER.start();
             } else {
-                DIALOG.message(LANG.getString("jop.wrongPass"));
+                DIALOG.message(owner, LANG.getString("jop.wrongPass"));
             }
         }
     }
@@ -124,7 +128,7 @@ public class SettingsDialog extends JDialog {
                     if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
                         new PopUp.PassPopUp(new PopUp.PopUpItem(LANG.getString("settings.pop.disableDrive"), action -> {
                             PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
-                            if (new File("StoredCredential").delete()) {
+                            if (new File(APP_DIR, "StoredCredential").delete()) {
                                 LOG.info("Deleted StoredCredential");
                             }
                             ((PassFrame) FRAME).refreshDriveVisibility();
@@ -159,7 +163,7 @@ public class SettingsDialog extends JDialog {
                         Password.savePasswords(PassFrame.passwordList, backup, PassFrame.aes);
                         LOG.info("Exported password to {}!", jfc.getSelectedFile().getAbsolutePath());
                     } else {
-                        DIALOG.message(String.format(LANG.getString("jop.fileExistsAlready"), backup.getAbsolutePath()));
+                        DIALOG.message(SettingsDialog.this, String.format(LANG.getString("jop.fileExistsAlready"), backup.getAbsolutePath()));
                     }
                 }
             }
@@ -223,17 +227,17 @@ public class SettingsDialog extends JDialog {
         btnChangeMainPass.addActionListener(action -> {
             if (PassFrame.aes.passIsSet()) {
                 // Validates the user via inserting current main pass
-                String mainPass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
+                String mainPass = DIALOG.input(this, LANG.getString("check.lbl.pass"), true);
                 if (mainPass == null) {
                     return;
                 }
                 if (mainPass.equals(PassFrame.aes.getPass())) {
-                    changeMainPass();
+                    changeMainPass(SettingsDialog.this);
                 } else if (!mainPass.isEmpty()) {
-                    DIALOG.message(LANG.getString("jop.wrongPass"));
+                    DIALOG.message(this, LANG.getString("jop.wrongPass"));
                 }
             } else {
-                changeMainPass();
+                changeMainPass(SettingsDialog.this);
             }
         });
         add(btnChangeMainPass, "settings.btn.changeMainPass");
@@ -264,7 +268,7 @@ public class SettingsDialog extends JDialog {
 
         JPanel panelInactivity = new JPanel(new FlowLayout());
         panelInactivity.setBackground(BACKGROUND);
-        components.add(panelInactivity);
+        add(panelInactivity, "settings.panel.inactivity");
 
         JCheckBox checkBoxInactivityLock = new JCheckBox();
         checkBoxInactivityLock.setSelected(Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()));
@@ -294,7 +298,7 @@ public class SettingsDialog extends JDialog {
         });
         spinnerInactivityTime.addChangeListener(e -> {
             if (!PassProperty.INACTIVITY_TIME.setValueAndStore(spinnerInactivityTime.getValue(), PassFrame.aes)) {
-                DIALOG.message(String.format(LANG.getString("settings.jop.noValidInactivityTime"), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMinimum(), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMaximum()));
+                DIALOG.message(this, String.format(LANG.getString("settings.jop.noValidInactivityTime"), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMinimum(), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMaximum()));
             } else {
                 INACTIVITY_LISTENER.setInactivity(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()));
             }
@@ -339,11 +343,11 @@ public class SettingsDialog extends JDialog {
             if (PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
                 return;
             }
-            String mainPass = DIALOG.input(LANG.getString("check.lbl.pass"), true);
+            String mainPass = DIALOG.input(this, LANG.getString("check.lbl.pass"), true);
             if (mainPass.equals(PassFrame.aes.getPass())) {
                 btnDrivePassword.setText(PassProperty.DRIVE_PASSWORD.getValue());
             } else if (!mainPass.isEmpty()) {
-                DIALOG.message(LANG.getString("jop.wrongPass"));
+                DIALOG.message(this, LANG.getString("jop.wrongPass"));
             }
         });
         btnDrivePassword.setForeground(FOREGROUND);

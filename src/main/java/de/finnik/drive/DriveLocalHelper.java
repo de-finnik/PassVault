@@ -39,21 +39,27 @@ public class DriveLocalHelper {
             url.openConnection().connect();
         } catch (Exception e) {
             assert url != null;
-            DIALOG.message(String.format(LANG.getString("drive.jop.noInternet"), url.getHost()));
+            DIALOG.message(FRAME, String.format(LANG.getString("drive.jop.noInternet"), url.getHost()));
             return;
         }
         Runnable run = () -> {
             try {
                 if (driveServiceHelper == null) {
+                    INACTIVITY_LISTENER.stop();
                     driveServiceHelper = new DriveServiceHelper(DriveServiceHelper.Builder.buildDrive());
+                    INACTIVITY_LISTENER.start();
                 }
                 startAnimation();
                 AES drivePass;
                 if (driveServiceHelper.passFileExists()) {
-                    drivePass = new AES(PassProperty.DRIVE_PASSWORD.getValue().isEmpty() ? DIALOG.input(LANG.getString("drive.jop.enterDrivePass"), true) : PassProperty.DRIVE_PASSWORD.getValue());
+                    String inputPass = PassProperty.DRIVE_PASSWORD.getValue().isEmpty() ? DIALOG.input(FRAME, LANG.getString("drive.jop.enterDrivePass"), true) : PassProperty.DRIVE_PASSWORD.getValue();
+                    if (inputPass == null || inputPass.isEmpty()) {
+                        return;
+                    }
+                    drivePass = new AES(inputPass);
                 } else {
                     drivePass = new AES(generateDrivePass(Boolean.parseBoolean(PassProperty.REAL_RANDOM.getValue()) ? new RealRandom().seedWithUserInput(FRAME, LANG.getString("generate.jop.realRandom")) : -1));
-                    DIALOG.message(String.format(LANG.getString("drive.jop.createdDrivePass"), drivePass.getPass()));
+                    DIALOG.message(FRAME, String.format(LANG.getString("drive.jop.createdDrivePass"), drivePass.getPass()));
                 }
                 try {
                     PassFrame.passwordList = compare(PassFrame.passwordList, drivePass);
@@ -63,8 +69,8 @@ public class DriveLocalHelper {
                     LOG.info("Synchronized with Drive");
                 } catch (AES.WrongPasswordException e) {
                     if (PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
-                        if (DIALOG.confirm(LANG.getString("drive.jop.wrongDrivePass"))) {
-                            String confirm = DIALOG.input(LANG.getString("drive.jop.deleteAllDrivePasswords"));
+                        if (DIALOG.confirm(FRAME, LANG.getString("drive.jop.wrongDrivePass"))) {
+                            String confirm = DIALOG.input(FRAME, LANG.getString("drive.jop.deleteAllDrivePasswords"));
                             if (confirm.replace("'", "").equals(LANG.getString("drive.jop.deleteAllDrivePasswords").split("'")[1])) {
                                 driveServiceHelper.deletePassFile();
                                 synchronize();

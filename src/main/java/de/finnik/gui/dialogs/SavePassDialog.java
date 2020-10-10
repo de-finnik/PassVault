@@ -149,7 +149,7 @@ public class SavePassDialog extends JDialog {
             if (!newPass.isEmpty()) {
                 // Checks whether the user has set a main password
                 if (!PassFrame.aes.passIsSet()) {
-                    SettingsDialog.changeMainPass();
+                    SettingsDialog.changeMainPass(SavePassDialog.this);
                 }
 
                 if (!PassFrame.aes.passIsSet()) {
@@ -162,7 +162,7 @@ public class SavePassDialog extends JDialog {
 
             PassFrame.savePasswords();
             try {
-                PassUtils.copyToClipboard(newPass.getPass());
+                PassUtils.copyToClipboard(this, newPass.getPass());
             } catch (IOException ioException) {
                 LOG.error("Error while checking for hints!");
             }

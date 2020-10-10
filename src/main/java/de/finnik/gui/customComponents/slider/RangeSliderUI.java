@@ -6,7 +6,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
 
 /**
  * UI delegate for the RangeSlider component.  RangeSliderUI paints two thumbs,
@@ -150,6 +149,7 @@ public class RangeSliderUI extends BasicSliderUI {
     @Override
     public void paint(Graphics g, JComponent c) {
         super.paint(g, c);
+        UIManager.put("Slider.tickColor", rangeColor);
 
         Rectangle clipRect = g.getClipBounds();
         if (upperThumbSelected) {
@@ -160,7 +160,6 @@ public class RangeSliderUI extends BasicSliderUI {
             if (clipRect.intersects(upperThumbRect)) {
                 paintUpperThumb(g);
             }
-
         } else {
             // Paint upper thumb first, then lower thumb.
             if (clipRect.intersects(upperThumbRect)) {
@@ -302,7 +301,28 @@ public class RangeSliderUI extends BasicSliderUI {
      */
     private Shape createThumbShape(int width, int height) {
         // Use circular shape.
-        return new Ellipse2D.Double(0, 0, width, height);
+        Polygon polygon = new Polygon();
+        polygon.addPoint(0, 0);
+        polygon.addPoint(0, height / 2);
+        polygon.addPoint(width / 2, height);
+        polygon.addPoint(width, height / 2);
+        polygon.addPoint(width, 0);
+        return polygon;
+    }
+
+    @Override
+    protected void paintMajorTickForHorizSlider(Graphics g, Rectangle tickBounds, int x) {
+        g.drawLine(x - 1, 0, x - 1, tickBounds.height - 2);
+    }
+
+    @Override
+    public void paintFocus(Graphics g) {
+
+    }
+
+    @Override
+    protected void paintMinorTickForHorizSlider(Graphics g, Rectangle tickBounds, int x) {
+        g.drawLine(x - 1, 0, x - 1, tickBounds.height / 2 - 1);
     }
 
     /**
