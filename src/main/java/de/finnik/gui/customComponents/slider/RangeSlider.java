@@ -35,7 +35,8 @@ public class RangeSlider extends JSlider {
      * values.
      */
     public RangeSlider(int min, int max, int lowValue, int highValue) {
-        this(min, max);
+        super(min, max, lowValue);
+        initSlider();
         setValue(lowValue);
         setUpperValue(highValue);
     }
