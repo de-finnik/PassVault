@@ -23,7 +23,7 @@ public class PassDialog {
     private final Font FONT;
     private final Cursor HAND_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 
-    private List<JDialog> dialogs;
+    private final List<JDialog> dialogs;
 
     /**
      * Predefines settings that will be used later

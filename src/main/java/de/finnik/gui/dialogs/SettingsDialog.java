@@ -19,6 +19,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -149,6 +150,11 @@ public class SettingsDialog extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                try {
+                    HINTS.triggerHint("hints.settings.backup", key -> DIALOG.message(SettingsDialog.this, LANG.getString(key)));
+                } catch (IOException ioException) {
+                    LOG.error("Error while loading hints", ioException);
+                }
                 // Choose the directory to store the update to
                 JFileChooser jfc = new JFileChooser();
                 jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

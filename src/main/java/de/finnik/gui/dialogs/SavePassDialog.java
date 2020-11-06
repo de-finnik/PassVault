@@ -8,10 +8,7 @@ import de.finnik.passvault.utils.Utils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,6 +84,17 @@ public class SavePassDialog extends JDialog {
         ((JPanel) COMPONENTS.get("savePass.toolbar")).add(Box.createRigidArea(new Dimension((getWidth() - COMPONENTS.get("savePass.lbl.pass").getPreferredSize().width) / 2, 10)), BorderLayout.WEST);
 
         setLocationRelativeTo(null);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowActivated(WindowEvent e) {
+                try {
+                    HINTS.triggerHint("hints.savePass.tutorial", key -> DIALOG.message(SavePassDialog.this, LANG.getString(key)));
+                } catch (IOException ex) {
+                    LOG.error("Error while loading hints", ex);
+                }
+            }
+        });
     }
 
     private void components(final String pass) {

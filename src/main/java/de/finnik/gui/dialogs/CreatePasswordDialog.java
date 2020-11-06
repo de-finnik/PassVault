@@ -65,7 +65,7 @@ public class CreatePasswordDialog extends JDialog {
         });
     }
 
-    private static void fadeBackgroundTo(Color to, Component c) {
+    private static void fadeStrengthTo(Color to, Component c) {
         AtomicInteger r = new AtomicInteger(c.getBackground().getRed());
         AtomicInteger g = new AtomicInteger(c.getBackground().getGreen());
         AtomicInteger b = new AtomicInteger(c.getBackground().getBlue());
@@ -196,7 +196,7 @@ public class CreatePasswordDialog extends JDialog {
                 Strength strength = new Zxcvbn().measure(new String(passwordField.getPassword()));
                 textAreaFeedback.setText(strength.getFeedback().withResourceBundle(ResourceBundle.getBundle("zxcvbn", new Locale(PassProperty.LANG.getValue()))).getWarning());
                 int index = passwordField.getPassword().length > 0 ? strength.getScore() + 2 : 0;
-                fadeBackgroundTo(colors[index], panelStrength);
+                fadeStrengthTo(colors[index], panelStrength);
             }
 
             @Override
