@@ -1,4 +1,5 @@
 import de.finnik.passvault.passwords.PasswordGenerator;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -32,11 +33,13 @@ public class PasswordGeneratorTest {
 
     @Test
     public void testLengthOfGeneratedPassword() {
-        int random;
+        int random1, random2;
         PasswordGenerator generator = new PasswordGenerator();
         for (int z = 0; z < 5; z++) {
-            random = (int) (Math.random() * 100) + 1;
-            assertEquals(random, generator.generatePassword(random, PassChars.BIG_LETTERS).length());
+            random1 = randomLength();
+            random2 = randomLength();
+            String generated = generator.generatePassword(random1, random2, PassChars.BIG_LETTERS);
+            Assert.assertTrue(generated.length() >= Math.min(random1, random2) && generated.length() <= Math.max(random1, random2));
         }
     }
 
@@ -47,10 +50,14 @@ public class PasswordGeneratorTest {
         for (int i = 0; i <= 500; i++) {
             Collections.shuffle(all);
             String password;
-            password = generator.generatePassword((int) (Math.random() * 30) + 1, all.get(0));
+            password = generator.generatePassword(randomLength(), randomLength(), all.get(0));
             if (Arrays.stream(all.get(0).get().split("")).noneMatch(password::contains)) {
                 fail();
             }
         }
+    }
+
+    private int randomLength() {
+        return (int) (Math.random() * 25) + 5;
     }
 }

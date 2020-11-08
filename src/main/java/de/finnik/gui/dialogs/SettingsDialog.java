@@ -11,7 +11,6 @@ import de.finnik.passvault.utils.PassUtils;
 import de.finnik.passvault.utils.Utils;
 
 import javax.swing.*;
-import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -45,12 +44,12 @@ public class SettingsDialog extends JDialog {
     public SettingsDialog(Window owner) {
         super(owner, ModalityType.APPLICATION_MODAL);
 
-        setContentPane(new JPanel());
-        ((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(FOREGROUND));
-        getContentPane().setBackground(BACKGROUND);
+        JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
+        contentPane.setBorder(BorderFactory.createLineBorder(FOREGROUND));
+        contentPane.setBackground(BACKGROUND);
+        setContentPane(contentPane);
 
-        BoxLayout boxLayout = new BoxLayout(getContentPane(), BoxLayout.Y_AXIS);
-        getContentPane().setLayout(boxLayout);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
         setUndecorated(true);
@@ -63,6 +62,12 @@ public class SettingsDialog extends JDialog {
 
         // Sets color for labels and buttons
         PassUtils.GUIUtils.colorComponents(getMatchingComponents("settings.lbl", "settings.btn", "settings.check"), FOREGROUND, BACKGROUND);
+
+        for (Component toolBar : getMatchingComponents("settings.toolBar")) {
+            for (Component label : ((JPanel) toolBar).getComponents()) {
+                label.setCursor(HAND_CURSOR);
+            }
+        }
 
         adjustSizeAndCenter();
     }
@@ -90,7 +95,6 @@ public class SettingsDialog extends JDialog {
                 LOG.info("Changed main password!");
                 PassFrame.savePasswords();
                 PassProperty.store(PassFrame.aes);
-                System.out.println(PassProperty.INACTIVITY_TIME.getValue());
                 INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
                 INACTIVITY_LISTENER.start();
             } else {
@@ -100,17 +104,12 @@ public class SettingsDialog extends JDialog {
     }
 
     private void components() {
-        JPanel toolBar = new JPanel();
+        JPanel toolBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         toolBar.setBackground(BACKGROUND);
-        toolBar.setLayout(new FlowLayout(FlowLayout.RIGHT));
         add(toolBar, "settings.toolBar");
-
-        UIManager.put("MenuItem.selectionBackground", new ColorUIResource(Color.white));
-        UIManager.put("MenuItem.selectionForeground", new ColorUIResource(Color.black));
 
         JLabel lblDrive = new JLabel();
         lblDrive.setIcon(new ImageIcon(DRIVE_ICON));
-        lblDrive.setCursor(HAND_CURSOR);
         lblDrive.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
         lblDrive.addMouseListener(new MouseAdapter() {
             @Override
@@ -128,7 +127,7 @@ public class SettingsDialog extends JDialog {
                 } else if (e.getButton() == MouseEvent.BUTTON3) {
                     if (!PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
                         new PopUp.PassPopUp(new PopUp.PopUpItem(LANG.getString("settings.pop.disableDrive"), action -> {
-                            PassProperty.DRIVE_PASSWORD.setValueAndStore("", PassFrame.aes);
+                            PassProperty.DRIVE_PASSWORD.setValue("", PassFrame.aes);
                             if (new File(APP_DIR, "StoredCredential").delete()) {
                                 LOG.info("Deleted StoredCredential");
                             }
@@ -145,17 +144,18 @@ public class SettingsDialog extends JDialog {
 
         JLabel lblExtract = new JLabel();
         lblExtract.setIcon(new ImageIcon(EXTRACT));
-        lblExtract.setCursor(HAND_CURSOR);
         lblExtract.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
+                if (PassFrame.passwordList.size() == 0)
+                    return;
                 try {
                     HINTS.triggerHint("hints.settings.backup", key -> DIALOG.message(SettingsDialog.this, LANG.getString(key)));
                 } catch (IOException ioException) {
                     LOG.error("Error while loading hints", ioException);
                 }
-                // Choose the directory to store the update to
+                // Choose the directory to store the update into
                 JFileChooser jfc = new JFileChooser();
                 jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                 int result = jfc.showOpenDialog(null);
@@ -178,12 +178,11 @@ public class SettingsDialog extends JDialog {
 
         JLabel lblHelp = new JLabel();
         lblHelp.setIcon(new ImageIcon(HELP));
-        lblHelp.setCursor(HAND_CURSOR);
         lblHelp.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 // Open help page
-                String url = "https://github.com/de-finnik/passvault";
+                String url = "https://finnik.de/passvault";
                 try {
                     Utils.Browser.browse(url);
                 } catch (Exception ex) {
@@ -196,7 +195,6 @@ public class SettingsDialog extends JDialog {
 
         JLabel lblClose = new JLabel();
         lblClose.setIcon(new ImageIcon(Utils.resizeImage(CLOSE, 20, 20)));
-        lblClose.setCursor(HAND_CURSOR);
         lblClose.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -213,7 +211,7 @@ public class SettingsDialog extends JDialog {
         JPanel panelVersion = new JPanel(new FlowLayout(FlowLayout.CENTER));
         panelVersion.setBackground(BACKGROUND);
 
-        JLabel lblVersion = new JLabel(APP_INFO.getProperty("app.name") + " " + APP_INFO.getProperty("app.version") + " \u00a9 "/* + APP_INFO.getProperty("app.author")*/);
+        JLabel lblVersion = new JLabel(APP_INFO.getProperty("app.name") + " " + APP_INFO.getProperty("app.version"));
         lblVersion.setFont(raleway(13));
         lblVersion.setSize(lblVersion.getPreferredSize());
         COMPONENTS.put("settings.lbl.version", lblVersion);
@@ -248,13 +246,10 @@ public class SettingsDialog extends JDialog {
         });
         add(btnChangeMainPass, "settings.btn.changeMainPass");
 
-        UIManager.put("ComboBox.selectionBackground", new ColorUIResource(Color.white));
-        UIManager.put("ComboBox.selectionForeground", new ColorUIResource(Color.black));
-
-        JComboBox<String> comboBoxLanguage = new JComboBox<>();
         DefaultComboBoxModel<String> comboBoxLanguageModel = new DefaultComboBoxModel<>();
-        comboBoxLanguage.setModel(comboBoxLanguageModel);
+        JComboBox<String> comboBoxLanguage = new JComboBox<>(comboBoxLanguageModel);
         comboBoxLanguage.setFont(raleway(15));
+        // Find all available languages and add them to the combo box model
         List<Locale> locales = PassUtils.FileUtils.availableLanguages().stream().map(Locale::new).collect(Collectors.toList());
         locales.stream().map(Locale::getDisplayName).forEach(comboBoxLanguageModel::addElement);
         comboBoxLanguage.setSelectedItem(new Locale(PassProperty.LANG.getValue()).getDisplayLanguage());
@@ -262,7 +257,7 @@ public class SettingsDialog extends JDialog {
             // Change language
             locales.stream()
                     .filter(locale -> locale.getDisplayLanguage().equals(comboBoxLanguage.getSelectedItem()))
-                    .forEach(locale -> PassProperty.LANG.setValueAndStore(locale.getLanguage(), PassFrame.aes));
+                    .forEach(locale -> PassProperty.LANG.setValue(locale.getLanguage(), PassFrame.aes));
             LANG = loadLang();
             textComponents();
             adjustSizeAndCenter();
@@ -279,7 +274,7 @@ public class SettingsDialog extends JDialog {
         JCheckBox checkBoxInactivityLock = new JCheckBox();
         checkBoxInactivityLock.setSelected(Boolean.parseBoolean(PassProperty.INACTIVITY_LOCK.getValue()));
         checkBoxInactivityLock.addActionListener(action -> {
-            PassProperty.INACTIVITY_LOCK.setValueAndStore(checkBoxInactivityLock.isSelected(), PassFrame.aes);
+            PassProperty.INACTIVITY_LOCK.setValue(checkBoxInactivityLock.isSelected(), PassFrame.aes);
             if (INACTIVITY_LISTENER != null)
                 INACTIVITY_LISTENER.start();
         });
@@ -303,7 +298,7 @@ public class SettingsDialog extends JDialog {
             }
         });
         spinnerInactivityTime.addChangeListener(e -> {
-            if (!PassProperty.INACTIVITY_TIME.setValueAndStore(spinnerInactivityTime.getValue(), PassFrame.aes)) {
+            if (!PassProperty.INACTIVITY_TIME.setValue(spinnerInactivityTime.getValue(), PassFrame.aes)) {
                 DIALOG.message(this, String.format(LANG.getString("settings.jop.noValidInactivityTime"), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMinimum(), ((SpinnerNumberModel) spinnerInactivityTime.getModel()).getMaximum()));
             } else {
                 INACTIVITY_LISTENER.setInactivity(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()));
@@ -320,7 +315,7 @@ public class SettingsDialog extends JDialog {
         JCheckBox checkBoxDottedPasswords = new JCheckBox();
         checkBoxDottedPasswords.setSelected(Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue()));
         checkBoxDottedPasswords.addActionListener(action -> {
-            PassProperty.SHOW_PASSWORDS_DOTTED.setValueAndStore(checkBoxDottedPasswords.isSelected(), PassFrame.aes);
+            PassProperty.SHOW_PASSWORDS_DOTTED.setValue(checkBoxDottedPasswords.isSelected(), PassFrame.aes);
             ((PassFrame) FRAME).passBankPanel.updateTableModel();
         });
         checkBoxDottedPasswords.setFont(raleway(13));
@@ -328,27 +323,28 @@ public class SettingsDialog extends JDialog {
 
         JCheckBox checkBoxShowMainPass = new JCheckBox();
         checkBoxShowMainPass.setSelected(Boolean.parseBoolean(PassProperty.SHOW_MAIN_PASSWORD.getValue()));
-        checkBoxShowMainPass.addActionListener(action -> PassProperty.SHOW_MAIN_PASSWORD.setValueAndStore(checkBoxShowMainPass.isSelected(), PassFrame.aes));
+        checkBoxShowMainPass.addActionListener(action -> PassProperty.SHOW_MAIN_PASSWORD.setValue(checkBoxShowMainPass.isSelected(), PassFrame.aes));
         checkBoxShowMainPass.setFont(raleway(13));
         add(checkBoxShowMainPass, "settings.check.showMainPass");
 
         JCheckBox checkBoxRealRandom = new JCheckBox();
         checkBoxRealRandom.setSelected(Boolean.parseBoolean(PassProperty.REAL_RANDOM.getValue()));
-        checkBoxRealRandom.addActionListener(action -> PassProperty.REAL_RANDOM.setValueAndStore(checkBoxRealRandom.isSelected(), PassFrame.aes));
+        checkBoxRealRandom.addActionListener(action -> PassProperty.REAL_RANDOM.setValue(checkBoxRealRandom.isSelected(), PassFrame.aes));
         checkBoxRealRandom.setFont(raleway(13));
         add(checkBoxRealRandom, "settings.check.realRandom");
 
         JButton btnDrivePassword = new JButton();
         btnDrivePassword.addActionListener(action -> {
+            // If password is already displayed, the font will be changed to ensure better readability
             if (!btnDrivePassword.getText().equals(LANG.getString("settings.btn.drivePassword"))) {
                 String[] availableFonts = Arrays.stream(GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts()).map(Font::getName).toArray(String[]::new);
                 btnDrivePassword.setFont(new Font(availableFonts[new Random().nextInt(availableFonts.length)], Font.PLAIN, 15));
                 return;
             }
-            // Validates main password
             if (PassProperty.DRIVE_PASSWORD.getValue().isEmpty()) {
                 return;
             }
+            // Validates main password
             String mainPass = DIALOG.input(this, LANG.getString("check.lbl.pass"), true);
             if (mainPass.equals(PassFrame.aes.getPass())) {
                 btnDrivePassword.setText(PassProperty.DRIVE_PASSWORD.getValue());
@@ -356,8 +352,6 @@ public class SettingsDialog extends JDialog {
                 DIALOG.message(this, LANG.getString("jop.wrongPass"));
             }
         });
-        btnDrivePassword.setForeground(FOREGROUND);
-        btnDrivePassword.setBackground(BACKGROUND);
         btnDrivePassword.setFont(raleway(15));
         add(btnDrivePassword, "settings.btn.drivePassword");
         refreshShowPassTextField();
@@ -388,12 +382,18 @@ public class SettingsDialog extends JDialog {
         });
     }
 
+    /**
+     * Adjusts the dialog's size and centers it via {@link Window#setLocationRelativeTo(Component)}
+     */
     private void adjustSizeAndCenter() {
         setSize(new Dimension((getContentPane().getLayout().preferredLayoutSize(getContentPane())).width + 50, (getContentPane().getLayout().preferredLayoutSize(getContentPane())).height + 60));
         setLocationRelativeTo(null);
     }
 
+    /**
+     * Checks whether {@link PassProperty#DRIVE_PASSWORD} is empty and toggles the visibility of the show drive password btn
+     */
     private void refreshShowPassTextField() {
-        COMPONENTS.get("settings.btn.drivePassword").setVisible(PassProperty.DRIVE_PASSWORD.getValue().length() > 0);
+        COMPONENTS.get("settings.btn.drivePassword").setVisible(!PassProperty.DRIVE_PASSWORD.getValue().isEmpty());
     }
 }

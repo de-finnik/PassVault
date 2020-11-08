@@ -1,7 +1,7 @@
 package de.finnik.passvault.utils;
 
 import de.finnik.gui.PassVault;
-import de.finnik.gui.hints.HintBrowser;
+import de.finnik.gui.dialogs.HintBrowser;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.passwords.Password;
 
@@ -22,10 +22,23 @@ import static de.finnik.gui.Var.*;
  */
 public class PassUtils {
 
+    /**
+     * Takes a {@link String} object and a list of {@link Password} objects and finds all passwords that contain the given {@link String}
+     *
+     * @param key       The keyword to be searched
+     * @param passwords The list of {@link Password} objects
+     * @return A list of {@link Password} objects containing the input information
+     * @see Password#getValues()
+     */
     public static List<Password> getAllMatchingPasswords(String key, List<Password> passwords) {
         return passwords.stream().filter(pass -> pass.getValues().anyMatch(arg -> arg.toLowerCase().contains(key.toLowerCase()))).collect(Collectors.toList());
     }
 
+    /**
+     * Deletes a given {@link Password} by clearing all parameters to ""
+     *
+     * @param password The {@link Password} to delete
+     */
     public static void deletePassword(Password password) {
         password.setPass("");
         password.setSite("");
@@ -33,6 +46,19 @@ public class PassUtils {
         password.setOther("");
     }
 
+    /**
+     * Copies a given {@link String} to the user's clipboard via {@link Utils#copyToClipboard(String)}
+     * <p>
+     * Windows: If the user uses a Windows system, the first time this method is called, he will be warned
+     * that Windows 10 has a feature that saves your clipboard and for this application your passwords
+     *
+     * @param owner  The {@link Window} object that would own the dialog with the warning
+     * @param string The {@link String} to be copied to the clipboard
+     * @throws IOException Error while triggering the hint
+     * @see Utils#copyToClipboard(String)
+     * @see de.finnik.gui.hints.Hints#triggerHint(String, Consumer)
+     * @see HintBrowser#show(Window, String, String)
+     */
     public static void copyToClipboard(Window owner, String string) throws IOException {
         if (!HINTS.triggerHint("hints.windows.clipboardHistory", t -> {
             if (System.getProperty("os.name").toLowerCase().contains("win")) {
@@ -147,6 +173,13 @@ public class PassUtils {
             }
         }
 
+        /**
+         * Executes a given {@link Consumer<Component>} for all components inside a given container whose {@link Type} is one of the given
+         *
+         * @param container The container {@link JComponent}
+         * @param consumer  The {@link Consumer<Component>} to be executed for all matching {@link JComponent}
+         * @param types     All valid {@link Type}s
+         */
         public static void doForAllComponents(JComponent container, Consumer<Component> consumer, Type... types) {
             List<Component> components = new ArrayList<>();
             addChildComponents(container, components);
@@ -156,6 +189,13 @@ public class PassUtils {
                     .forEach(consumer);
         }
 
+        /**
+         * Collects all {@link JComponent} objects inside a given container and all of this container's sub-containers...
+         * into a given list
+         *
+         * @param container  The parent container
+         * @param components The list where all child components will be added to
+         */
         private static void addChildComponents(JComponent container, List<Component> components) {
             for (Component component : container.getComponents()) {
                 components.add(component);

@@ -134,6 +134,13 @@ public class Password {
         }
     }
 
+    /**
+     * Tests two {@link Password} objects for similarities in their main parameters: password, site, user, other
+     *
+     * @param one One password
+     * @param two The other password
+     * @return Are the two password similar in face of their main parameters?
+     */
     public static boolean equalsInformation(Password one, Password two) {
         return one.getPass().equals(two.getPass()) &&
                 one.getSite().equals(two.getSite()) &&

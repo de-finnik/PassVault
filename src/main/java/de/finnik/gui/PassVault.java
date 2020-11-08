@@ -29,25 +29,26 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import static de.finnik.gui.Var.*;
-import static de.finnik.passvault.utils.Utils.sizeFont;
 
 /**
  * The PassVault program implements an application that saves passwords encrypted
  * with a main password. It also generates new passwords with a given length and given parameters.
  *
  * @author finnik
- * @version 1.0
- * @since 21.03.2020
+ * @version 3.0
+ * @since 06.11.2020
  */
 
 public class PassVault {
 
     public static void main(String[] args) {
+        // Creates the matching logger object
         LOG = LoggerFactory.getLogger(args.length == 0 ? "APPLICATION" : "API");
+        System.setErr(new PrintStream(new LogErrorStream(LOG)));
 
         LOG.info("Welcome to PassVault, we're happy to see you!");
 
-        System.setErr(new PrintStream(new LogErrorStream(LOG)));
+        // Launches api if necessary
         if (args.length > 0) {
             init();
             EventQueue.invokeLater(() -> {
@@ -70,6 +71,10 @@ public class PassVault {
         main.run();
     }
 
+    /**
+     * Creates necessary files (if they don´t already exist), loads fonts, images and properties,
+     * creates necessary objects for variables in {@link Var} and starts the application.
+     */
     private static void init() {
         APP_DIR = new File(System.getProperty("user.home") + "/.passvault");
         if (APP_DIR.mkdirs()) {
@@ -82,7 +87,7 @@ public class PassVault {
                 LOG.info("Created pass file in main directory! ({})!", PASSWORDS.getAbsolutePath());
             }
         } catch (Exception e) {
-            LOG.error("Error while creating pass file in APPDATA!", e);
+            LOG.error("Error while creating pass file in {}!", APP_DIR.getAbsolutePath(), e);
         }
 
         APP_INFO = new Properties();
@@ -92,6 +97,7 @@ public class PassVault {
             LOG.error("Error while reading application.properties!", e);
         }
 
+        PassProperty.PROPERTIES = new File(APP_DIR, "config.properties");
         try {
             if (PassProperty.PROPERTIES.createNewFile()) {
                 LOG.info("Created config.properties in main directory ({})!", PassProperty.PROPERTIES.getAbsolutePath());
@@ -100,6 +106,7 @@ public class PassVault {
             LOG.error("Error while creating config.properties");
         }
 
+        // Loads non-encrypted properties
         PassProperty.load(null);
 
         LANG = loadLang();
@@ -142,16 +149,20 @@ public class PassVault {
     }
 
     /**
-     * Creates necessary files (if they don´t already exist), loads fonts, images and properties,
-     * creates necessary instances for variables in {@link Var} and starts the application.
+     * Runs {@link PassVault#init()} and then launches either {@link CheckFrame} or {@link PassFrame}
      */
     private void run() {
         init();
 
         EventQueue.invokeLater(() -> {
+            // Put some default values to UIManager
             UIManager.put("ToolTip.background", FOREGROUND);
             UIManager.put("ToolTip.foreground", BACKGROUND);
             UIManager.put("ToolTip.border", BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            UIManager.put("MenuItem.selectionBackground", FOREGROUND);
+            UIManager.put("MenuItem.selectionForeground", BACKGROUND);
+            UIManager.put("ComboBox.selectionBackground", FOREGROUND);
+            UIManager.put("ComboBox.selectionForeground", BACKGROUND);
 
             /*
             Reads the {@link Var#PASSWORDS} file, checks whether passwords are already saved and creates either the login dialog
@@ -185,21 +196,24 @@ public class PassVault {
         private final String message;
 
         /**
-         * Creates the frame
+         * Creates the CheckFrame. Second parameter can be null -> No additional message will be displayed
+         *
+         * @param after   The BiConsumer that will handle the inputted AES and password list
+         * @param message An additional message that will be displayed while input
          */
-        public CheckFrame(BiConsumer<AES, List<Password>> todo, String message) {
-            this.todo = todo;
+        public CheckFrame(BiConsumer<AES, List<Password>> after, String message) {
+            this.todo = after;
             this.message = message;
 
             setSize(380, 200);
             setTitle("Login");
 
-            setContentPane(new JPanel());
-            getContentPane().setLayout(null);
-            ((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(FOREGROUND));
+            JPanel contentPane = new JPanel(null);
+            contentPane.setBorder(BorderFactory.createLineBorder(FOREGROUND));
+            contentPane.setBackground(BACKGROUND);
+            setContentPane(contentPane);
 
             setResizable(false);
-            getContentPane().setBackground(BACKGROUND);
             setUndecorated(true);
             setIconImage(FRAME_ICON);
 
@@ -213,8 +227,13 @@ public class PassVault {
             textComponents();
         }
 
-        public CheckFrame(BiConsumer<AES, List<Password>> todo) {
-            this(todo, null);
+        /**
+         * Calls {@link CheckFrame#CheckFrame(BiConsumer, String)} with the string object as null
+         *
+         * @param after The BiConsumer that will handle the inputted AES and password list
+         */
+        public CheckFrame(BiConsumer<AES, List<Password>> after) {
+            this(after, null);
         }
 
         /**
@@ -242,6 +261,7 @@ public class PassVault {
 
             JLabel lblPass = new JLabel();
             add(lblPass, "check.lbl.pass");
+            // Is needed to calculate label's width
             textComponents();
             lblPass.setForeground(FOREGROUND);
             lblPass.setFont(raleway(15));
@@ -282,7 +302,7 @@ public class PassVault {
             });
             add(passwordField, "check.pf.password");
 
-            btnLogin.setFont(sizeFont(RALEWAY, 15));
+            btnLogin.setFont(RALEWAY.deriveFont(15f));
             btnLogin.setSize(200, 30);
             btnLogin.setForeground(BACKGROUND);
             btnLogin.setBackground(FOREGROUND);

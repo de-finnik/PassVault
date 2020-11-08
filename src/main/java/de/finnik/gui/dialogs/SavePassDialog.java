@@ -37,12 +37,12 @@ public class SavePassDialog extends JDialog {
     public SavePassDialog(Window owner, String pass) {
         super(owner, ModalityType.APPLICATION_MODAL);
 
-        setContentPane(new JPanel());
-        ((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(FOREGROUND));
-        getContentPane().setBackground(BACKGROUND);
-
-        BoxLayout boxLayout = new BoxLayout(getContentPane(), BoxLayout.Y_AXIS);
-        getContentPane().setLayout(boxLayout);
+        JPanel contentPane = new JPanel();
+        BoxLayout boxLayout = new BoxLayout(contentPane, BoxLayout.Y_AXIS);
+        contentPane.setLayout(boxLayout);
+        contentPane.setBorder(BorderFactory.createLineBorder(FOREGROUND));
+        contentPane.setBackground(BACKGROUND);
+        setContentPane(contentPane);
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -54,7 +54,7 @@ public class SavePassDialog extends JDialog {
 
         positionComponents(components);
 
-        // Sets border for textfields
+        // Sets border for text fields
         Arrays.stream(getMatchingComponents("savePass.tf"))
                 .map(c -> ((JTextField) c))
                 .forEach(tf -> tf.setBorder(BorderFactory.createLineBorder(Color.lightGray)));
@@ -62,7 +62,7 @@ public class SavePassDialog extends JDialog {
         // Sets color for labels and buttons
         PassUtils.GUIUtils.colorComponents(getMatchingComponents("savePass.btn", "savePass.lbl"), FOREGROUND, BACKGROUND);
 
-        // Sets font for labels and textfields
+        // Sets font for labels and text fields
         for (Component component : getMatchingComponents("savePass.lbl", "savePass.tf")) {
             if (component.getClass() != JLabel.class) {
                 // Redirects a 'enter' stroke to a button click
@@ -79,12 +79,6 @@ public class SavePassDialog extends JDialog {
             component.setFont(raleway(13));
         }
 
-        setSize(new Dimension(boxLayout.preferredLayoutSize(getContentPane()).width + 100, boxLayout.preferredLayoutSize(getContentPane()).height + 60));
-
-        ((JPanel) COMPONENTS.get("savePass.toolbar")).add(Box.createRigidArea(new Dimension((getWidth() - COMPONENTS.get("savePass.lbl.pass").getPreferredSize().width) / 2, 10)), BorderLayout.WEST);
-
-        setLocationRelativeTo(null);
-
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowActivated(WindowEvent e) {
@@ -95,6 +89,13 @@ public class SavePassDialog extends JDialog {
                 }
             }
         });
+
+
+        setSize(new Dimension(boxLayout.preferredLayoutSize(getContentPane()).width + 100, boxLayout.preferredLayoutSize(getContentPane()).height + 60));
+        setLocationRelativeTo(null);
+
+        // Adds necessary margin to the toolbar
+        ((JPanel) COMPONENTS.get("savePass.toolbar")).add(Box.createRigidArea(new Dimension((getWidth() - COMPONENTS.get("savePass.lbl.pass").getPreferredSize().width) / 2, 10)), BorderLayout.WEST);
     }
 
     private void components(final String pass) {

@@ -7,18 +7,21 @@ import java.io.*;
 import java.util.*;
 
 import static de.finnik.gui.Var.LOG;
-import static de.finnik.gui.Var.PASSWORDS;
 
 /**
- * The properties of the application
+ * The properties of the PassVault application
  */
 public enum PassProperty {
-    LANG, INACTIVITY_LOCK, INACTIVITY_TIME, DRIVE_PASSWORD, SHOW_PASSWORDS_DOTTED, SHOW_MAIN_PASSWORD, GEN_LOW_LENGTH, GEN_UP_LENGTH, GEN_BIG, GEN_SMALL, GEN_NUM, GEN_SPE, REAL_RANDOM;
+    /**
+     * PassVault's properties
+     */
+    LANG, INACTIVITY_LOCK, INACTIVITY_TIME, DRIVE_PASSWORD, SHOW_PASSWORDS_DOTTED, SHOW_MAIN_PASSWORD,
+    GEN_LOW_LENGTH, GEN_UP_LENGTH, GEN_BIG, GEN_SMALL, GEN_NUM, GEN_SPE, REAL_RANDOM;
 
     /**
      * The file where the properties are saved
      */
-    public static final File PROPERTIES = new File(PASSWORDS.getParent(), "config.properties");
+    public static File PROPERTIES;
 
     /**
      * The value of the property
@@ -77,7 +80,7 @@ public enum PassProperty {
                 bw.newLine();
             }
         } catch (IOException e) {
-            LOG.error("Error while saving config.properties!", e);
+            LOG.error("Error while saving properties!", e);
         }
     }
 
@@ -91,13 +94,13 @@ public enum PassProperty {
     }
 
     /**
-     * Sets the value of this property. Casts the given object to a string via {@link String#valueOf(Object)},
-     * checks whether the value is valid ({@link PassProperty#matches(String)}) for this property and loads the default value ({@link PassProperty#getDefault()}) if not.
+     * Sets the value for this property via {@link PassProperty#setValue(Object)} and takes the given AES to store the properties encrypted via {@link PassProperty#store(AES)}
      *
-     * @param value The value to be assigned to the property
-     * @return Whether the input was valid or not
+     * @param value The value to be assigned to this property
+     * @param aes   The AES object that will be used for encrypting the stored properties
+     * @return A boolean that tells whether the input was matching to the property's specifications via {@link PassProperty#matches(String)}
      */
-    public boolean setValueAndStore(Object value, AES aes) {
+    public boolean setValue(Object value, AES aes) {
         boolean matches = setValue(value);
         if (matches)
             LOG.info("Changed property {}", name());
@@ -106,7 +109,14 @@ public enum PassProperty {
         return matches;
     }
 
-    public boolean setValue(Object value) {
+    /**
+     * Sets the value of this property. Casts the given object to a string via {@link String#valueOf(Object)},
+     * checks whether the value is valid ({@link PassProperty#matches(String)}) for this property and loads the default value ({@link PassProperty#getDefault()}) if not.
+     *
+     * @param value The value to be assigned to the property
+     * @return Whether the input was valid or not
+     */
+    private boolean setValue(Object value) {
         String s = String.valueOf(value);
         if (matches(s)) {
             this.value = s;
@@ -119,7 +129,7 @@ public enum PassProperty {
     /**
      * Loads the default value of each property
      *
-     * @return Default value of {@code this}
+     * @return Default value of {@code this} property
      */
     private String getDefault() {
         switch (this) {
@@ -188,6 +198,11 @@ public enum PassProperty {
         }
     }
 
+    /**
+     * Tells whether this property has to be encrypted when storing
+     *
+     * @return Needs to be encrypted when storing or not
+     */
     private boolean encrypt() {
         return this != PassProperty.LANG
                 && this != PassProperty.SHOW_MAIN_PASSWORD;

@@ -12,26 +12,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static de.finnik.gui.Var.HAND_CURSOR;
+
 
 /**
- * With an instance you can show small dialogs for simple actions
+ * With this class you can show small dialogs for simple actions
  */
 public class PassDialog {
     private final BufferedImage CLOSE;
     private final BufferedImage[] IMAGES;
     private final Color FOREGROUND, BACKGROUND;
     private final Font FONT;
-    private final Cursor HAND_CURSOR = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
 
+    /**
+     * A list of every {@link JDialog} that was produced by this instance
+     */
     private final List<JDialog> dialogs;
 
     /**
      * Predefines settings that will be used later
      *
-     * @param foreground The foreground of the dialogs
-     * @param background The background of the dialogs
+     * @param foreground The foreground color of the dialogs
+     * @param background The background color of the dialogs
      * @param font       The font that will be used for the dialogs
-     * @param close      An image which will be displayed by a button that closes the dialog
+     * @param close      An image which will be displayed as a button that closes the dialog
      * @param images     An array of images that will be used for icons in the dialogs
      *                   (images[0] in {@link PassDialog#message(Window, String)}, images[1] in {@link PassDialog#input(Window, String)}
      *                   images[2] in {@link PassDialog#confirm(Window, String)}
@@ -51,7 +55,7 @@ public class PassDialog {
      * Displays a message dialog which displays a simple message
      *
      * @param message The message which the user should see
-     * @param owner   The {@link java.awt.Window} object that will own the created dialog
+     * @param owner   The {@link Window} object that will own the created dialog
      */
     public void message(Window owner, String message) {
         Toolkit.getDefaultToolkit().beep();
@@ -59,15 +63,13 @@ public class PassDialog {
         JDialog dialog = new JDialog(owner);
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setAlwaysOnTop(true);
-
-        JPanel content = new JPanel();
-
-        dialog.setContentPane(content);
         dialog.setUndecorated(true);
 
+        JPanel content = new JPanel(new BorderLayout(20, 0));
         content.setBackground(BACKGROUND);
-        content.setLayout(new BorderLayout(20, 0));
         content.setBorder(BorderFactory.createLineBorder(FOREGROUND, 1));
+        dialog.setContentPane(content);
+
 
         JLabel lblLogo = new JLabel();
         lblLogo.setIcon(new ImageIcon(IMAGES[0]));
@@ -81,6 +83,7 @@ public class PassDialog {
         textPaneMessage.setEditable(false);
         textPaneMessage.setEditorKit(new CenteredEditorKit());
         try {
+            // Centers the text inside textPaneMessage
             SimpleAttributeSet attrs = new SimpleAttributeSet();
             StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_CENTER);
             StyledDocument doc = (StyledDocument) textPaneMessage.getDocument();
@@ -126,26 +129,29 @@ public class PassDialog {
 
         dialog.setSize(content.getLayout().preferredLayoutSize(content));
         dialog.setLocationRelativeTo(null);
+
         dialogs.add(dialog);
         dialog.setVisible(true);
     }
 
     /**
-     * Displays an input dialog which displays a message and lets the user enter something
+     * Displays an input dialog which displays a message and lets the user enter something.
+     * Calls {@link PassDialog#input(Window, String, boolean)} with the boolean as {@code false}
      *
      * @param message The message which the user should see
-     * @param owner   The {@link java.awt.Window} object that will own the created dialog
+     * @param owner   The {@link Window} object that will own the created dialog
      */
     public String input(Window owner, String message) {
         return input(owner, message, false);
     }
 
     /**
-     * Displays the same input dialog as {@link PassDialog#input(Window, String)} but accepts a boolean to let the user input a password
+     * Displays an input dialog which displays a message and lets the user enter something.
+     * Takes a boolean as an input which tells whether the user should input a password
      *
      * @param message The message which the user should see
      * @param pass    A boolean whether the input is a password
-     * @param owner   The {@link java.awt.Window} object that will own the created dialog
+     * @param owner   The {@link Window} object that will own the created dialog
      * @return The user's input
      */
     public String input(Window owner, String message, boolean pass) {
@@ -153,16 +159,18 @@ public class PassDialog {
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setAlwaysOnTop(true);
 
-        String[] result = new String[1];
+        StringBuilder result = new StringBuilder();
 
-        JPanel content = new JPanel(new FlowLayout());
+        FlowLayout flowLayout = new FlowLayout();
+        flowLayout.setHgap(10);
+
+        JPanel content = new JPanel(flowLayout);
+        content.setBackground(BACKGROUND);
+        content.setBorder(BorderFactory.createLineBorder(FOREGROUND, 1));
 
         dialog.setContentPane(content);
         dialog.setUndecorated(true);
 
-        content.setBackground(BACKGROUND);
-        ((FlowLayout) content.getLayout()).setHgap(10);
-        content.setBorder(BorderFactory.createLineBorder(FOREGROUND, 1));
 
         JLabel lblLogo = new JLabel();
         lblLogo.setIcon(new ImageIcon(IMAGES.length >= 2 ? IMAGES[1] : IMAGES[0]));
@@ -185,7 +193,6 @@ public class PassDialog {
         textPaneMessage.setEditable(false);
         textPaneMessage.setSize(new Dimension(Math.min(textPaneMessage.getPreferredSize().width, owner.getWidth()), 10));
         textPaneMessage.setPreferredSize(new Dimension(textPaneMessage.getSize().width, textPaneMessage.getPreferredSize().height));
-
         panel.add(textPaneMessage, BorderLayout.NORTH);
 
         JTextField tfInput = pass ? new JPasswordField() {
@@ -206,10 +213,10 @@ public class PassDialog {
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
                 if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-                    result[0] = tfInput.getText();
+                    result.append(tfInput.getText());
                     dialog.dispose();
                 } else if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    result[0] = "";
+                    dialog.dispose();
                 }
             }
         });
@@ -224,7 +231,7 @@ public class PassDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                result[0] = tfInput.getText();
+                result.append(tfInput.getText());
                 dialog.dispose();
             }
         });
@@ -236,7 +243,6 @@ public class PassDialog {
         lblClose.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                result[0] = "";
                 dialog.dispose();
             }
         });
@@ -245,12 +251,12 @@ public class PassDialog {
         lblClose.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
         content.add(lblClose, BorderLayout.EAST);
 
-        dialog.setSize(new Dimension(content.getLayout().preferredLayoutSize(content).width + 50, content.getLayout().preferredLayoutSize(content).height + 50));
         dialog.setSize(content.getLayout().preferredLayoutSize(content));
         dialog.setLocationRelativeTo(null);
+
         dialogs.add(dialog);
         dialog.setVisible(true);
-        return result[0];
+        return result.toString();
     }
 
 
@@ -258,7 +264,7 @@ public class PassDialog {
      * Displays a confirm dialog which displays a question that the user can answer with yes or no
      *
      * @param message The message which the user should see
-     * @param owner   The {@link java.awt.Window} object that will own the created dialog
+     * @param owner   The {@link Window} object that will own the created dialog
      * @return The user's confirmation
      */
     public boolean confirm(Window owner, String message) {
@@ -266,17 +272,18 @@ public class PassDialog {
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setAlwaysOnTop(true);
 
-        JPanel content = new JPanel();
+        FlowLayout flowLayout = new FlowLayout();
+        flowLayout.setHgap(10);
+
+        JPanel content = new JPanel(flowLayout);
+        content.setBackground(BACKGROUND);
+        content.setBorder(BorderFactory.createLineBorder(FOREGROUND, 1));
 
         AtomicBoolean result = new AtomicBoolean(false);
 
         dialog.setContentPane(content);
         dialog.setUndecorated(true);
 
-        content.setBackground(BACKGROUND);
-        content.setLayout(new FlowLayout());
-        ((FlowLayout) content.getLayout()).setHgap(10);
-        content.setBorder(BorderFactory.createLineBorder(FOREGROUND, 1));
 
         JLabel lblLogo = new JLabel();
         lblLogo.setIcon(new ImageIcon(IMAGES.length >= 3 ? IMAGES[2] : IMAGES[0]));
@@ -290,6 +297,7 @@ public class PassDialog {
         textPaneMessage.setEditable(false);
         textPaneMessage.setEditorKit(new CenteredEditorKit());
         try {
+            // Centers the text inside textPaneMessage
             SimpleAttributeSet attrs = new SimpleAttributeSet();
             StyleConstants.setAlignment(attrs, StyleConstants.ALIGN_CENTER);
             StyledDocument doc = (StyledDocument) textPaneMessage.getDocument();
@@ -334,7 +342,6 @@ public class PassDialog {
         lblYes.setIcon(new ImageIcon(IMAGES[3]));
         content.add(lblYes);
 
-
         JLabel lblClose = new JLabel();
         lblClose.setCursor(HAND_CURSOR);
         lblClose.addMouseListener(new MouseAdapter() {
@@ -349,19 +356,25 @@ public class PassDialog {
         lblClose.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
         content.add(lblClose);
 
-        dialog.setSize(new Dimension(content.getLayout().preferredLayoutSize(content).width + 50, content.getLayout().preferredLayoutSize(content).height + 50));
         dialog.setSize(content.getLayout().preferredLayoutSize(content));
         dialog.setLocationRelativeTo(null);
+
         dialogs.add(dialog);
         dialog.setVisible(true);
         return result.get();
     }
 
+    /**
+     * Disposes all dialogs from {@link PassDialog#dialogs} via {@link JDialog#dispose()}
+     */
     public void disposeDialogs() {
         dialogs.forEach(JDialog::dispose);
         dialogs.clear();
     }
 
+    /**
+     * A {@link StyledEditorKit} that displays its content centered
+     */
     private static class CenteredEditorKit extends StyledEditorKit {
         public ViewFactory getViewFactory() {
             return new StyledViewFactory();

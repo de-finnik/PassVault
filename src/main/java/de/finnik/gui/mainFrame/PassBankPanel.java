@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 import static de.finnik.gui.Var.*;
 
 /**
- * Observing your passwords via inserting a parameter
+ * Manage your passwords via inserting a parameter
  */
 public class PassBankPanel extends JPanel {
 
-    private static JTextField tfSearch;
-    private static ListPasswordPanel listPasswordPanel;
-    private static JButton btnShowPass;
-    private static JLabel lblCopy;
+    private JTextField tfSearch;
+    private ListPasswordPanel listPasswordPanel;
+    private JButton btnShowPass;
+    private JLabel lblCopy;
 
     /**
      * Creates the panel
@@ -38,6 +38,7 @@ public class PassBankPanel extends JPanel {
         components();
         textComponents();
 
+        // Sets the font for all generated labels, tables and TextFields
         Arrays.stream(getMatchingComponents("passBank.lbl", "passBank.table", "passBank.tf"))
                 .forEach(c -> c.setFont(raleway(13)));
     }
@@ -78,7 +79,6 @@ public class PassBankPanel extends JPanel {
         add(tfSearch, "passBank.tf.search");
 
         listPasswordPanel = new ListPasswordPanel();
-        listPasswordPanel.setBackground(Color.pink);
         listPasswordPanel.setBounds(0, 70, 350, 280);
         add(listPasswordPanel, "passBank.listPasswordPanel");
 

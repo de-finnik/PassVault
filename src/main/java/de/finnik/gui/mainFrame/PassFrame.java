@@ -25,7 +25,7 @@ import static de.finnik.gui.Var.*;
 
 /**
  * The heart of the PassVault application.
- * It's the main frame where you can generate new passwords ({@link GeneratePasswordPanel}) or search for the password that you need ({@link PassBankPanel}).
+ * It's the main frame where you can generate new passwords ({@link GeneratePasswordPanel}) or manage stored passwords ({@link PassBankPanel}).
  */
 public class PassFrame extends JFrame {
 
@@ -51,11 +51,11 @@ public class PassFrame extends JFrame {
         PassFrame.aes = aes;
         PassFrame.passwordList = new ArrayList<>(passwordList);
 
-        setContentPane(new JPanel());
-        ((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(FOREGROUND));
+        JPanel contentPane = new JPanel(null);
+        contentPane.setBorder(BorderFactory.createLineBorder(FOREGROUND));
+        contentPane.setBackground(BACKGROUND);
+        setContentPane(contentPane);
 
-        getContentPane().setLayout(null);
-        getContentPane().setBackground(BACKGROUND);
         setTitle("PassVault");
         setResizable(false);
         setUndecorated(true);
@@ -63,7 +63,7 @@ public class PassFrame extends JFrame {
         setSize(710, 460);
         setLocationRelativeTo(null);
 
-        MouseAdapter moveListener = new MouseAdapter() {
+        MouseAdapter mouseAdapter = new MouseAdapter() {
             private Point mouseDown = null;
 
             // Shift and right click -> import backup
@@ -78,7 +78,7 @@ public class PassFrame extends JFrame {
                         }
                     };
                     jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                    jfc.setFileFilter(new FileNameExtensionFilter(".bin", "bin"));
+                    jfc.setFileFilter(new FileNameExtensionFilter("PassVault backup", "bin"));
                     int result = jfc.showOpenDialog(null);
                     if (result == JFileChooser.APPROVE_OPTION && PassFrame.aes.passIsSet()) {
                         startImport(jfc.getSelectedFile());
@@ -111,8 +111,8 @@ public class PassFrame extends JFrame {
             }
         };
 
-        addMouseListener(moveListener);
-        addMouseMotionListener(moveListener);
+        addMouseListener(mouseAdapter);
+        addMouseMotionListener(mouseAdapter);
 
         setIconImage(FRAME_ICON);
         setTransferHandler(new TransferHandler() {
@@ -296,12 +296,19 @@ public class PassFrame extends JFrame {
         setVisible(true);
     }
 
+    /**
+     * Refreshes the visibility of the drive label with the help of {@link PassProperty#DRIVE_PASSWORD}
+     */
     public void refreshDriveVisibility() {
         COMPONENTS.get("passFrame.lbl.refresh").setVisible(!PassProperty.DRIVE_PASSWORD.getValue().isEmpty());
     }
 
     /**
-     * Import a backup from a file
+     * Starts the import for a user selected file. Checks whether backup has a file extension of .bin,
+     * whether the backup was encrypted with the same password as the users current master password
+     * or else asks the user for the correct password.
+     * <p>
+     * When the correct password is found, {@link PassFrame#importBackup(File, AES)} is called
      *
      * @param file The location of the backup
      */
@@ -322,6 +329,12 @@ public class PassFrame extends JFrame {
         }
     }
 
+    /**
+     * Imports a backup from a file
+     *
+     * @param file The location of the backup
+     * @param aes  The aes object with that the backup is encrypted
+     */
     private void importBackup(File file, AES aes) throws AES.WrongPasswordException {
         List<Password> backup = Password.readPasswords(file, aes);
 

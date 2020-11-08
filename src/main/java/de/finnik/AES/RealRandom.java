@@ -9,8 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Creates a dialog where the user has to type some keys in order to get a real random seed
+ */
 public class RealRandom {
-    public long seedWithUserInput(Window owner, String message) {
+    /**
+     * Displays the dialog where the user has to type some keys in order to get a real random seed
+     *
+     * @param owner   The {@link Window} object that owns the dialog
+     * @param message The message to be displayed inside the dialog
+     * @return The user-generated seed
+     */
+    public static long seedWithUserInput(Window owner, String message) {
         JDialog dialog = new JDialog(owner);
         dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setAlwaysOnTop(true);
@@ -43,7 +53,13 @@ public class RealRandom {
         return seed.get();
     }
 
-    public long getSeedFromInput(String input) {
+    /**
+     * Creates a random seed out of a given {@link String}
+     *
+     * @param input The input string
+     * @return The random seed
+     */
+    private static long getSeedFromInput(String input) {
         List<Integer> numbers = new ArrayList<>();
         for (char c : input.toCharArray()) {
             numbers.add((int) c);

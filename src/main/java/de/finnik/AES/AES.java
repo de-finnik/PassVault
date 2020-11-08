@@ -10,25 +10,41 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A class that allows you to encrypt and decrypt {@link String} objects via AES by choosing the hashing algorithm
+ */
 public class AES {
 
-    private final Map<HashMode, SecretKeySpec> secretKeySpec;
+    private final Map<HashAlgorithm, SecretKeySpec> secretKeySpec;
     private final String pass;
 
+    /**
+     * Initializes a new object via saving a given password to en-/decrypt and generating {@link SecretKeySpec} objects for all {@link HashAlgorithm}s
+     *
+     * @param pass The password to be used for en/decrypting
+     */
     public AES(String pass) {
         this.pass = pass;
         secretKeySpec = new HashMap<>();
-        for (HashMode hashMode : HashMode.values()) {
-            secretKeySpec.put(hashMode, getSecretKey(pass, hashMode));
+        for (HashAlgorithm hashAlgorithm : HashAlgorithm.values()) {
+            secretKeySpec.put(hashAlgorithm, getSecretKey(pass, hashAlgorithm));
         }
     }
 
-    private static SecretKeySpec getSecretKey(String myKey, HashMode hashMode) {
+    /**
+     * Creates a {@link SecretKeySpec} object by getting a password as de/encryption key
+     * and the {@link HashAlgorithm} to be used
+     *
+     * @param myKey         The password to be used for en/decrypting
+     * @param hashAlgorithm The hashing algorithm
+     * @return The generated SecretKeySpec
+     */
+    private static SecretKeySpec getSecretKey(String myKey, HashAlgorithm hashAlgorithm) {
         MessageDigest sha;
         byte[] key;
         try {
             key = myKey.getBytes(StandardCharsets.UTF_8);
-            sha = hashMode.digest();
+            sha = hashAlgorithm.getDigestInstance();
             key = sha.digest(key);
             key = Arrays.copyOf(key, 16);
             return new SecretKeySpec(key, "AES");
@@ -41,6 +57,9 @@ public class AES {
         return pass;
     }
 
+    /**
+     * @return True when {@link AES#pass} is empty
+     */
     public boolean passIsSet() {
         return !pass.isEmpty();
     }
@@ -54,7 +73,7 @@ public class AES {
     public String encrypt(String strToEncrypt) {
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec.get(HashMode.SHA_256));
+            cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec.get(HashAlgorithm.SHA_256));
             return Base64.getEncoder().encodeToString(cipher.doFinal(strToEncrypt.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             throw new RuntimeException("Error while encrypting: " + e.toString());
@@ -70,9 +89,9 @@ public class AES {
      */
     public String decrypt(String strToDecrypt) throws WrongPasswordException {
         try {
-            return decrypt(strToDecrypt, HashMode.SHA_256);
+            return decrypt(strToDecrypt, HashAlgorithm.SHA_256);
         } catch (Exception e) {
-            return decrypt(strToDecrypt, HashMode.SHA_1);
+            return decrypt(strToDecrypt, HashAlgorithm.SHA_1);
         }
     }
 
@@ -83,24 +102,37 @@ public class AES {
      * @return Decrypted key
      * @throws WrongPasswordException Wrong password!
      */
-    private String decrypt(String strToDecrypt, HashMode hashMode) throws WrongPasswordException {
+    private String decrypt(String strToDecrypt, HashAlgorithm hashAlgorithm) throws WrongPasswordException {
         try {
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5PADDING");
-            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec.get(hashMode));
+            cipher.init(Cipher.DECRYPT_MODE, secretKeySpec.get(hashAlgorithm));
             return new String(cipher.doFinal(Base64.getDecoder().decode(strToDecrypt.getBytes(StandardCharsets.UTF_8))));
         } catch (Exception e) {
             throw new WrongPasswordException();
         }
     }
 
-    public enum HashMode {
+    /**
+     * All available hashing algorithms
+     */
+    public enum HashAlgorithm {
         SHA_256, SHA_1;
 
-        public MessageDigest digest() throws NoSuchAlgorithmException {
+        /**
+         * Creates a {@link MessageDigest} instance with this enum's name
+         *
+         * @return The created {@link MessageDigest} instance
+         * @throws NoSuchAlgorithmException There's no algorithm with this name
+         */
+        public MessageDigest getDigestInstance() throws NoSuchAlgorithmException {
             return MessageDigest.getInstance(name().replace("_", "-"));
         }
     }
 
+    /**
+     * Is used in connection to {@link AES} objects.
+     * The {@link AES} methods {@link AES#encrypt(String)} and {@link AES#decrypt(String)} throw this exception when the given password is incorrect
+     */
     public static class WrongPasswordException extends RuntimeException {
 
     }

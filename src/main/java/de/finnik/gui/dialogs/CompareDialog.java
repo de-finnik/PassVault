@@ -29,8 +29,6 @@ public class CompareDialog extends JDialog {
      */
     List<Password> chosen;
 
-    boolean closed;
-
     /**
      * Creates but not displays the dialog. To make it visible, call {@link CompareDialog#open()}
      *
@@ -57,19 +55,14 @@ public class CompareDialog extends JDialog {
         findDuplicates(local, backup);
         textComponents();
 
+        // Sets the colors for all panels, buttons, labels and text areas
         PassUtils.GUIUtils.doForAllComponents(contentPane, component -> {
             component.setBackground(BACKGROUND);
             component.setForeground(FOREGROUND);
-        }, JPanel.class, JButton.class);
+        }, JPanel.class, JButton.class, JLabel.class, JTextArea.class);
 
-        PassUtils.GUIUtils.doForAllComponents(contentPane, label -> {
-            label.setForeground(FOREGROUND);
-            label.setBackground(BACKGROUND);
-            label.setFont(raleway(15));
-        }, JLabel.class, JTextArea.class);
-
-        setSize(getPreferredSize().width, getPreferredSize().height + 100);
-        setLocationRelativeTo(null);
+        // Sets the font for all labels and text areas
+        PassUtils.GUIUtils.doForAllComponents(contentPane, label -> label.setFont(raleway(15)), JLabel.class, JTextArea.class);
 
         addWindowListener(new WindowAdapter() {
             /*
@@ -88,12 +81,14 @@ public class CompareDialog extends JDialog {
                 inactive = true;
             }
         });
-        closed = false;
+
+        setSize(getPreferredSize().width, Math.min(getPreferredSize().height + 50, Toolkit.getDefaultToolkit().getScreenSize().height / 4 * 3));
+        setLocationRelativeTo(null);
     }
 
     /**
      * Finds duplicate passwords that doesn't have the same content via {@link Utils#findDuplicateIDs(List, List)},
-     * adds the non-corresponding passwords to a list that the user can pick the right version from.
+     * adds the non-corresponding passwords to a list thus the user can pick the right version from.
      *
      * @param local  One source
      * @param backup The other source
@@ -139,14 +134,18 @@ public class CompareDialog extends JDialog {
                 dispose();
             }
         });
-        lblClose.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        lblClose.setCursor(HAND_CURSOR);
         lblClose.setPreferredSize(new Dimension(30, 30));
         panelToolbar.add(lblClose, BorderLayout.EAST);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout());
+        JPanel panel = new JPanel(new BorderLayout());
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, FOREGROUND));
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        getContentPane().add(panel);
+        getContentPane().add(scrollPane);
 
         JPanel panelLocal = new JPanel(new BorderLayout());
         JLabel local = new JLabel("Local");
@@ -158,15 +157,10 @@ public class CompareDialog extends JDialog {
         panelBackup.add(backup, BorderLayout.NORTH);
         panel.add(panelBackup, BorderLayout.EAST);
 
-        GridLayout gridLayout = new GridLayout(0, 1);
-        gridLayout.setVgap(10);
-
-        panelLocalElements = new JPanel();
-        panelLocalElements.setLayout(gridLayout);
+        panelLocalElements = new JPanel(new GridLayout(0, 1, 0, 10));
         panelLocalElements.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
-        panelBackupElements = new JPanel();
-        panelBackupElements.setLayout(gridLayout);
+        panelBackupElements = new JPanel(new GridLayout(0, 1, 0, 10));
 
         panelLocal.add(panelLocalElements, BorderLayout.CENTER);
 
@@ -202,6 +196,9 @@ public class CompareDialog extends JDialog {
         return chosen;
     }
 
+    /**
+     * Contains essentials for this class
+     */
     private static class Utils {
         /**
          * Finds a {@link Password} with a given id within a list of  {@link Password}s
@@ -223,14 +220,14 @@ public class CompareDialog extends JDialog {
          * @return A list of duplicate password ids
          */
         public static List<String> findDuplicateIDs(List<Password> one, List<Password> two) {
-            List<Password> all = new ArrayList<>();
-            all.addAll(one);
-            all.addAll(two);
+            List<Password> allPasswords = new ArrayList<>();
+            allPasswords.addAll(one);
+            allPasswords.addAll(two);
 
-            List<String> ids = all.stream().map(Password::id).collect(Collectors.toList());
+            List<String> allIDs = allPasswords.stream().map(Password::id).collect(Collectors.toList());
 
-            return ids.stream()
-                    .filter(id -> Collections.frequency(ids, id) == 2)
+            return allIDs.stream()
+                    .filter(id -> Collections.frequency(allIDs, id) == 2)
                     // Remove duplicates that have the same content
                     .filter(id -> !Password.equalsInformation(getPasswordForID(id, one), getPasswordForID(id, two)))
                     .distinct()
@@ -260,8 +257,8 @@ public class CompareDialog extends JDialog {
 
         /**
          * Takes a list of {@link Password} objects, a list of {@link PassComp} objects and a {@link JPanel} as input
-         * and creates new {@link PassComp} objects that will be added to the existing list. The {@link JPanel} object contained in each new {@link PassComp} object
-         * will be appended to the given {@link JPanel} container.
+         * and creates new {@link PassComp} objects from the passwords that will be added to the existing list.
+         * The {@link JPanel} object contained in each new {@link PassComp} object will be appended to the given {@link JPanel} container.
          *
          * @param duplicatePasswords A list of {@link Password} objects
          * @param elements           A list of {@link PassComp} objects
@@ -270,6 +267,7 @@ public class CompareDialog extends JDialog {
         public static void convertDuplicatesToPassComp(List<Password> duplicatePasswords, List<PassComp> elements, JPanel container) {
             List<String> values = new ArrayList<>();
             duplicatePasswords.stream().map(Password::getValues).forEach(v -> v.forEach(values::add));
+            // Searches the longest value and stores its width
             int width = Math.max(200, values
                     .stream()
                     .mapToInt(string -> container.getFontMetrics(raleway(15)).stringWidth(string) + 20)
@@ -280,9 +278,7 @@ public class CompareDialog extends JDialog {
                 panel.setBorder(BorderFactory.createLineBorder(Color.WHITE));
                 panel.setLayout(new GridLayout(0, 1));
 
-                if (!password.isEmpty()) {
-                    password.getValues().forEach(v -> panel.add(new JLabel(v)));
-                } else {
+                if (password.isEmpty()) {
                     JLabel trash = new JLabel() {
                         @Override
                         protected void paintComponent(Graphics g) {
@@ -291,6 +287,8 @@ public class CompareDialog extends JDialog {
                         }
                     };
                     panel.add(trash);
+                } else {
+                    password.getValues().forEach(v -> panel.add(new JLabel(v)));
                 }
 
                 PassComp passComp = new PassComp(password, panel);
@@ -302,18 +300,20 @@ public class CompareDialog extends JDialog {
                     }
                 });
 
+                // Sets a border for each label inside the generated panel
                 Arrays.stream(panel.getComponents()).filter(c -> c.getClass() == JLabel.class)
                         .forEach(lbl -> ((JLabel) lbl).setBorder(BorderFactory.createEmptyBorder(5, 5, 0, 0)));
 
-                elements.add(passComp);
                 panel.setPreferredSize(new Dimension(width, 100));
+
+                elements.add(passComp);
                 container.add(panel);
             }
         }
 
         /**
          * Takes a list of {@link PassComp} objects and a password id as input, finds the latest edited version of this password
-         * and highlights its JPanel
+         * and highlights its JPanel via {@link PassComp#select(List)}
          *
          * @param elements A list of all {@link PassComp} objects
          * @param id       The id to highlight the latest version
@@ -341,12 +341,25 @@ public class CompareDialog extends JDialog {
             isSelected = false;
         }
 
-        private static void deselect(List<PassComp> comps, PassComp select) {
+        /**
+         * Deselects a PassComp with the given id inside the given list
+         *
+         * @param comps List of PassComp objects
+         * @param id    The id to deselect
+         */
+        private static void deselect(List<PassComp> comps, String id) {
             comps.stream()
-                    .filter(comp -> comp.getId().equals(select.getId()))
+                    .filter(comp -> comp.getId().equals(id))
                     .forEach(comp -> comp.setSelected(false));
         }
 
+        /**
+         * Takes a list of PassComp objects and sets the border of each PassComp's panel:
+         * If it's selected, its panel gets a green border, else it gets a white border.
+         *
+         * @param comps The list of PassComp objects
+         * @see PassComp#isSelected()
+         */
         private static void paintSelected(List<PassComp> comps) {
             comps.forEach(comp -> comp.getPanel().setBorder(BorderFactory.createLineBorder(comp.isSelected ? Color.green : Color.white)));
         }
@@ -358,7 +371,7 @@ public class CompareDialog extends JDialog {
          * @param comps A list of {@link PassComp} objects to handle
          */
         public void select(List<PassComp> comps) {
-            deselect(comps, this);
+            deselect(comps, getId());
             setSelected(true);
             paintSelected(comps);
         }

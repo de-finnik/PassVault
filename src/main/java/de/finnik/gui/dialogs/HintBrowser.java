@@ -1,4 +1,4 @@
-package de.finnik.gui.hints;
+package de.finnik.gui.dialogs;
 
 import de.finnik.gui.PassVault;
 import de.finnik.passvault.utils.Utils;
@@ -10,12 +10,23 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 public class HintBrowser {
-    public static void show(Window owner, String t, String language) throws IOException {
+    /**
+     * Opens a html file inside an {@link JEditorPane}
+     * <p>
+     * The html file will be picked from the directory: /help/${name}_${language}.html
+     *
+     * @param owner    The window that will own the dialog
+     * @param name     The name of the file to be opened
+     * @param language The language that will be displayed inside the html file
+     * @throws IOException Html file couldn't be found
+     */
+    public static void show(Window owner, String name, String language) throws IOException {
         JDialog frame = new JDialog(owner);
         frame.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
         frame.setSize(800, 600);
+
         JEditorPane editorPane = new JEditorPane();
-        editorPane.setPage(PassVault.class.getResource(String.format("/help/%s_%s.html", t, language)));
+        editorPane.setPage(PassVault.class.getResource(String.format("/help/%s_%s.html", name, language)));
         editorPane.setEditable(false);
         editorPane.addHyperlinkListener(e -> {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
@@ -27,10 +38,11 @@ public class HintBrowser {
             }
         });
         editorPane.setBorder(BorderFactory.createEmptyBorder());
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setViewportView(editorPane);
+
+        JScrollPane scrollPane = new JScrollPane(editorPane);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
+
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }

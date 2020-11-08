@@ -44,13 +44,12 @@ public class ListPasswordPanel extends JPanel {
         removeAll();
 
         passwords = new JPanel();
+        passwords.setLayout(new BoxLayout(passwords, BoxLayout.Y_AXIS));
+        passwords.setBackground(BACKGROUND);
+
         JScrollPane scrollPane = new JScrollPane(passwords, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBorder(null);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-        BoxLayout boxLayout = new BoxLayout(passwords, BoxLayout.Y_AXIS);
-        passwords.setLayout(boxLayout);
-        passwords.setBackground(BACKGROUND);
         scrollPane.setBounds(0, 0, getWidth(), getHeight());
         add(scrollPane);
 
@@ -77,8 +76,6 @@ public class ListPasswordPanel extends JPanel {
                 .filter(c -> c.getClass() == PasswordPanel.class)
                 .map(c -> ((PasswordPanel) c))
                 .collect(Collectors.toList());
-        if (passwordPanels.isEmpty())
-            return null;
         return passwordPanels.size() == 1 ? passwordPanels.get(0).getPassword() :
                 passwordPanels.stream().filter(PasswordPanel::isSelected)
                         .map(PasswordPanel::getPassword)
@@ -149,7 +146,7 @@ public class ListPasswordPanel extends JPanel {
     /**
      * Creates a {@link JPanel} to be added to a new {@link PasswordPanel} by taking two {@code String} objects to be displayed inside the Panel as a title and a content
      *
-     * @param pass        {@link JTextField} -> {@code false}; {@link JPasswordField} -> {@code true}
+     * @param pass        {@code false} -> {@link JTextField}; {@code true} -> {@link JPasswordField}
      * @param title       The string to be displayed as a title inside the top label
      * @param content     The string to be displayed inside the TextField
      * @param keyListener A {@link Consumer} that takes a {@link String} and accepts the user input after he made changes to the TextField
@@ -166,10 +163,10 @@ public class ListPasswordPanel extends JPanel {
         panel.add(label);
 
         JTextField textField;
-        if (!pass) {
-            textField = new JTextField(content);
+        if (pass && Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue())) {
+            textField = new JPasswordField(content);
         } else {
-            textField = Boolean.parseBoolean(PassProperty.SHOW_PASSWORDS_DOTTED.getValue()) ? new JPasswordField(content) : new JTextField(content);
+            textField = new JTextField(content);
         }
         textField.addKeyListener(new KeyAdapter() {
             @Override
@@ -192,7 +189,7 @@ public class ListPasswordPanel extends JPanel {
 
     /**
      * Deletes the user-selected password when he presses the delete key by asking the user, whether he really wants to delete the password,
-     * the taking the selected password from {@link ListPasswordPanel#getSelectedPassword()} and deleting it via {@link PassUtils#deletePassword(Password)}
+     * then taking the selected password from {@link ListPasswordPanel#getSelectedPassword()} and deleting it via {@link PassUtils#deletePassword(Password)}
      */
     private void deleteSelectedPassword() {
         if (DIALOG.confirm(FRAME, LANG.getString("jop.deletePass"))) {
@@ -202,7 +199,7 @@ public class ListPasswordPanel extends JPanel {
     }
 
     /**
-     * A custom panel that has a {@link Password} parameter
+     * A custom panel that has a {@link Password} and a {@link boolean} parameter whether it's selected or not
      */
     private static class PasswordPanel extends JPanel {
         Password password;

@@ -30,10 +30,23 @@ import java.util.List;
 
 import static de.finnik.gui.Var.*;
 
+/**
+ * Creates the connection to Google Drive and handles the files stored on Google Drive
+ */
 public class DriveServiceHelper {
+    /**
+     * The name of the file where everything is stored on Google Drive
+     */
     private static final String FILE_NAME = "pass";
+    /**
+     * The {@link Drive} object
+     */
     private final Drive mDrive;
 
+    /**
+     * List of files on Google Drive in AppData folder with the name {@link DriveServiceHelper#FILE_NAME}
+     * size is either 0 and not exceeding 1
+     */
     private List<File> passFile;
 
     public DriveServiceHelper(Drive mDrive) {
@@ -41,16 +54,37 @@ public class DriveServiceHelper {
         refreshPassFile();
     }
 
+    /**
+     * Calls {@link DriveServiceHelper#refreshPassFile()} and then checks whether {@link DriveServiceHelper#passFile}' size is bigger than 0
+     *
+     * @return {@link DriveServiceHelper#passFile}'s size is > 0 -> pass file exists or not
+     */
     public boolean passFileExists() {
         refreshPassFile();
         return passFile.size() > 0;
     }
 
+    /**
+     * Calls {@link DriveServiceHelper#passFileId()} and then reads this file's content via the given {@link AES} object
+     * and {@link Password#readPasswords(InputStream, AES)}
+     *
+     * @param aes The {@link AES} object containing the drive password
+     * @return The read list of {@link Password} objects stored on Google Drive
+     * @throws IOException Error while reading pass file
+     */
     public List<Password> readPasswords(AES aes) throws IOException {
         InputStream is = mDrive.files().get(passFileId()).executeMediaAsInputStream();
         return Password.readPasswords(is, aes);
     }
 
+    /**
+     * Stores a given list of {@link Password} objects encrypted with a given {@link AES} object
+     * to the user's Google Drive
+     *
+     * @param passwords {@link Password} objects to be stored
+     * @param aes       The {@link AES} object to encrypt the passwords
+     * @throws IOException Error while writing pass file
+     */
     public void savePasswords(List<Password> passwords, AES aes) throws IOException {
         java.io.File tempFile = java.io.File.createTempFile("pass", "vault");
         Password.savePasswords(passwords, tempFile, aes);
@@ -76,15 +110,27 @@ public class DriveServiceHelper {
         refreshPassFile();
     }
 
+    /**
+     * Deletes the pass file from Google Drive and then calls {@link DriveServiceHelper#refreshPassFile()}
+     *
+     * @throws IOException Error while deleting pass file
+     * @see DriveServiceHelper#passFileId()
+     */
     public void deletePassFile() throws IOException {
         mDrive.files().delete(passFileId()).execute();
         refreshPassFile();
     }
 
+    /**
+     * @return The id of the first file in {@link DriveServiceHelper#passFile}
+     */
     private String passFileId() {
         return passFile.get(0).getId();
     }
 
+    /**
+     * Checks Google Drive for all files in the app data folder with file name of {@link DriveServiceHelper#FILE_NAME}
+     */
     private void refreshPassFile() {
         try {
             passFile = mDrive.files().list().setQ("name = '" + FILE_NAME + "'").setSpaces("appDataFolder").execute().getFiles();
@@ -94,6 +140,9 @@ public class DriveServiceHelper {
         }
     }
 
+    /**
+     * Constructs a {@link Drive} object of PassVault's Google Drive application
+     */
     public static final class Builder {
         private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
         private static final String CREDENTIALS_FILE_PATH = "/credentials.json";

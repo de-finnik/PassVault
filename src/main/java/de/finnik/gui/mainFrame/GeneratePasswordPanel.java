@@ -67,8 +67,8 @@ public class GeneratePasswordPanel extends JPanel {
         sliderLength.setPaintLabels(true);
         sliderLength.setBounds(0, 40, 300, 50);
         sliderLength.addChangeListener(e -> {
-            PassProperty.GEN_LOW_LENGTH.setValueAndStore(sliderLength.getValue(), PassFrame.aes);
-            PassProperty.GEN_UP_LENGTH.setValueAndStore(sliderLength.getUpperValue(), PassFrame.aes);
+            PassProperty.GEN_LOW_LENGTH.setValue(sliderLength.getValue(), PassFrame.aes);
+            PassProperty.GEN_UP_LENGTH.setValue(sliderLength.getUpperValue(), PassFrame.aes);
         });
         add(sliderLength, "generate.slider.length");
 
@@ -77,25 +77,25 @@ public class GeneratePasswordPanel extends JPanel {
         JCheckBox checkBoxBigLetters = new JCheckBox();
         checkBoxBigLetters.setSelected(Boolean.parseBoolean(PassProperty.GEN_BIG.getValue()));
         checkBoxBigLetters.setBounds(0, 100, 300, 30);
-        checkBoxBigLetters.addActionListener(e -> PassProperty.GEN_BIG.setValueAndStore(checkBoxBigLetters.isSelected(), PassFrame.aes));
+        checkBoxBigLetters.addActionListener(e -> PassProperty.GEN_BIG.setValue(checkBoxBigLetters.isSelected(), PassFrame.aes));
         add(checkBoxBigLetters, "generate.checkBox.bigLetters");
 
         JCheckBox checkBoxSmallLetters = new JCheckBox();
         checkBoxSmallLetters.setSelected(Boolean.parseBoolean(PassProperty.GEN_SMALL.getValue()));
         checkBoxSmallLetters.setBounds(0, 130, 300, 30);
-        checkBoxSmallLetters.addActionListener(e -> PassProperty.GEN_SMALL.setValueAndStore(checkBoxSmallLetters.isSelected(), PassFrame.aes));
+        checkBoxSmallLetters.addActionListener(e -> PassProperty.GEN_SMALL.setValue(checkBoxSmallLetters.isSelected(), PassFrame.aes));
         add(checkBoxSmallLetters, "generate.checkBox.smallLetters");
 
         JCheckBox checkBoxNumbers = new JCheckBox();
         checkBoxNumbers.setSelected(Boolean.parseBoolean(PassProperty.GEN_NUM.getValue()));
         checkBoxNumbers.setBounds(0, 160, 300, 30);
-        checkBoxNumbers.addActionListener(e -> PassProperty.GEN_NUM.setValueAndStore(checkBoxNumbers.isSelected(), PassFrame.aes));
+        checkBoxNumbers.addActionListener(e -> PassProperty.GEN_NUM.setValue(checkBoxNumbers.isSelected(), PassFrame.aes));
         add(checkBoxNumbers, "generate.checkBox.numbers");
 
         JCheckBox checkBoxSpecialCharacters = new JCheckBox();
         checkBoxSpecialCharacters.setSelected(Boolean.parseBoolean(PassProperty.GEN_SPE.getValue()));
         checkBoxSpecialCharacters.setBounds(0, 190, 300, 30);
-        checkBoxSpecialCharacters.addActionListener(e -> PassProperty.GEN_SPE.setValueAndStore(checkBoxSpecialCharacters.isSelected(), PassFrame.aes));
+        checkBoxSpecialCharacters.addActionListener(e -> PassProperty.GEN_SPE.setValue(checkBoxSpecialCharacters.isSelected(), PassFrame.aes));
         add(checkBoxSpecialCharacters, "generate.checkBox.specials");
 
         JTextField tfPass = new JTextField();
@@ -118,9 +118,9 @@ public class GeneratePasswordPanel extends JPanel {
             }
             if (chars.size() > 0) {
                 if (Boolean.parseBoolean(PassProperty.REAL_RANDOM.getValue())) {
-                    generate(new RealRandom().seedWithUserInput(FRAME, LANG.getString("generate.jop.realRandom")), chars);
+                    generate(RealRandom.seedWithUserInput(FRAME, LANG.getString("generate.jop.realRandom")), chars, sliderLength, tfPass);
                 } else {
-                    generate(-1, chars);
+                    generate(-1, chars, sliderLength, tfPass);
                 }
             } else {
                 DIALOG.message(FRAME, LANG.getString("generate.jop.insufficientChars"));
@@ -129,7 +129,7 @@ public class GeneratePasswordPanel extends JPanel {
         add(btnGenerate, "generate.btn.generate");
 
         tfPass.setBounds(0, 270, 300, 40);
-        tfPass.setEditable(false);
+        tfPass.setEditable(true);
         tfPass.setHorizontalAlignment(SwingConstants.CENTER);
         add(tfPass, "generate.tf.pass");
 
@@ -155,10 +155,15 @@ public class GeneratePasswordPanel extends JPanel {
         add(c);
     }
 
-    private void generate(long seed, List<PasswordGenerator.PassChars> chars) {
-        JTextField tfPass = (JTextField) COMPONENTS.get("generate.tf.pass");
-        RangeSlider sliderLength = (RangeSlider) COMPONENTS.get("generate.slider.length");
-
+    /**
+     * Generates a password via {@link PasswordGenerator#generatePassword(int, int, PasswordGenerator.PassChars...)}
+     *
+     * @param seed         A seed if the user activated {@link PassProperty#REAL_RANDOM} or {@code -1}
+     * @param chars        A list of {@link de.finnik.passvault.passwords.PasswordGenerator.PassChars} that the user selected
+     * @param sliderLength The {@link RangeSlider} containing lower and upper password lengths selected by the user
+     * @param tfPass       The TextField where the generated password should be displayed
+     */
+    private void generate(long seed, List<PasswordGenerator.PassChars> chars, RangeSlider sliderLength, JTextField tfPass) {
         tfPass.setFont(raleway(20));
         PasswordGenerator generator = seed >= 0 ? new PasswordGenerator(seed) : new PasswordGenerator();
         String pass = generator.generatePassword(sliderLength.getValue(), sliderLength.getUpperValue(), chars.toArray(new PasswordGenerator.PassChars[0]));
@@ -166,6 +171,6 @@ public class GeneratePasswordPanel extends JPanel {
             tfPass.setFont(tfPass.getFont().deriveFont((float) tfPass.getFont().getSize() - 1));
         }
         tfPass.setText(pass);
-        LOG.info("Generated password with length: {} and chars {}! ", sliderLength.getValue(), chars);
+        LOG.info("Generated password!");
     }
 }

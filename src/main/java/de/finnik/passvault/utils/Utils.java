@@ -13,28 +13,6 @@ import java.net.URISyntaxException;
 public class Utils {
 
     /**
-     * Inverts the color of every pixel in an image
-     *
-     * @param input The original image
-     * @return The inverted image
-     */
-    public static BufferedImage invertImage(BufferedImage input) {
-        BufferedImage output = new BufferedImage(input.getWidth(), input.getHeight(), input.getType());
-        for (int x = 0; x < input.getWidth(); x++) {
-            for (int y = 0; y < input.getHeight(); y++) {
-                int rgba = input.getRGB(x, y);
-                Color col = new Color(rgba, true);
-                col = new Color(Math.abs(255 - col.getRed()),
-                        Math.abs(255 - col.getGreen()),
-                        Math.abs(255 - col.getBlue()),
-                        col.getAlpha());
-                output.setRGB(x, y, col.getRGB());
-            }
-        }
-        return output;
-    }
-
-    /**
      * Resize a given image to a new width and a new height
      *
      * @param input  The original image
@@ -51,7 +29,7 @@ public class Utils {
     }
 
     /**
-     * Rotates a given image by given degrees
+     * Rotates a given image by a given angle in degrees
      *
      * @param img   The input image
      * @param angle The angle to rotate in degrees
@@ -71,7 +49,7 @@ public class Utils {
     }
 
     /**
-     * Calculates the central X position of an element in a container
+     * Calculates the central X position of an element inside a container
      *
      * @param widthContainer Width of container
      * @param widthElement   Width of element
@@ -92,16 +70,8 @@ public class Utils {
     }
 
     /**
-     * Formats a font to a size
-     *
-     * @param font The origin font
-     * @param size The new font size
-     * @return The resized font
+     * Opens URLs cross-platform
      */
-    public static Font sizeFont(Font font, float size) {
-        return font.deriveFont(size);
-    }
-
     public static class Browser {
         /**
          * Allows you to open a given URL in the users default browser cross-platform

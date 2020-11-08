@@ -6,7 +6,6 @@ import de.finnik.gui.hints.Hints;
 import de.finnik.passvault.InactivityListener;
 import de.finnik.passvault.PassProperty;
 import de.finnik.passvault.utils.PassUtils;
-import de.finnik.passvault.utils.Utils;
 import org.slf4j.Logger;
 
 import java.awt.*;
@@ -40,6 +39,7 @@ public class Var {
      * The file where passwords are saved
      */
     public static File PASSWORDS;
+
     /**
      * Properties that contain information about the application:
      * app.name
@@ -47,33 +47,51 @@ public class Var {
      * app.author
      */
     public static Properties APP_INFO;
+
     /**
      * Language properties that contain texts for all components
      */
     public static ResourceBundle LANG;
+
     /**
      * Images for the application components and dialogs
      */
     public static BufferedImage LOGO, ICON, ICON_SMALL, FRAME_ICON, COPY, EXTRACT, DRIVE_ICON, SETTINGS, REFRESH, REFRESH_DRIVE, CLOSE, WARNING, SELECTED, NOT_SELECTED, CHECK_MARK, QUESTION_MARK, HELP, FINNIK, HIDE, SHOW, TRASH;
+
+    /**
+     * Fore- and background colors for this application
+     */
     public static Color FOREGROUND = Color.white;
     public static Color BACKGROUND = Color.black;
+
     /**
      * The logger for every class
      */
     public static Logger LOG;
+
     /**
      * The raleway font (© Matt McInerney, Pablo Impallari, Rodrigo Fuenzalida; licensed under the SIL Open Font License, Version 1.1.)
      */
     public static Font RALEWAY;
+
     /**
      * All components with their matching names to get their texts and tool-tip-texts from {@link Var#LANG} properties
      */
     public static Map<String, Component> COMPONENTS;
 
+    /**
+     * PassVault's {@link InactivityListener} object
+     */
     public static InactivityListener INACTIVITY_LISTENER;
 
+    /**
+     * PassVault's {@link DriveLocalHelper} object
+     */
     public static DriveLocalHelper DRIVE;
 
+    /**
+     * PassVault's {@link Hints} object
+     */
     public static Hints HINTS;
 
     /**
@@ -104,12 +122,12 @@ public class Var {
     }
 
     /**
-     * Overrides {@link Utils#sizeFont(Font, float)} method with matching variables from this class
+     * Resizes {@link Var#RALEWAY} font to a given size
      *
      * @param size The new font size
      * @return The resized font
      */
-    public static Font raleway(int size) {
-        return Utils.sizeFont(RALEWAY, size);
+    public static Font raleway(float size) {
+        return RALEWAY.deriveFont(size);
     }
 }
