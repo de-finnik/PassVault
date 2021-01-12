@@ -148,7 +148,7 @@
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/usr/share/passvault</prefix>
+                                        <prefix>/usr/local/share/passvault</prefix>
                                     </mapper>
                                 </data>
                                 <data>
@@ -156,7 +156,7 @@
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/usr/share/passvault</prefix>
+                                        <prefix>/usr/local/share/passvault</prefix>
                                     </mapper>
                                 </data>
                                 <data>
@@ -164,7 +164,7 @@
                                     <type>file</type>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/usr/share/applications</prefix>
+                                        <prefix>/usr/local/share/applications</prefix>
                                     </mapper>
                                 </data>
                             </dataSet>
