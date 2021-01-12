@@ -2,7 +2,15 @@ package de.finnik.gui;
 
 import de.finnik.AES.AES;
 import de.finnik.api.PassAPI;
-import de.finnik.passvault.*;
+import de.finnik.drive.DriveLocalHelper;
+import de.finnik.gui.dialogs.PassDialog;
+import de.finnik.gui.hints.Hints;
+import de.finnik.gui.mainFrame.PassFrame;
+import de.finnik.passvault.InactivityListener;
+import de.finnik.passvault.LogErrorStream;
+import de.finnik.passvault.PassProperty;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.Utils;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
@@ -21,25 +29,26 @@ import java.util.*;
 import java.util.function.BiConsumer;
 
 import static de.finnik.gui.Var.*;
-import static de.finnik.passvault.Utils.sizeFont;
 
 /**
  * The PassVault program implements an application that saves passwords encrypted
  * with a main password. It also generates new passwords with a given length and given parameters.
  *
  * @author finnik
- * @version 1.0
- * @since 21.03.2020
+ * @version 3.0
+ * @since 06.11.2020
  */
 
 public class PassVault {
 
     public static void main(String[] args) {
+        // Creates the matching logger object
         LOG = LoggerFactory.getLogger(args.length == 0 ? "APPLICATION" : "API");
+        System.setErr(new PrintStream(new LogErrorStream(LOG)));
 
         LOG.info("Welcome to PassVault, we're happy to see you!");
 
-        System.setErr(new PrintStream(new LogErrorStream(LOG)));
+        // Launches api if necessary
         if (args.length > 0) {
             init();
             EventQueue.invokeLater(() -> {
@@ -62,16 +71,23 @@ public class PassVault {
         main.run();
     }
 
+    /**
+     * Creates necessary files (if they don´t already exist), loads fonts, images and properties,
+     * creates necessary objects for variables in {@link Var} and starts the application.
+     */
     private static void init() {
-        final File dir = new File("bin");
+        APP_DIR = new File(System.getProperty("user.home") + "/.passvault");
+        if (APP_DIR.mkdirs()) {
+            LOG.info("Created main directory {}", APP_DIR.getAbsolutePath());
+        }
 
-        PASSWORDS = new File(dir, "pass");
+        PASSWORDS = new File(APP_DIR, "pass");
         try {
             if (PASSWORDS.createNewFile()) {
                 LOG.info("Created pass file in main directory! ({})!", PASSWORDS.getAbsolutePath());
             }
         } catch (Exception e) {
-            LOG.error("Error while creating pass file in APPDATA!", e);
+            LOG.error("Error while creating pass file in {}!", APP_DIR.getAbsolutePath(), e);
         }
 
         APP_INFO = new Properties();
@@ -81,6 +97,7 @@ public class PassVault {
             LOG.error("Error while reading application.properties!", e);
         }
 
+        PassProperty.PROPERTIES = new File(APP_DIR, "config.properties");
         try {
             if (PassProperty.PROPERTIES.createNewFile()) {
                 LOG.info("Created config.properties in main directory ({})!", PassProperty.PROPERTIES.getAbsolutePath());
@@ -89,7 +106,8 @@ public class PassVault {
             LOG.error("Error while creating config.properties");
         }
 
-        PassProperty.load();
+        // Loads non-encrypted properties
+        PassProperty.load(null);
 
         LANG = loadLang();
 
@@ -99,11 +117,19 @@ public class PassVault {
             LOG.error("Error while loading Raleway font!", e);
         }
 
+        try {
+            HINTS = new Hints(new File(APP_DIR, "hints"));
+        } catch (IOException e) {
+            LOG.error("Error while loading hints!", e);
+        }
+
         loadImages(Arrays.stream(Var.class.getFields()).filter(field -> field.getType() == BufferedImage.class).toArray(Field[]::new));
 
         DIALOG = new PassDialog(FOREGROUND, BACKGROUND, RALEWAY, CLOSE, WARNING, ICON_SMALL, QUESTION_MARK, CHECK_MARK);
 
         COMPONENTS = new HashMap<>();
+
+        DRIVE = new DriveLocalHelper();
     }
 
     /**
@@ -123,18 +149,20 @@ public class PassVault {
     }
 
     /**
-     * Creates necessary files (if they don´t already exist), loads fonts, images and properties,
-     * creates necessary instances for variables in {@link Var} and starts the application.
+     * Runs {@link PassVault#init()} and then launches either {@link CheckFrame} or {@link PassFrame}
      */
     private void run() {
         init();
 
         EventQueue.invokeLater(() -> {
-            INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
-
+            // Put some default values to UIManager
             UIManager.put("ToolTip.background", FOREGROUND);
             UIManager.put("ToolTip.foreground", BACKGROUND);
             UIManager.put("ToolTip.border", BorderFactory.createEmptyBorder(2, 2, 2, 2));
+            UIManager.put("MenuItem.selectionBackground", FOREGROUND);
+            UIManager.put("MenuItem.selectionForeground", BACKGROUND);
+            UIManager.put("ComboBox.selectionBackground", FOREGROUND);
+            UIManager.put("ComboBox.selectionForeground", BACKGROUND);
 
             /*
             Reads the {@link Var#PASSWORDS} file, checks whether passwords are already saved and creates either the login dialog
@@ -142,13 +170,15 @@ public class PassVault {
              */
             try (BufferedReader br = new BufferedReader(new FileReader(PASSWORDS))) {
                 String file = br.readLine();
-                if (file != null) {
+                if (file != null && !file.isEmpty()) {
                     FRAME = new CheckFrame((pass, passList) -> {
+                        PassProperty.load(pass);
+                        INACTIVITY_LISTENER = new InactivityListener(Integer.parseInt(PassProperty.INACTIVITY_TIME.getValue()), () -> ((PassFrame) FRAME).inactive());
                         FRAME = new PassFrame(pass, passList);
                         FRAME.setVisible(true);
                     });
                 } else {
-                    FRAME = new PassFrame("", new ArrayList<>());
+                    FRAME = new PassFrame(new AES(""), new ArrayList<>());
                 }
                 FRAME.setVisible(true);
             } catch (Exception e) {
@@ -162,25 +192,28 @@ public class PassVault {
      * It´s created on beginning and you won´t enter {@link PassFrame} unless you haven´t typed in the correct password.
      */
     public static class CheckFrame extends JDialog {
-        private final BiConsumer<String, List<Password>> todo;
+        private final BiConsumer<AES, List<Password>> todo;
         private final String message;
 
         /**
-         * Creates the frame
+         * Creates the CheckFrame. Second parameter can be null -> No additional message will be displayed
+         *
+         * @param after   The BiConsumer that will handle the inputted AES and password list
+         * @param message An additional message that will be displayed while input
          */
-        public CheckFrame(BiConsumer<String, List<Password>> todo, String message) {
-            this.todo = todo;
+        public CheckFrame(BiConsumer<AES, List<Password>> after, String message) {
+            this.todo = after;
             this.message = message;
 
             setSize(380, 200);
             setTitle("Login");
 
-            setContentPane(new JPanel());
-            getContentPane().setLayout(null);
-            ((JPanel) getContentPane()).setBorder(BorderFactory.createLineBorder(FOREGROUND));
+            JPanel contentPane = new JPanel(null);
+            contentPane.setBorder(BorderFactory.createLineBorder(FOREGROUND));
+            contentPane.setBackground(BACKGROUND);
+            setContentPane(contentPane);
 
             setResizable(false);
-            getContentPane().setBackground(BACKGROUND);
             setUndecorated(true);
             setIconImage(FRAME_ICON);
 
@@ -194,8 +227,13 @@ public class PassVault {
             textComponents();
         }
 
-        public CheckFrame(BiConsumer<String, List<Password>> todo) {
-            this(todo, null);
+        /**
+         * Calls {@link CheckFrame#CheckFrame(BiConsumer, String)} with the string object as null
+         *
+         * @param after The BiConsumer that will handle the inputted AES and password list
+         */
+        public CheckFrame(BiConsumer<AES, List<Password>> after) {
+            this(after, null);
         }
 
         /**
@@ -223,6 +261,7 @@ public class PassVault {
 
             JLabel lblPass = new JLabel();
             add(lblPass, "check.lbl.pass");
+            // Is needed to calculate label's width
             textComponents();
             lblPass.setForeground(FOREGROUND);
             lblPass.setFont(raleway(15));
@@ -263,7 +302,7 @@ public class PassVault {
             });
             add(passwordField, "check.pf.password");
 
-            btnLogin.setFont(sizeFont(RALEWAY, 15));
+            btnLogin.setFont(RALEWAY.deriveFont(15f));
             btnLogin.setSize(200, 30);
             btnLogin.setForeground(BACKGROUND);
             btnLogin.setBackground(FOREGROUND);
@@ -272,16 +311,16 @@ public class PassVault {
                 // The login
                 List<Password> passwordList;
                 try {
-                    passwordList = Password.readPasswords(PASSWORDS, new String(passwordField.getPassword()));
+                    passwordList = Password.readPasswords(PASSWORDS, new AES(new String(passwordField.getPassword())));
                 } catch (AES.WrongPasswordException e) {
                     // Exception -> Wrong password
                     LOG.info("User tried to log in with wrong password!");
                     passwordField.setText("");
-                    DIALOG.message(this, LANG.getProperty("jop.wrongPass"));
+                    DIALOG.message(CheckFrame.this, LANG.getString("jop.wrongPass"));
                     return;
                 }
                 LOG.info("User logged in!");
-                todo.accept(new String(passwordField.getPassword()), passwordList);
+                todo.accept(new AES(new String(passwordField.getPassword())), passwordList);
                 dispose();
             });
             add(btnLogin, "check.btn.login");

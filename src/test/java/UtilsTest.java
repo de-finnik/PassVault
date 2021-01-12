@@ -1,4 +1,4 @@
-import de.finnik.passvault.Utils;
+import de.finnik.passvault.utils.Utils;
 import org.junit.Test;
 
 import java.awt.*;

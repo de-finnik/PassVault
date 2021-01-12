@@ -7,18 +7,33 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Creates a dialog where the user has to type some keys in order to get a real random seed
+ */
 public class RealRandom {
-    public void seedWithUserInput(String message, Consumer<Long> toDo) {
-        JFrame frame = new JFrame();
-        frame.setUndecorated(true);
+    /**
+     * Displays the dialog where the user has to type some keys in order to get a real random seed
+     *
+     * @param owner   The {@link Window} object that owns the dialog
+     * @param message The message to be displayed inside the dialog
+     * @return The user-generated seed
+     */
+    public static long seedWithUserInput(Window owner, String message) {
+        JDialog dialog = new JDialog(owner);
+        dialog.setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
+        dialog.setAlwaysOnTop(true);
+        dialog.setUndecorated(true);
         JPanel contentPane = new JPanel();
-        frame.setContentPane(contentPane);
+        dialog.setContentPane(contentPane);
         contentPane.add(new JLabel(message), BorderLayout.CENTER);
         contentPane.setBorder(BorderFactory.createEmptyBorder());
         contentPane.setBackground(Color.white);
-        frame.addKeyListener(new KeyAdapter() {
+
+        AtomicLong seed = new AtomicLong(-1);
+
+        dialog.addKeyListener(new KeyAdapter() {
             final StringBuilder input = new StringBuilder();
 
             @Override
@@ -26,17 +41,25 @@ public class RealRandom {
                 super.keyTyped(e);
                 input.append(e.getKeyChar());
                 if (input.length() == 16) {
-                    frame.dispose();
-                    toDo.accept(getSeedFromInput(input.toString()));
+                    seed.set(getSeedFromInput(input.toString()));
+                    dialog.dispose();
                 }
             }
         });
-        frame.setVisible(true);
-        frame.setSize(contentPane.getPreferredSize());
-        frame.setLocationRelativeTo(null);
+        dialog.setSize(contentPane.getPreferredSize());
+        dialog.setLocationRelativeTo(null);
+
+        dialog.setVisible(true);
+        return seed.get();
     }
 
-    public long getSeedFromInput(String input) {
+    /**
+     * Creates a random seed out of a given {@link String}
+     *
+     * @param input The input string
+     * @return The random seed
+     */
+    private static long getSeedFromInput(String input) {
         List<Integer> numbers = new ArrayList<>();
         for (char c : input.toCharArray()) {
             numbers.add((int) c);

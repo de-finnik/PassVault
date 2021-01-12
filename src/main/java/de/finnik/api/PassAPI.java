@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import de.finnik.gui.PassVault;
-import de.finnik.passvault.PassUtils;
-import de.finnik.passvault.Password;
+import de.finnik.passvault.passwords.Password;
+import de.finnik.passvault.utils.PassUtils;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -75,11 +75,12 @@ public class PassAPI {
 
         Password finalPassword = password;
 
-        new PassVault.CheckFrame((pass, passwords) -> {
+        PassVault.CheckFrame checkFrame = new PassVault.CheckFrame((pass, passwords) -> {
             passwords.add(finalPassword);
             Password.savePasswords(passwords, PASSWORDS, pass);
             LOG.info(Password.log(finalPassword, "User added password"));
-        }).setVisible(true);
+        });
+        checkFrame.setVisible(true);
     }
 
     /**
@@ -93,7 +94,7 @@ public class PassAPI {
         if (args[0].length() < 3) {
             error(11, "The input must be at least three characters long");
         }
-        new PassVault.CheckFrame((pass, passwords) -> {
+        PassVault.CheckFrame checkFrame = new PassVault.CheckFrame((pass, passwords) -> {
             List<Password> matching = PassUtils.getAllMatchingPasswords(args[0], passwords);
             if (matching.size() == 0) {
                 error(10, "No matching passwords were found");
@@ -104,8 +105,11 @@ public class PassAPI {
                 builder.setPrettyPrinting();
             }
 
+            System.out.println(builder.create().toJson(matching));
+
             LOG.info("User got information about passwords containing {}!", args[0]);
-        }, String.format(LANG.getProperty("api.get.warning"), args[0])).setVisible(true);
+        }, String.format(LANG.getString("api.get.warning"), args[0]));
+        checkFrame.setVisible(true);
     }
 
     /**
@@ -116,7 +120,7 @@ public class PassAPI {
      */
     @Command(description = "Get information about the installed version of PassVault")
     private static void version(String[] args) {
-        System.out.printf("%s %s by %s", APP_INFO.getProperty("app.name"), APP_INFO.getProperty("app.version"), APP_INFO.getProperty("app.author"));
+        System.out.printf("%s %s by %s\n", APP_INFO.getProperty("app.name"), APP_INFO.getProperty("app.version"), APP_INFO.getProperty("app.author"));
         LOG.info("User got information about the installed version of PassVault!");
     }
 
@@ -127,7 +131,7 @@ public class PassAPI {
      * @param message The error message to display
      */
     private static void error(int code, String message) {
-        System.out.printf("!%d %s", code, message);
+        System.out.printf("!%d %s\n", code, message);
         System.exit(1);
     }
 
@@ -137,13 +141,13 @@ public class PassAPI {
      * @param command The command to get more information from
      */
     private void printHelp(String command) {
-        InputStream inputStream = PassVault.class.getResourceAsStream("/api_help/" + command + ".help");
+        InputStream inputStream = PassVault.class.getResourceAsStream("/help/api_help/" + command + ".help");
         if (inputStream == null)
             return;
         Arrays.stream(PassAPI.class.getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(Command.class) && method.getName().equals(command))
                 .map(method -> method.getDeclaredAnnotation(Command.class).description())
-                .forEach(description -> System.out.printf(new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining(System.lineSeparator())), description));
+                .forEach(description -> System.out.printf(new BufferedReader(new InputStreamReader(inputStream)).lines().collect(Collectors.joining(System.lineSeparator())) + "\n", description));
     }
 
     /**

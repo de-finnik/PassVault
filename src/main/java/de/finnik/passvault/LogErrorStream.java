@@ -1,13 +1,14 @@
 package de.finnik.passvault;
 
 import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
 import java.io.OutputStream;
 
+/**
+ * Redirects all written content to a given {@link Logger} object
+ */
 public class LogErrorStream extends OutputStream {
     Logger logger;
-    Level level;
     StringBuilder stringBuilder;
 
     public LogErrorStream(Logger logger) {

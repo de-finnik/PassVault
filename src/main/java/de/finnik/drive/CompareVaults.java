@@ -1,6 +1,6 @@
 package de.finnik.drive;
 
-import de.finnik.passvault.Password;
+import de.finnik.passvault.passwords.Password;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +9,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CompareVaults {
+    /**
+     * Compares {@link Password} objects of multiple list and if a password has multiple occurrences, the one that has been modified the most recently
+     * will be returned among the ones with just one occurrence.
+     *
+     * @param passwords Lists of {@link Password} objects
+     * @return The compared list of {@link Password} objects
+     */
     @SafeVarargs
     public static List<Password> compare(List<Password>... passwords) {
         List<Password> allPasswords = new ArrayList<>();

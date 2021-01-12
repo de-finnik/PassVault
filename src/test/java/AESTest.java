@@ -18,10 +18,10 @@ public class AESTest {
         assertEquals(string, de.decrypt(en.encrypt(string)));
     }
 
-    public String randomString(int length) {
+    private String randomString(int length) {
         char[] pass = new char[length];
         for (int i = 0; i < pass.length; i++) {
-            pass[i] = (char)((int)(Math.random()*(60))+33);
+            pass[i] = (char) ((int) (Math.random() * (60)) + 33);
         }
         return new String(pass);
     }
